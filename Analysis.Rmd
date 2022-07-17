@@ -1,0 +1,95 @@
+---
+author: "Florian Fox"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+title: 'Master Thesis: A Causal Test of the Law of 1/n and its Mechanisms -- Analysis'
+toc: yes
+toc_float: yes
+---
+
+# Load data and packages
+
+```{r Packages}
+library(tidyverse)
+library(AER)
+library(plm)
+library(rdmulti)
+```
+
+```{r Data}
+data <-
+  readRDS("data/gemeinderatswahlen_alldata.rds")
+```
+
+```{r Options}
+options(scipen = 20)
+theme_set(theme_minimal())
+```
+
+to do Liste
+
+- clustered SE
+
+
+# OLS regression
+
+**Discuss biases here**
+
+```{r}
+ols <- lm(gross_expenditure ~ total_seats, data = data) # Expenditure must be in logs
+summary(ols)
+coeftest(ols, vcov = vcovHC, type = "HC1")
+```
+
+
+
+
+
+# Instrumental variables regression
+
+Try an an IV regression based on [R. Baqir (2002)](https://doi.org/10.1086/342804), using council size 24 years ago (Baqir: 30 years ago) as an instrument.
+
+The analysis in this section is exclusively based on Bavaria data.
+
+**to do: Discuss relevance and validity here**
+
+```{r}
+ivreg <- ivreg(log(gross_expenditure) ~ total_seats |
+                 log(total_seats_24_y_ago), data = data)
+summary(ivreg)
+coeftest(ivreg, vcov = vcovHC, type = "HC1")
+```
+
+
+
+# Panel regression
+
+```{r}
+fe <- plm(
+  gross_expenditure ~ total_seats, # Expenditure must be in logs
+  data = data,
+  index = c("ags", "year"),
+  model = "within"
+)
+summary(fe)
+coeftest(fe, vcov = vcovHC, type = "HC1")
+```
+
+
+
+# Regression discontinuity design
+
+```{r}
+data2 <- data %>% filter(state == 5)
+rdd <- rdmulti::rdmc(Y = log(data2$gross_expenditure), X = data2$exact_pop, C = data2$inhabitants_treshold)
+```
+
+
+
+
+
+```{r}
+
+```

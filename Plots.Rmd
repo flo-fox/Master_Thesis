@@ -1,0 +1,332 @@
+---
+author: "Florian Fox"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+title: 'Master Thesis: A Causal Test of the Law of 1/n and its Mechanisms -- Descriptive Plots'
+toc: yes
+toc_float: yes
+---
+
+# Load packages and data
+
+```{r Packages}
+library(tidyverse)
+library(plotly)
+library(ggcorrplot)
+library(htmltools)
+```
+
+```{r Data}
+data <-
+  readRDS("data/gemeinderatswahlen_alldata.rds")
+```
+
+```{r Options}
+options(scipen = 20)
+theme_set(theme_minimal())
+```
+
+
+# Unvariate Statistics
+
+```{r Histogram}
+data  %>%
+  select(where(is.numeric)) %>%
+  reshape2::melt(.) %>%
+  ggplot(., aes(x = value)) + 
+    facet_wrap(~variable, scales = "free") + 
+    geom_histogram()
+ggsave("plots/histograms.svg", width = 45, height = 45, units = "cm")
+```
+
+
+# Bivariate descriptive statistics
+
+## Correlations
+
+```{r}
+data %>%
+  select(where(is.numeric)) %>%
+  cor(., use = "pairwise.complete.obs") %>%
+  ggcorrplot::ggcorrplot(
+    .,
+    colors = c("red", "white", "blue"),
+    #lab = TRUE,
+    digits = 1
+    )
+ggsave("plots/bivariate_correlations.svg", width = 45, height = 45, units = "cm")
+```
+
+
+# Cutoffs
+
+Define cutoffs for each state, in some cases depending on years (if reforms took place) and whether town is muinicipality ("Gemeinde") or "district-free city" ("kreisfreie Stadt").
+
+"th" stands for threshold.
+
+```{r Define thresholds}
+th_1_muni_since_2012 <- c(70, 200, 750, 1250, 2500, 5000, 10000, 15000, 25000, 35000, 45000)
+th_1_muni_before_2012 <- c(70, 200, 750, 1250, 2000, 5000, 10000, 15000, 25000, 35000, 45000)
+th_1_krefr <- c(150000)
+#th_3 <- c(500, 1000, 2000, 3000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 15000, 20000, 25000, 30000, 40000, 50000, 75000, 100000, 125000, 150000, 175000, 200000, 250000, 300000, 350000, 400000, 500000, 600000)
+th_5 <- c(5000, 8000, 15000, 30000, 50000, 100000, 250000, 400000, 550000, 700000)
+th_6 <- c(3000, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000)
+th_7 <- c(300, 500, 1000, 2500, 5000, 7500, 10000, 15000, 20000, 30000, 40000, 60000, 80000, 100000, 150000)
+th_8 <- c(1000, 2000, 3000, 5000, 10000, 20000, 30000, 50000, 150000, 400000)
+th_9 <- c(1000, 2000, 3000, 5000, 10000, 20000, 30000, 50000, 100000, 200000, 500000) # Except Nuremburg and Munich
+th_10 <- c(10000, 20000, 30000, 40000, 60000, 100000)
+th_12_muni_since_2008 <- c(700, 1500, 2500, 5000, 10000, 15000, 25000, 35000, 45000)
+#th_12_muni_before_2008 <- c(200, 700, 1500, 2500, 5000, 10000, 15000, 25000, 35000, 45000)
+th_12_krefr <- c(100000, 150000)
+th_13 <- c(500, 1000, 1500, 3000, 4500, 6000, 7500, 10000, 20000, 30000, 50000, 75000, 100000, 150000)
+th_14 <- c(500, 1000, 2000, 3000, 5000, 10000, 20000, 30000, 40000, 50000, 60000, 80000, 150000, 400000)
+th_15_since_2014 <- c(1000, 2000, 3000, 5000, 10000, 20000, 30000, 50000, 150000, 300000)
+th_15_before_2014 <- c(100, 500, 1000, 2000, 3000, 5000, 10000, 20000, 30000, 50000, 150000, 300000)
+th_16 <- c(500, 1000, 2000, 3000, 5000, 10000, 20000, 30000, 50000, 100000, 200000)
+```
+
+
+## Visualizing changes in cutoff rules
+
+01 Schleswig-Holstein (with "2002" representing the 1998 election): You can clearly see municipalities with 2000-2500 inhabitants "overlapping" in terms of total seats (compare 2018 to prior elections):
+
+```{r}
+data %>%
+  filter(state == 1 & exact_pop > 1250 & exact_pop <= 5000 & (election_year == 1 | year == 2002)) %>%
+  ggplot() +
+  geom_point(aes(x = exact_pop, y = total_seats, colour = as.factor(year)))
+```
+
+12 Brandenburg -- population data only for 2019:
+
+```{r}
+data %>%
+  filter(state == 12 & exact_pop <= 700 & election_year == 1) %>%
+  ggplot() +
+  geom_point(aes(x = exact_pop, y = total_seats, colour = as.factor(year)))
+```
+
+15 Saxony-Anhalt (with "2002" representing the 1999 election): After redistricting in 2007, municipalities are larger than before (and far less exist).
+
+```{r}
+data %>%
+  filter(state == 15 & exact_pop <= 1000 & (election_year == 1 | year == 2002)) %>%
+  ggplot() +
+  geom_point(aes(x = exact_pop, y = total_seats, colour = as.factor(year)))
+data %>%
+  filter(state == 15 & exact_pop <= 1000 & (election_year == 1 | year == 2002)) %>%
+  group_by(year) %>%
+  summarize(mean = mean(exact_pop), median = median(exact_pop), n = n())
+```
+
+
+## Visualizing the relationship between inhabitants and council size for each state separately
+
+States with no changes in cutoffs and no distinction between municipalities and "district-free cities" only (i. e. 01, 12, 15 excluded). 03 Lower Saxony excluded due to missing data. Vertical bars indicate cutoffs.
+
+```{r}
+plot_list <- htmltools::tagList()
+for (s in c(5:10, 13, 14, 16)) {
+  df_subset <- data %>%
+    filter(state == s & (election_year == 1 | year == 2002))
+  correlation <-
+    cor(df_subset$exact_pop, df_subset$total_seats, use = "pairwise.complete.obs") %>%
+    round(., 2)
+  plot <- df_subset %>%
+    ggplot() +
+    geom_vline(xintercept = get(paste0("th_", s))) +
+    geom_point(aes(
+      x = exact_pop,
+      y = total_seats,
+      colour = as.factor(year),
+      text = paste("town:", town)
+    )) +
+    labs(title = paste0("State: ", s, "; linear correlation: ", correlation)) +
+    scale_x_log10()
+  plot_list[[s]] <- plotly::ggplotly(plot)
+}
+plot_list
+```
+
+We observe some countries where cutoffs play a huge role (06 Hesse, 07 Rhineland-Palantine, 09 Bavaria, 10 Saarland, 16 Thuringia). In other states they do not and `total_seats` spreads more (05 North Rhine-Westphalia, 08 Baden-Württemberg, 14 Sachsen-Anhalt).
+
+"Special" states:
+
+Red vertical lines indicate a cutoff that did not exist over the entire time period.
+
+```{r}
+# 01 Schleswig-Holstein
+df_subset <- data %>%
+  filter(state == 1 & (election_year == 1 | year == 2002) & kreisfreie_stadt == 0)
+correlation <-
+  cor(df_subset$exact_pop, df_subset$total_seats, use = "pairwise.complete.obs") %>%
+  round(., 2)
+plot <- df_subset %>%
+  ggplot() +
+  geom_vline(xintercept = th_1_muni_since_2012) +
+  geom_vline(xintercept = c(2000, 2500), colour = "red") +
+  geom_point(aes(
+    x = exact_pop,
+    y = total_seats,
+    colour = as.factor(year),
+    text = paste("town:", town)
+  )) +
+  labs(title = paste0("State: ", 1, "; linear correlation: ", correlation, "; no kreisfreie Städte")) +
+  scale_x_log10()
+plotly::ggplotly(plot)
+
+# 12 Brandenburg
+df_subset <- data %>%
+  filter(state == 12 & (election_year == 1 | year == 2002) & kreisfreie_stadt == 0)
+correlation <-
+  cor(df_subset$exact_pop, df_subset$total_seats, use = "pairwise.complete.obs") %>%
+  round(., 2)
+plot <- df_subset %>%
+  ggplot() +
+  geom_vline(xintercept = th_12_muni_since_2008) +
+  geom_point(aes(
+    x = exact_pop,
+    y = total_seats,
+    colour = as.factor(year),
+    text = paste("town:", town)
+  )) +
+  labs(title = paste0("State: ", 12, "; linear correlation: ", correlation, "; no kreisfreie Städte")) +
+  scale_x_log10()
+plotly::ggplotly(plot)
+
+# 15 Saxony-Anhalt
+df_subset <- data %>%
+  filter(state == 15 & (election_year == 1 | year == 2002))
+correlation <-
+  cor(df_subset$exact_pop, df_subset$total_seats, use = "pairwise.complete.obs") %>%
+  round(., 2)
+plot <- df_subset %>%
+  ggplot() +
+  geom_vline(xintercept = th_15_before_2014, colour = "red") +
+  geom_vline(xintercept = th_15_since_2014) +
+  geom_point(aes(
+    x = exact_pop,
+    y = total_seats,
+    colour = as.factor(year),
+    text = paste("town:", town)
+  )) +
+  labs(title = paste0("State: ", 15, "; linear correlation: ", correlation)) +
+  scale_x_log10()
+plotly::ggplotly(plot)
+```
+
+12 Brandenburg also has quite a strong relationship but no population data beyond 2019. 15 Saxony-Anhalt may have had some special rules after 2007 county reform (**to do: investigate**)!
+
+
+
+## Visualizing the relationship between inhabitants and council size for all states
+
+Linear difference:
+```{r}
+df_subset <- data %>%
+  filter(election_year == 1 | year == 2002)
+correlation <-
+  cor(df_subset$exact_pop, df_subset$total_seats, use = "pairwise.complete.obs") %>%
+  round(., 2)
+plot <- df_subset %>%
+  ggplot() +
+  geom_vline(xintercept = 0) +
+  geom_point(aes(
+    x = diff_to_cutoff,
+    y = total_seats,
+    colour = as.factor(state),
+    #shape = as.factor(state),
+    text = paste("town:", town, "<br>year:", year)
+  )) +
+  labs(title = paste0("All states; linear correlation: ", correlation))
+plotly::ggplotly(plot)
+```
+
+Log difference:
+```{r}
+#df_subset <- data %>%
+#  filter(election_year == 1 | year == 2002)
+#correlation <-
+#  cor(df_subset$exact_pop, df_subset$total_seats, use = "pairwise.complete.obs") %>%
+#  round(., 2)
+plot <- df_subset %>%
+  ggplot() +
+  geom_vline(xintercept = 0) +
+  geom_point(aes(
+    x = ln_diff_to_cutoff,
+    y = total_seats,
+    colour = as.factor(state),
+    #shape = as.factor(state),
+    text = paste("town:", town, "<br>year:", year)
+  )) +
+  labs(title = paste0("All states; linear correlation: ", correlation))
+plotly::ggplotly(plot)
+```
+
+
+
+## Visualizing the relationship between inhabitants and public spending for each state separately
+
+Relationship between inhabitants and public spending for those states that did not change cutoffs:
+
+```{r}
+plot_list <- htmltools::tagList()
+for (s in c(5:10, 13, 14, 16)) {
+  df_subset <- data %>%
+    filter(state == s & (election_year == 1 | year == 2002))
+  correlation <-
+    cor(df_subset$exact_pop, df_subset$gross_expenditure, use = "pairwise.complete.obs") %>%
+    round(., 2)
+  plot <- df_subset %>%
+    ggplot() +
+    geom_vline(xintercept = get(paste0("th_", s))) +
+    geom_point(aes(
+      x = exact_pop,
+      y = gross_expenditure,
+      colour = as.factor(year),
+      text = paste("town:", town)
+    )) +
+    labs(title = paste0("State: ", s, "; linear correlation: ", correlation)) +
+    scale_x_log10() +
+    scale_y_log10()
+  plot_list[[s]] <- plotly::ggplotly(plot)
+}
+plot_list
+rm(s, plot_list, plot, df_subset)
+```
+
+Relationship between inhabitants and public spending per capita for those states that did not change cutoffs:
+
+```{r}
+plot_list <- htmltools::tagList()
+for (s in c(5:10, 13, 14, 16)) {
+  df_subset <- data %>%
+    filter(state == s & (election_year == 1 | year == 2002)) %>%
+    mutate(gross_expenditure_pc = gross_expenditure / inh_tot)
+  correlation <-
+    cor(df_subset$exact_pop, df_subset$gross_expenditure_pc, use = "pairwise.complete.obs") %>%
+    round(., 2)
+  plot <- df_subset %>%
+    ggplot() +
+    geom_vline(xintercept = get(paste0("th_", s))) +
+    geom_point(aes(
+      x = exact_pop,
+      y = gross_expenditure_pc,
+      colour = as.factor(year),
+      text = paste("town:", town)
+    )) +
+    labs(title = paste0("State: ", s, "; linear correlation: ", correlation)) +
+    scale_x_log10()
+  plot_list[[s]] <- plotly::ggplotly(plot)
+}
+plot_list
+rm(s, plot_list, plot, df_subset)
+```
+
+
+```{r}
+
+```
+

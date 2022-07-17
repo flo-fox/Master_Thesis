@@ -4,8 +4,7 @@ date: "`r Sys.Date()`"
 output:
   html_document:
     df_print: paged
-pdf_document: default
-title: 'Master Thesis: A Causal Test of the Law of 1/n and its Mechanisms'
+title: 'Master Thesis: A Causal Test of the Law of 1/n and its Mechanisms -- Descriptive Statistics'
 toc: yes
 toc_float: yes
 ---
@@ -14,21 +13,17 @@ toc_float: yes
 
 ```{r Packages}
 library(tidyverse)
-library(haven)
-library(ggcorrplot)
 library(reshape2)
 ```
 
 ```{r Data}
 data <-
-  haven::read_stata("data/gemeinderatswahlen_alldata.dta") %>%
-  select(-starts_with("pct_votes"), -starts_with("seats_"),
-         -state_election, -voters_state, -valid_votes_state, -turnout_state, -ends_with("_state_sh"),
-         -pattern, -ln_inh_tot, -Elec_data_no_elec_iteration, -class, -ags_length)
+  readRDS("data/gemeinderatswahlen_alldata.rds")
 ```
 
 ```{r Options}
 options(scipen = 20)
+theme_set(theme_minimal())
 ```
 
 
@@ -96,16 +91,6 @@ data %>%
          .before = No)
 ```
 
-```{r Histogram}
-data  %>%
-  select(where(is.numeric)) %>%
-  reshape2::melt(.) %>%
-  ggplot(., aes(x = value)) + 
-    facet_wrap(~variable, scales = "free") + 
-    geom_histogram()
-```
-
-
 
 ## Factors
 
@@ -118,21 +103,19 @@ data %>%
 
 # Bivariate descriptive statistics
 
-## Correlations
 
-```{r}
+
+Display correlation between standard council size (as determined (by me) by council size) with actual number of seats. Especially weak in Baden-Württemberg, North-Rhine Westphalia, and Saxony. Strong in Saarland (sharp design here), Thuringia, and Brandenburg (though few data points here).
+
+```{r, rows.print=15}
 data %>%
-  select(where(is.numeric)) %>%
-  cor(., use = "pairwise.complete.obs") %>%
-  ggcorrplot::ggcorrplot(
-    .,
-    colors = c("red", "white", "blue"),
-    lab = TRUE,
-    digits = 1
-    )
+  group_by(state) %>%
+  summarize(n = n(), seat_cor = cor(total_seats, by_law_seats, use = "pairwise.complete.obs")) %>%
+  arrange(seat_cor)
 ```
 
 
 ```{r}
 
 ```
+
