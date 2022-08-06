@@ -1,21 +1,23 @@
 ---
 author: "Florian Fox"
 date: "`r Sys.Date()`"
+title: 'Master Thesis: A Causal Test of the Law of 1/n and its Mechanisms -- Analysis'
 output:
   html_document:
     df_print: paged
-title: 'Master Thesis: A Causal Test of the Law of 1/n and its Mechanisms -- Analysis'
-toc: yes
-toc_float: yes
+    toc: true
+    toc_float: true
 ---
 
 # Load data and packages
 
 ```{r Packages}
 library(tidyverse)
-library(AER)
-library(plm)
+library(fixest)
+library(rdrobust)
 library(rdmulti)
+library(rddensity)
+library(rdd) # For the McCrary (2008) test
 ```
 
 ```{r Data}
@@ -32,18 +34,100 @@ to do Liste
 
 - clustered SE
 
-
-# OLS regression
-
-**Discuss biases here**
+Generating different data sets:
 
 ```{r}
-ols <- lm(gross_expenditure ~ total_seats, data = data) # Expenditure must be in logs
-summary(ols)
-coeftest(ols, vcov = vcovHC, type = "HC1")
+d_bivariate <- data %>%
+  select(ln_gross_expenditure_pc, total_seats, ags, year) %>% drop_na()
+d_bivariate_iv <- data %>%
+  select(ln_gross_expenditure_pc, total_seats, ags, year, total_seats_24_y_ago) %>% drop_na()
+d_rdd_bivariate <- data %>%
+  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, inhabitants_treshold, year, ags) %>%
+  drop_na()
+
+d_controls <- data %>%
+  select(ln_gross_expenditure_pc, total_seats, ags, year, inh_tot, unempl_rate, total_area_ha, share_working_age, kreisfreie_stadt, stadt, years_since_last_elec) %>%
+  drop_na()
+d_controls_iv <- data %>%
+  select(ln_gross_expenditure_pc, total_seats, ags, year, total_seats_24_y_ago, inh_tot, unempl_rate, total_area_ha, share_working_age, kreisfreie_stadt, stadt, years_since_last_elec) %>%
+  drop_na()
+d_rdd_bivariate <- data %>%
+  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, inhabitants_treshold, year, ags,
+         inh_tot, unempl_rate, total_area_ha, share_working_age, kreisfreie_stadt, stadt, years_since_last_elec) %>%
+  drop_na()
+d_ttest <- data %>%
+  select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff) %>% drop_na()
 ```
 
 
+
+# OLS regression
+
+**Biases in OLS regression**
+
+"However, this regression potentially suffers from reverse causality as well as omitted variable bias. Reverse causality may arise from the fact that a municipality with a larger public budget faces more complex budget negotiations and hence may need more councilors ([Pettersson-Lidbom, 2012](https://doi.org/10.1016/j.jpubeco.2011.07.004), p. 269). If this is indeed the case, one would expect β to overestimate the true causal effect of council size. Omitted variable bias may also be at play because even with a large number of control variables one can not completely rule out confounders ([Höhmann, 2017](https://doi.org/10.1007/s11127-017-0484-2), p. 347). Depending on the sign of the association with council size and public spending, this bias could go either way. More precisely, if voters who prefer a larger number of councilors also want higher spending, the relationship between council size and government size might be spuriously correlated ([Egger & Koethenbuerger, 2010](https://www.doi.org/10.1257/app.2.4.200), pp. 201, 204), again resulting in an overestimate of the true effect."
+
+(Citation from my project study)
+
+```{r}
+fixest::feols(ln_gross_expenditure_pc ~ total_seats,
+              vcov = "hetero", # heteroskedasticity-robust SEs
+              data = d_bivariate)
+# Adding variables stepwise using the `csw` function
+fixest::feols(
+  ln_gross_expenditure_pc ~ csw0(total_seats, inh_tot, unempl_rate, total_area_ha,
+    share_working_age, kreisfreie_stadt, stadt, years_since_last_elec),
+  vcov = "hetero",
+  data = data
+)
+ols <- fixest::feols(
+  ln_gross_expenditure_pc ~ total_seats + inh_tot + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + years_since_last_elec,
+  vcov = "hetero",
+  data = d_controls
+)
+summary(ols, n = 20)
+rm(ols)
+```
+
+
+
+# Panel regression
+
+Ignoring the potential issue of bad controls, I am running some panel regressions with year and municipality as fixed effects.
+
+`stadt` and `kreisfreie_stadt` have been dropped because of collinearity concerns.
+
+```{r}
+panel_bivariate <-
+  fixest::feols(ln_gross_expenditure_pc ~ total_seats |
+                  year + ags,
+                data = d_bivariate)
+summary(panel_bivariate, vcov = "hetero")
+summary(panel_bivariate, vcov = "twoway")
+# Adding variables stepwise using the `csw` function
+fixest::feols(
+  ln_gross_expenditure_pc ~ csw0(total_seats, inh_tot, unempl_rate, total_area_ha,
+    share_working_age, years_since_last_elec) |
+    year + ags,
+  data = data,
+  vcov = "twoway"
+)
+panel_multivariate <- fixest::feols(
+  ln_gross_expenditure_pc ~ total_seats + inh_tot + unempl_rate + total_area_ha +
+    share_working_age + years_since_last_elec |
+    year + ags,
+  data = d_controls
+)
+summary(panel_multivariate, vcov = "hetero", n = 20)
+summary(panel_multivariate, vcov = "twoway", n = 20)
+```
+
+Using heteroskedasticity-robust SE, the coefficient on `total_seats` shrinks by 70-90 %, compared to the OLS model but remains statistically significantly positive. However, once I allow for clustered standard errors, the coefficient is only significant at the 10 % level.
+
+```{r}
+rm(list=ls(pattern="^panel_"))
+```
 
 
 
@@ -53,37 +137,322 @@ Try an an IV regression based on [R. Baqir (2002)](https://doi.org/10.1086/34280
 
 The analysis in this section is exclusively based on Bavaria data.
 
-**to do: Discuss relevance and validity here**
+For the IV to be a valid research design, three assumptions need to hold:
+
+- Relevance: The instrument $Z_i$ needs to be correlated with the endogenous regressor $W_i$, $cov(Z_i, W_i) \neq 0$. The correlation (Pearson) coefficient is $r=$
+`r round(cor(data$total_seats, data$total_seats_24_y_ago, use = "pairwise.complete.obs"),2)`
+so formally, this holds. However, I would question whether the correlation indeed is *too strong* as the first-stage fitted values might pick up some of the endogenous character of the endogenous regressor, yielding biased results.
+- Validity -- Exclusion:
+- Validity -- Exogeneity:
+
+`years_since_last_elec` has been removed from the equation over collinearity concerns.
 
 ```{r}
-ivreg <- ivreg(log(gross_expenditure) ~ total_seats |
-                 log(total_seats_24_y_ago), data = data)
-summary(ivreg)
-coeftest(ivreg, vcov = vcovHC, type = "HC1")
+iv_bivariate <-
+  fixest::feols(ln_gross_expenditure_pc ~
+                  1 | # 1 is the intercept
+                  year + ags | # FE
+                  total_seats ~ total_seats_24_y_ago,
+                data = d_bivariate_iv)
+summary(iv_bivariate, vcov = "hetero")
+summary(iv_bivariate, vcov = "twoway")
+```
+```{r, eval = FALSE}
+# Adding variables stepwise using the `csw` function
+# Not working as desired
+fixest::feols(
+  ln_gross_expenditure_pc ~
+    csw0(inh_tot + unempl_rate + total_area_ha + share_working_age) | # controls
+    year + ags | # FE
+    total_seats ~ total_seats_24_y_ago,
+  # IV formula for 1st stage
+  data = data,
+  vcov = "twoway"
+)
+```
+```{r}
+iv_multivariate <- fixest::feols(
+  ln_gross_expenditure_pc ~
+    inh_tot + unempl_rate + total_area_ha + share_working_age | # controls
+    year + ags | # FE
+    total_seats ~ total_seats_24_y_ago,
+  # IV formula for 1st stage
+  data = d_controls_iv
+)
+summary(iv_multivariate, vcov = "hetero")
+summary(iv_multivariate, vcov = "twoway")
 ```
 
+["Wu-Hausman tests that IV is just as consistent as OLS, and since OLS is more efficient, it would be preferable. The null here is that they are equally consistent"](https://stats.stackexchange.com/questions/134789/interpretation-of-ivreg-diagnostics-in-r). The null is rejected at the 10 % level here, which is "good" from the IV perspective.
 
+The IV coefficients on `total_seats` are positive but far from any commonly accepted level of statistical significance. The effect size appears way to large...
 
-# Panel regression
 
 ```{r}
-fe <- plm(
-  gross_expenditure ~ total_seats, # Expenditure must be in logs
-  data = data,
-  index = c("ags", "year"),
-  model = "within"
-)
-summary(fe)
-coeftest(fe, vcov = vcovHC, type = "HC1")
+rm(list=ls(pattern="^iv_"))
 ```
 
 
 
 # Regression discontinuity design
 
+## Treating cutoffs as one
+
+Treating all of the cutoffs as one requires a harmonization. This happens according to Egger and Koethenbuerger (2010):
+
+Using the Egger and Koethenbuerger (2010) calculation steps:
+$$\tilde{N_i} = N_i/N_d$$
+with $N_i$ as the relevant actual population size and $N_d$ as the respective thresholds.
+
+
+### t test
+
+The most simple thing to do is a simple t test for differences.
+
 ```{r}
-data2 <- data %>% filter(state == 5)
-rdd <- rdmulti::rdmc(Y = log(data2$gross_expenditure), X = data2$exact_pop, C = data2$inhabitants_treshold)
+# 0.1 around cutoff
+d_ttest2 <- d_ttest %>%
+  filter(abs(inhabs_rel_to_cutoff) < 0.1) # Choose bandwidth
+nrow(d_ttest2) / nrow(data) # Share of observations close to threshold
+t.test(log(d_ttest2$ln_gross_expenditure_pc[d_ttest2$inhabs_rel_to_cutoff < 0]),
+       log(d_ttest2$ln_gross_expenditure_pc[d_ttest2$inhabs_rel_to_cutoff >= 0]))
+# 0.05 around cutoff
+d_ttest2 <- d_ttest %>%
+  filter(abs(inhabs_rel_to_cutoff) < 0.05) # Choose bandwidth
+nrow(d_ttest2) / nrow(data) # Share of observations close to threshold
+t.test(log(d_ttest2$ln_gross_expenditure_pc[d_ttest2$inhabs_rel_to_cutoff < 0]),
+       log(d_ttest2$ln_gross_expenditure_pc[d_ttest2$inhabs_rel_to_cutoff >= 0]))
+# 0.01 around cutoff
+d_ttest2 <- d_ttest %>%
+  filter(abs(inhabs_rel_to_cutoff) < 0.025) # Choose bandwidth
+nrow(d_ttest2) / nrow(data) # Share of observations close to threshold
+t.test(log(d_ttest2$ln_gross_expenditure_pc[d_ttest2$inhabs_rel_to_cutoff < 0]),
+       log(d_ttest2$ln_gross_expenditure_pc[d_ttest2$inhabs_rel_to_cutoff >= 0]))
+```
+
+The results are not really consistent when it comes to statistical significance. The difference between both sides also heavily depends on the bandwidth chosen.
+Keep in mind, however, that a t test is not exactly appropriate due to the fuzzy nature of the setting.
+
+```{r}
+rm(d_ttest2)
+```
+
+
+### Manual IV regression
+
+This is how it is done according to ["The Effect" of Nick Huntington-Klein, chapter 20](https://theeffectbook.net/ch-RegressionDiscontinuity.html):
+```{r}
+df <- d_rdd_bivariate %>%
+  filter(abs(inhabs_rel_to_cutoff) < 0.05) # Choose bandwidth
+nrow(df) / nrow(data) # Share of observations close to threshold
+rdd <- fixest::feols(ln_gross_expenditure_pc ~
+                     1  | # controls
+                     inhabitants_treshold + year + ags | # fixed-effect controls
+                     # First stage regression:
+                     inhabs_rel_to_cutoff*total_seats ~ # Instrument our standard RDD...
+                     inhabs_rel_to_cutoff*above_cutoff, # ... with being above the cutoff
+                     data = df)
+summary(rdd, vcov = "hetero")
+summary(rdd, vcov = "threeway")
+# First stage:
+summary(rdd, stage = 1, vcov = "threeway")
+rm(df, rdd)
+```
+
+This is how I would do it:
+```{r}
+df <- d_rdd_bivariate %>%
+  filter(abs(inhabs_rel_to_cutoff) < 0.05) # Choose bandwidth
+nrow(df) / nrow(data) # Share of observations close to threshold
+rdd <- fixest::feols(ln_gross_expenditure_pc ~
+                     1  | # controls
+                     inhabitants_treshold + year + ags | # fixed-effect controls
+                     # First stage regression:
+                     total_seats ~ # Instrument our standard RDD...
+                     above_cutoff, # ... with being above the cutoff
+                     data = df)
+summary(rdd, vcov = "hetero")
+summary(rdd, vcov = "threeway")
+# First stage:
+summary(rdd, stage = 1, vcov = "threeway")
+rm(df, rdd)
+```
+
+```{r}
+df <- d_rdd_bivariate %>%
+  filter(abs(inhabs_rel_to_cutoff) < 0.05) # Choose bandwidth
+nrow(df) / nrow(data) # Share of observations close to threshold
+rdd <- fixest::feols(ln_gross_expenditure_pc ~
+                     inhabs_rel_to_cutoff  | # controls
+                     inhabitants_treshold + year + ags | # fixed-effect controls
+                     # First stage regression:
+                     total_seats ~ # Instrument our standard RDD...
+                     above_cutoff, # ... with being above the cutoff
+                     data = df)
+summary(rdd, vcov = "hetero")
+summary(rdd, vcov = "threeway")
+# First stage:
+summary(rdd, stage = 1, vcov = "threeway")
+rm(df, rdd)
+```
+
+Include polynomials:
+
+```{r}
+df <- d_rdd_bivariate %>%
+  filter(abs(inhabs_rel_to_cutoff) < 0.05) # Choose bandwidth
+nrow(df) / nrow(data) # Share of observations close to threshold
+rdd <- fixest::feols(ln_gross_expenditure_pc ~
+                     1  | # controls
+                     inhabitants_treshold + year + ags | # fixed-effect controls
+                     # First stage regression:
+                     poly(inhabs_rel_to_cutoff, 6)*total_seats ~ # Instrument our standard RDD...
+                     poly(inhabs_rel_to_cutoff, 6)*above_cutoff, # ... with being above the cutoff
+                     data = df)
+summary(rdd, vcov = "threeway")
+rm(df, rdd)
+```
+
+
+Vary polynomials, bandwidths etc.
+
+Add controls
+
+
+
+### `rdrobust` package
+
+```{r}
+#df <- d_rdd_bivariate %>%
+#  filter(abs(inhabs_rel_to_cutoff) < 0.05) # Choose bandwidth
+#rdd <- rdrobust::rdrobust(y = log(data2$gross_expenditure), x = data2$inhabs_rel_to_cutoff, fuzzy = data2$jump_in_seats_cutoff)
+#rdd <- rdrobust::rdrobust(y = log(data2$gross_expenditure), x = data2$inhabs_rel_to_cutoff, fuzzy = ifelse(data2$inhabs_rel_to_cutoff>=0,data2$jump_in_seats_cutoff, 0))
+#rdd <- rdrobust::rdrobust(y = log(data2$gross_expenditure), x = data2$inhabs_rel_to_cutoff)
+rdd <- rdrobust::rdrobust(y = d_rdd_bivariate$ln_gross_expenditure_pc, x = d_rdd_bivariate$inhabs_rel_to_cutoff, fuzzy = d_rdd_bivariate$total_seats)
+summary(rdd)
+#rdrobust::rdplot(y = data2$gross_expenditure, x = data2$inhabs_rel_to_cutoff, fuzzy = data2$total_seats)
+```
+
+Second stage interpretation if loglin: coefficient times 100 %.
+
+Second stage interpretation if loglog: 1 % increase in council size = $coefficient$ % increase in spending.
+
+```{r}
+rdrobust::rdplot(y = d_rdd_bivariate$ln_gross_expenditure_pc, x = d_rdd_bivariate$inhabs_rel_to_cutoff)
+ggplot(data = d_rdd_bivariate) +
+  geom_density(aes(inhabs_rel_to_cutoff))
+ggplot(data = d_rdd_bivariate) +
+  geom_point(aes(x = inhabs_rel_to_cutoff, y = ln_gross_expenditure_pc))
+```
+
+
+
+### Mechanisms
+
+
+#### Different fiscal policy variables
+
+etc.
+
+
+### Checking assumptions
+
+McCrary (2008) Sorting test
+
+**Hier sollten vermutlich nur Wahljahre auftauchen, sonst doppelte Fälle!**
+
+McCrary test for all states pooled:
+```{r}
+rdd::DCdensity(runvar = data$inhabs_rel_to_cutoff, cutpoint = 0, plot = TRUE)
+rdd::DCdensity(runvar = data$inhabs_rel_to_cutoff, cutpoint = 0, plot = FALSE, verbose = TRUE)
+```
+```{r}
+rdd::DCdensity(runvar = d_rdd_bivariate$inhabs_rel_to_cutoff, cutpoint = 0, plot = TRUE)
+rdd::DCdensity(runvar = d_rdd_bivariate$inhabs_rel_to_cutoff, cutpoint = 0, plot = FALSE, verbose = TRUE)
+```
+The pooled sorting test shows for pooled data set as well as the data set used in the analysis a (positive) jump at the discontinuity! This invalidates the research design.
+
+
+McCrary test for each state separately: NW, HE, BW, SN, TH have significant jumps, BY, SL barely do not, and SH, RP do not at all.
+```{r}
+all_states <- data %>%
+  distinct(state) %>%
+  filter(state != 3 & state != 12 & state != 13 & state != 15) %>% # Remove state with no/too few obs
+  pull()
+for (i in all_states){
+  print(paste("State:", i))
+  df_subset <- data %>% filter(state == i) %>% drop_na(inhabs_rel_to_cutoff)
+  print(rdd::DCdensity(runvar = df_subset$inhabs_rel_to_cutoff, cutpoint = 0, plot = FALSE))
+}
+rm(all_states, df_subset)
+```
+McCrary test for each year separately: No significant discontinuities here.
+```{r}
+all_years <- data %>%
+  distinct(year) %>%
+  pull()
+for (i in all_years){
+  print(paste("Year:", i))
+  df_subset <- data %>% filter(year == i) %>% drop_na(inhabs_rel_to_cutoff)
+  print(rdd::DCdensity(runvar = df_subset$inhabs_rel_to_cutoff, cutpoint = 0, plot = FALSE))
+}
+rm(all_years, df_subset)
+```
+Placebo McCrary (2008) test: Even the placebo thresholds are statistically significant in many cases. Maybe the discontinuities above are just a matter of statistical power?
+```{r}
+cuts <- seq(from = -(2+2/3), to = 2/3, by = 1/3) # Values chosen such that code does run
+for (i in cuts){
+  print(paste("Cutoff at:", i))
+  print(rdd::DCdensity(runvar = data$inhabs_rel_to_cutoff, cutpoint = i, plot = FALSE))
+}
+rm(cuts)
+```
+
+
+
+### Robustness checks
+
+Different specifications (e. g. varying bandwidth, polynomials), 
+
+placebo etc
+
+### Sensitivity analysis
+
+How does estimate react to different bandwidth?
+
+
+## Multiple cutoffs
+
+Versuch 1
+
+```{r, eval = FALSE}
+data2 <- data %>%
+  filter(gross_expenditure > 0, state == 9) %>%
+  select(gross_expenditure, exact_pop, inhabitants_treshold, total_seats) %>%
+  drop_na() %>%
+  slice(50:500)
+rdd <- rdmulti::rdms(Y = data2$gross_expenditure, X = data2$exact_pop, C = unique(data2$inhabitants_treshold), fuzzy = data2$total_seats)
+```
+
+Versuch 2:
+
+```{r, eval = FALSE}
+data2 <- data %>%
+  filter(gross_expenditure > 0, state == 9) %>%
+  select(gross_expenditure, exact_pop, inhabitants_treshold, total_seats) %>%
+  drop_na() %>%
+  slice(50:500)
+rdrobust::rdrobust(y = data2$gross_expenditure, x = data2$exact_pop, c = 0, fuzzy = data2$total_seats)
+```
+
+```{r, eval=FALSE}
+rdms(Y,X,cvec)
+```
+
+
+
+```{r, eval = FALSE}
+rdmulti::rdmcplot(Y = log(data2$gross_expenditure), X = data2$exact_pop, C = data2$inhabitants_treshold)
 ```
 
 

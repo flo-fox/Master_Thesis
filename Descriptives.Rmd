@@ -1,12 +1,12 @@
 ---
 author: "Florian Fox"
 date: "`r Sys.Date()`"
+title: 'Master Thesis: A Causal Test of the Law of 1/n and its Mechanisms -- Descriptive Statistics'
 output:
   html_document:
     df_print: paged
-title: 'Master Thesis: A Causal Test of the Law of 1/n and its Mechanisms -- Descriptive Statistics'
-toc: yes
-toc_float: yes
+    toc: true
+    toc_float: true
 ---
 
 # Load data and packages
@@ -34,7 +34,7 @@ theme_set(theme_minimal())
 glimpse(data)
 ```
 
-## Univaraite statistics
+# Univariat statistics
 
 ## NAs
 
@@ -73,6 +73,7 @@ summarize2 <- function(x, na.rm = TRUE) {
     Max = max(x, na.rm = na.rm),
     Mean = mean(x, na.rm = na.rm),
     SD = sd(x, na.rm = na.rm),
+    No_of_unique_values = n_distinct(x),
     N = length(x) - sum(is.na(x)),
     No_NA = sum(is.na(x))
   )
@@ -87,7 +88,7 @@ data %>%
       summarize2
     )
   ) %>%
-  mutate(Stat = c("Min", "1st Quar", "Median", "3rd Quar", "Max", "Mean", "SD", "n", "No_NA"),
+  mutate(Stat = c("Min", "1st Quar", "Median", "3rd Quar", "Max", "Mean", "SD", "No of unique values", "n", "No of NA"),
          .before = No)
 ```
 

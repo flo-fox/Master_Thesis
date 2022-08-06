@@ -1,13 +1,15 @@
 ---
 author: "Florian Fox"
 date: "`r Sys.Date()`"
+title: 'Master Thesis: A Causal Test of the Law of 1/n and its Mechanisms -- Descriptive Plots'
 output:
   html_document:
     df_print: paged
-title: 'Master Thesis: A Causal Test of the Law of 1/n and its Mechanisms -- Descriptive Plots'
-toc: yes
-toc_float: yes
+    toc: true
+    toc_float: true
 ---
+
+This file may take some time to load at times. Please be patient!
 
 # Load packages and data
 
@@ -88,7 +90,7 @@ th_16 <- c(500, 1000, 2000, 3000, 5000, 10000, 20000, 30000, 50000, 100000, 2000
 ```
 
 
-## Visualizing changes in cutoff rules
+## Cutoff rule changes
 
 01 Schleswig-Holstein (with "2002" representing the 1998 election): You can clearly see municipalities with 2000-2500 inhabitants "overlapping" in terms of total seats (compare 2018 to prior elections):
 
@@ -122,7 +124,7 @@ data %>%
 ```
 
 
-## Visualizing the relationship between inhabitants and council size for each state separately
+## Inhabitants vs. council size for each state separately
 
 States with no changes in cutoffs and no distinction between municipalities and "district-free cities" only (i. e. 01, 12, 15 excluded). 03 Lower Saxony excluded due to missing data. Vertical bars indicate cutoffs.
 
@@ -220,8 +222,34 @@ plotly::ggplotly(plot)
 12 Brandenburg also has quite a strong relationship but no population data beyond 2019. 15 Saxony-Anhalt may have had some special rules after 2007 county reform (**to do: investigate**)!
 
 
+## "Expected" number of seats vs. actual seats number
 
-## Visualizing the relationship between inhabitants and council size for all states
+Expected is what I deemed the size of the local parliament based on laws and ignoring voluntary reductions as well as "overhang seats"
+
+```{r}
+df_subset <- data %>%
+  filter((election_year == 1 | year == 2002))
+correlation <-
+  cor(df_subset$by_law_seats, df_subset$total_seats, use = "pairwise.complete.obs") %>%
+  round(., 2)
+plot <- df_subset %>%
+  ggplot() +
+  #geom_vline(xintercept = th_1_muni_since_2012) +
+  #geom_vline(xintercept = c(2000, 2500), colour = "red") +
+  geom_point(aes(
+    x = by_law_seats,
+    y = total_seats,
+    colour = as.factor(state),
+    text = paste("town:", town, "<br>year:", year)
+  )) +
+  labs(title = paste0("All states", "; linear correlation: ", correlation))
+plotly::ggplotly(plot)
+```
+
+
+
+
+## Inhabitants vs. council size for all states
 
 Linear difference:
 ```{r}
@@ -244,18 +272,21 @@ plot <- df_subset %>%
 plotly::ggplotly(plot)
 ```
 
-Log difference:
+Using the Egger and Koethenbuerger (2010) calculation steps:
+$$\tilde{N_i} = N_i/N_d$$
+with $N_i$ as the relevant actual population size and $N_d$ as the respective thresholds.
+
 ```{r}
-#df_subset <- data %>%
-#  filter(election_year == 1 | year == 2002)
-#correlation <-
-#  cor(df_subset$exact_pop, df_subset$total_seats, use = "pairwise.complete.obs") %>%
-#  round(., 2)
+df_subset <- data %>%
+  filter(election_year == 1 | year == 2002)
+correlation <-
+  cor(df_subset$inhabs_rel_to_cutoff, df_subset$total_seats, use = "pairwise.complete.obs") %>%
+  round(., 2)
 plot <- df_subset %>%
   ggplot() +
   geom_vline(xintercept = 0) +
   geom_point(aes(
-    x = ln_diff_to_cutoff,
+    x = inhabs_rel_to_cutoff,
     y = total_seats,
     colour = as.factor(state),
     #shape = as.factor(state),
@@ -267,7 +298,8 @@ plotly::ggplotly(plot)
 
 
 
-## Visualizing the relationship between inhabitants and public spending for each state separately
+
+## Inhabitants and public spending for each state separately
 
 Relationship between inhabitants and public spending for those states that did not change cutoffs:
 
@@ -277,14 +309,14 @@ for (s in c(5:10, 13, 14, 16)) {
   df_subset <- data %>%
     filter(state == s & (election_year == 1 | year == 2002))
   correlation <-
-    cor(df_subset$exact_pop, df_subset$gross_expenditure, use = "pairwise.complete.obs") %>%
+    cor(df_subset$exact_pop, df_subset$ln_gross_expenditure_pc, use = "pairwise.complete.obs") %>%
     round(., 2)
   plot <- df_subset %>%
     ggplot() +
     geom_vline(xintercept = get(paste0("th_", s))) +
     geom_point(aes(
       x = exact_pop,
-      y = gross_expenditure,
+      y = ln_gross_expenditure_pc,
       colour = as.factor(year),
       text = paste("town:", town)
     )) +
@@ -303,17 +335,16 @@ Relationship between inhabitants and public spending per capita for those states
 plot_list <- htmltools::tagList()
 for (s in c(5:10, 13, 14, 16)) {
   df_subset <- data %>%
-    filter(state == s & (election_year == 1 | year == 2002)) %>%
-    mutate(gross_expenditure_pc = gross_expenditure / inh_tot)
+    filter(state == s & (election_year == 1 | year == 2002))
   correlation <-
-    cor(df_subset$exact_pop, df_subset$gross_expenditure_pc, use = "pairwise.complete.obs") %>%
+    cor(df_subset$exact_pop, df_subset$ln_gross_expenditure_pc, use = "pairwise.complete.obs") %>%
     round(., 2)
   plot <- df_subset %>%
     ggplot() +
     geom_vline(xintercept = get(paste0("th_", s))) +
     geom_point(aes(
       x = exact_pop,
-      y = gross_expenditure_pc,
+      y = ln_gross_expenditure_pc,
       colour = as.factor(year),
       text = paste("town:", town)
     )) +

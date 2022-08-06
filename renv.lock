@@ -426,6 +426,16 @@
         "vctrs"
       ]
     },
+    "dreamerr": {
+      "Package": "dreamerr",
+      "Version": "1.2.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "5b31f43f60613477ee28abec9ab07f1b",
+      "Requirements": [
+        "Formula"
+      ]
+    },
     "dtplyr": {
       "Package": "dtplyr",
       "Version": "1.2.1",
@@ -486,6 +496,20 @@
       "Repository": "CRAN",
       "Hash": "77bd60a6157420d4ffa93b27cf6a58b8",
       "Requirements": []
+    },
+    "fixest": {
+      "Package": "fixest",
+      "Version": "0.10.4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "c88e57859a11d0a184d8ed454e45222d",
+      "Requirements": [
+        "Rcpp",
+        "dreamerr",
+        "nlme",
+        "numDeriv",
+        "sandwich"
+      ]
     },
     "forcats": {
       "Package": "forcats",
@@ -841,6 +865,17 @@
         "zoo"
       ]
     },
+    "lpdensity": {
+      "Package": "lpdensity",
+      "Version": "2.3.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "c77e10d39502fb81be54b90d010509a2",
+      "Requirements": [
+        "MASS",
+        "ggplot2"
+      ]
+    },
     "lubridate": {
       "Package": "lubridate",
       "Version": "1.8.0",
@@ -1168,6 +1203,52 @@
       "Repository": "CRAN",
       "Hash": "5e3c5dc0b071b21fa128676560dbe94d",
       "Requirements": []
+    },
+    "rdd": {
+      "Package": "rdd",
+      "Version": "0.57",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "57aaebabda76863a8969e3a75c8ff98a",
+      "Requirements": [
+        "AER",
+        "Formula",
+        "lmtest",
+        "sandwich"
+      ]
+    },
+    "rddensity": {
+      "Package": "rddensity",
+      "Version": "2.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "248c319396512c6083bd8165b664b69c",
+      "Requirements": [
+        "ggplot2",
+        "lpdensity"
+      ]
+    },
+    "rdmulti": {
+      "Package": "rdmulti",
+      "Version": "0.9",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "13d0da70ca656c7f275007941ab21e76",
+      "Requirements": [
+        "ggplot2",
+        "rdrobust"
+      ]
+    },
+    "rdrobust": {
+      "Package": "rdrobust",
+      "Version": "2.0.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "42654468fad6fab7de337fc3dcb9dc13",
+      "Requirements": [
+        "MASS",
+        "ggplot2"
+      ]
     },
     "readr": {
       "Package": "readr",
