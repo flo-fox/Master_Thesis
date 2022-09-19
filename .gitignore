@@ -40,3 +40,6 @@ vignettes/*.pdf
 
 # Do not upload data
 data/
+
+# Ignore additional information (e. g. MWE)
+trashcan/

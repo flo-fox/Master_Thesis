@@ -14,6 +14,7 @@ output:
 ```{r Packages}
 library(tidyverse)
 library(reshape2)
+library(xtable)
 ```
 
 ```{r Data}
@@ -34,7 +35,7 @@ theme_set(theme_minimal())
 glimpse(data)
 ```
 
-# Univariat statistics
+# Univariate statistics
 
 ## NAs
 
@@ -78,6 +79,7 @@ summarize2 <- function(x, na.rm = TRUE) {
     No_NA = sum(is.na(x))
   )
 }
+sum_stats <- c("Min", "1st Quar", "Median", "3rd Quar", "Max", "Mean", "SD", "No of unique values", "n", "No of NA")
 ```
 ```{r Univariate stats}
 dim(data)
@@ -88,9 +90,56 @@ data %>%
       summarize2
     )
   ) %>%
-  mutate(Stat = c("Min", "1st Quar", "Median", "3rd Quar", "Max", "Mean", "SD", "No of unique values", "n", "No of NA"),
+  mutate(Stat = sum_stats,
          .before = No)
 ```
+
+
+## Export to LaTeX
+
+Exporting ta table of descriptive univariate statistics to LaTeX to use it in the paper.
+
+```{r}
+univar_descriptives <- data %>%
+  select(ln_gross_expenditure_pc, total_seats, inh_tot, exact_pop) %>%
+  summarize(across(
+    everything(), summarize2
+  )) %>%
+  mutate(
+    Stat = c("Min.", "1st Quar.", "Median", "3rd Quar.", "Max.", "Mean", "S. D.", "Number of unique values", "n", "Missings"),
+    .before = 1
+    ) %>%
+  filter(!(Stat %in% c("Number of unique values", "Missings"))) %>%
+  rename(
+    `Log gross expenditure p. c.` = ln_gross_expenditure_pc,
+    `Council size` = total_seats,
+    `Population (as of 12-31)` = inh_tot,
+    `Population (for coun. size)` = exact_pop
+  ) %>%
+  pivot_longer(-Stat, names_to = "Statistic") %>%
+  pivot_wider(names_from = Stat, values_from = value)
+univar_descriptives
+print(xtable::xtable(univar_descriptives, digits = c(rep(2, times = 9), 0)),
+      file = "tables/descriptives.tex",
+      booktabs = TRUE, floating = FALSE,
+      include.rownames = FALSE)
+```
+
+Further (descriptive) information mentioned in the paper:
+
+Correlation of Bavarian council size:
+
+```{r}
+cor(data$total_seats, data$total_seats_24_y_ago, use = "pairwise.complete.obs")
+```
+
+Distance between population (cutoff) date for determining council size and the actual election date:
+
+```{r}
+summary(data$time_elec_pop_diff)
+```
+
+
 
 
 ## Factors

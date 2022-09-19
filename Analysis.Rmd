@@ -42,8 +42,8 @@ d_bivariate <- data %>%
 d_bivariate_iv <- data %>%
   select(ln_gross_expenditure_pc, total_seats, ags, year, total_seats_24_y_ago) %>% drop_na()
 d_rdd_bivariate <- data %>%
-  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, inhabitants_treshold, year, ags) %>%
-  drop_na()
+  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, inhabitants_treshold, year, ags, election_year) %>%
+  drop_na(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff)
 
 d_controls <- data %>%
   select(ln_gross_expenditure_pc, total_seats, ags, year, inh_tot, unempl_rate, total_area_ha, share_working_age, kreisfreie_stadt, stadt, years_since_last_elec) %>%
@@ -51,7 +51,7 @@ d_controls <- data %>%
 d_controls_iv <- data %>%
   select(ln_gross_expenditure_pc, total_seats, ags, year, total_seats_24_y_ago, inh_tot, unempl_rate, total_area_ha, share_working_age, kreisfreie_stadt, stadt, years_since_last_elec) %>%
   drop_na()
-d_rdd_bivariate <- data %>%
+d_rdd <- data %>%
   select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, inhabitants_treshold, year, ags,
          inh_tot, unempl_rate, total_area_ha, share_working_age, kreisfreie_stadt, stadt, years_since_last_elec) %>%
   drop_na()
@@ -194,9 +194,9 @@ rm(list=ls(pattern="^iv_"))
 
 
 
-# Regression discontinuity design
+# Regression discontinuity design -- Normalized Cutoff
 
-## Treating cutoffs as one
+Sharp RDD mit "intention-to-treat" effect?
 
 Treating all of the cutoffs as one requires a harmonization. This happens according to Egger and Koethenbuerger (2010):
 
@@ -205,7 +205,7 @@ $$\tilde{N_i} = N_i/N_d$$
 with $N_i$ as the relevant actual population size and $N_d$ as the respective thresholds.
 
 
-### t test
+## t test
 
 The most simple thing to do is a simple t test for differences.
 
@@ -238,7 +238,7 @@ rm(d_ttest2)
 ```
 
 
-### Manual IV regression
+## Manual IV regression
 
 This is how it is done according to ["The Effect" of Nick Huntington-Klein, chapter 20](https://theeffectbook.net/ch-RegressionDiscontinuity.html):
 ```{r}
@@ -256,6 +256,8 @@ summary(rdd, vcov = "hetero")
 summary(rdd, vcov = "threeway")
 # First stage:
 summary(rdd, stage = 1, vcov = "threeway")
+# More tests:
+fixest::fitstat(rdd, ~ ivf1 + ivwald1 + ivf2 + ivwald2)
 rm(df, rdd)
 ```
 
@@ -275,6 +277,8 @@ summary(rdd, vcov = "hetero")
 summary(rdd, vcov = "threeway")
 # First stage:
 summary(rdd, stage = 1, vcov = "threeway")
+# More tests:
+fixest::fitstat(rdd, ~ ivf1 + ivwald1 + ivf2 + ivwald2)
 rm(df, rdd)
 ```
 
@@ -320,7 +324,7 @@ Add controls
 
 
 
-### `rdrobust` package
+## `rdrobust` package
 
 ```{r}
 #df <- d_rdd_bivariate %>%
@@ -328,12 +332,14 @@ Add controls
 #rdd <- rdrobust::rdrobust(y = log(data2$gross_expenditure), x = data2$inhabs_rel_to_cutoff, fuzzy = data2$jump_in_seats_cutoff)
 #rdd <- rdrobust::rdrobust(y = log(data2$gross_expenditure), x = data2$inhabs_rel_to_cutoff, fuzzy = ifelse(data2$inhabs_rel_to_cutoff>=0,data2$jump_in_seats_cutoff, 0))
 #rdd <- rdrobust::rdrobust(y = log(data2$gross_expenditure), x = data2$inhabs_rel_to_cutoff)
-rdd <- rdrobust::rdrobust(y = d_rdd_bivariate$ln_gross_expenditure_pc, x = d_rdd_bivariate$inhabs_rel_to_cutoff, fuzzy = d_rdd_bivariate$total_seats)
+rdd <- rdrobust::rdrobust(y = d_rdd_bivariate$ln_gross_expenditure_pc, x = d_rdd_bivariate$inhabs_rel_to_cutoff, fuzzy = d_rdd_bivariate$total_seats, all = TRUE)
 summary(rdd)
 #rdrobust::rdplot(y = data2$gross_expenditure, x = data2$inhabs_rel_to_cutoff, fuzzy = data2$total_seats)
 ```
 
 Second stage interpretation if loglin: coefficient times 100 %.
+
+**Explanation of the output required! (which coefficients, SE, CI to read)**
 
 Second stage interpretation if loglog: 1 % increase in council size = $coefficient$ % increase in spending.
 
@@ -346,30 +352,46 @@ ggplot(data = d_rdd_bivariate) +
 ```
 
 
+Investigating mass points: to do
 
-### Mechanisms
+```{r}
+sum(!is.na(data$inhabs_rel_to_cutoff)) # Number of valid observations of running variable
+length(unique(data$inhabs_rel_to_cutoff)) # Number of unique values of running variable
+sum(!is.na(data$inhabs_rel_to_cutoff)) / length(unique(data$inhabs_rel_to_cutoff)) # 18 observations per value
+```
 
 
-#### Different fiscal policy variables
+
+## Mechanisms
+
+
+### Different fiscal policy variables
 
 etc.
 
 
-### Checking assumptions
+## Checking assumptions
 
-McCrary (2008) Sorting test
+### McCrary (2008) Sorting test
 
-**Hier sollten vermutlich nur Wahljahre auftauchen, sonst doppelte Fälle!**
+I am only using election years in order to avoid multiple observations on the running variable (also for the `rddensity` check).
+
+```{r}
+dens_test_d_rdd_bivariate <- d_rdd_bivariate %>%
+  filter(election_year == 1 | year == 2002)
+```
+
 
 McCrary test for all states pooled:
 ```{r}
-rdd::DCdensity(runvar = data$inhabs_rel_to_cutoff, cutpoint = 0, plot = TRUE)
-rdd::DCdensity(runvar = data$inhabs_rel_to_cutoff, cutpoint = 0, plot = FALSE, verbose = TRUE)
+rdd::DCdensity(runvar = data$inhabs_rel_to_cutoff, cutpoint = 0, plot = TRUE, verbose = TRUE)
 ```
 ```{r}
-rdd::DCdensity(runvar = d_rdd_bivariate$inhabs_rel_to_cutoff, cutpoint = 0, plot = TRUE)
-rdd::DCdensity(runvar = d_rdd_bivariate$inhabs_rel_to_cutoff, cutpoint = 0, plot = FALSE, verbose = TRUE)
+rdd::DCdensity(runvar = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff, cutpoint = 0, plot = TRUE, verbose = TRUE)
+title(xlab = "Running variable")
 ```
+
+
 The pooled sorting test shows for pooled data set as well as the data set used in the analysis a (positive) jump at the discontinuity! This invalidates the research design.
 
 
@@ -408,30 +430,54 @@ for (i in cuts){
 rm(cuts)
 ```
 
+### `rddensity` discontinuity test
+
+```{r}
+rddensity_disc_test <- rddensity::rddensity(X = data$inhabs_rel_to_cutoff, c = 0, all = TRUE)
+rddensity_disc_test
+summary(rddensity_disc_test)
+rddensity::rdplotdensity(rddensity_disc_test, X = data$inhabs_rel_to_cutoff)
+```
 
 
-### Robustness checks
+
+## Robustness checks
 
 Different specifications (e. g. varying bandwidth, polynomials), 
 
 placebo etc
 
-### Sensitivity analysis
+## Sensitivity analysis
 
-How does estimate react to different bandwidth?
+How does estimate react to different bandwidths?
 
 
-## Multiple cutoffs
+## Mass points
+
+Lee and Card 2008 procedure: Clustering at the respective dicrete values of the running variable
+
+--> RDhonest???
+
+
+## Treatment Effect Heterogeneity
+
+Hsu Shen nd
+
+
+# Regression Discontinuity Design -- Exploiting the multiple-cutoff setting
 
 Versuch 1
 
 ```{r, eval = FALSE}
+set.seed(123)
 data2 <- data %>%
-  filter(gross_expenditure > 0, state == 9) %>%
-  select(gross_expenditure, exact_pop, inhabitants_treshold, total_seats) %>%
+  filter(state == 9, total_seats <= 24) %>%
+  select(ln_gross_expenditure_pc, inhabitants_treshold, exact_pop, total_seats) %>%
   drop_na() %>%
-  slice(50:500)
-rdd <- rdmulti::rdms(Y = data2$gross_expenditure, X = data2$exact_pop, C = unique(data2$inhabitants_treshold), fuzzy = data2$total_seats)
+  slice_sample(n = 8000)
+rdd <- rdmulti::rdms(Y = data2$ln_gross_expenditure_pc, X = data2$exact_pop, fuzzy = data2$total_seats, C = data2$inhabitants_treshold)
+#rdd <- rdmulti::rdms(Y = data2$ln_gross_expenditure_pc, X = data2$exact_pop, C = data$inhabitants_treshold)
+#unique(data2$inhabitants_treshold), fuzzy = data2$total_seats)
 ```
 
 Versuch 2:
@@ -442,7 +488,7 @@ data2 <- data %>%
   select(gross_expenditure, exact_pop, inhabitants_treshold, total_seats) %>%
   drop_na() %>%
   slice(50:500)
-rdrobust::rdrobust(y = data2$gross_expenditure, x = data2$exact_pop, c = 0, fuzzy = data2$total_seats)
+rdrobust::rdrobust(y = data2$gross_expenditure, x = data2$exact_pop, c = 0, fuzzy = data2$total_seats, all = TRUE)
 ```
 
 ```{r, eval=FALSE}
