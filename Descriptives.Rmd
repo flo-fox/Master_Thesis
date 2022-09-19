@@ -64,23 +64,6 @@ data %>%
 
 ## Numeric variables
 
-```{r}
-summarize2 <- function(x, na.rm = TRUE) {
-  result <- c(
-    Min = min(x, na.rm = na.rm),
-    Q25 = quantile(x, probs = 0.25, na.rm = na.rm),
-    Median = median(x, na.rm = na.rm),
-    Q75 = quantile(x, probs = 0.75, na.rm = na.rm),
-    Max = max(x, na.rm = na.rm),
-    Mean = mean(x, na.rm = na.rm),
-    SD = sd(x, na.rm = na.rm),
-    No_of_unique_values = n_distinct(x),
-    N = length(x) - sum(is.na(x)),
-    No_NA = sum(is.na(x))
-  )
-}
-sum_stats <- c("Min", "1st Quar", "Median", "3rd Quar", "Max", "Mean", "SD", "No of unique values", "n", "No of NA")
-```
 ```{r Univariate stats}
 dim(data)
 data %>%
@@ -101,7 +84,7 @@ Exporting ta table of descriptive univariate statistics to LaTeX to use it in th
 
 ```{r}
 univar_descriptives <- data %>%
-  select(ln_gross_expenditure_pc, total_seats, inh_tot, exact_pop) %>%
+  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, inh_tot, exact_pop) %>%
   summarize(across(
     everything(), summarize2
   )) %>%
@@ -113,6 +96,7 @@ univar_descriptives <- data %>%
   rename(
     `Log gross expenditure p. c.` = ln_gross_expenditure_pc,
     `Council size` = total_seats,
+    `Running variable` = inhabs_rel_to_cutoff,
     `Population (as of 12-31)` = inh_tot,
     `Population (for coun. size)` = exact_pop
   ) %>%

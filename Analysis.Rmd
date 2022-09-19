@@ -42,7 +42,7 @@ d_bivariate <- data %>%
 d_bivariate_iv <- data %>%
   select(ln_gross_expenditure_pc, total_seats, ags, year, total_seats_24_y_ago) %>% drop_na()
 d_rdd_bivariate <- data %>%
-  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, inhabitants_treshold, year, ags, election_year) %>%
+  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, inhabitants_treshold, year, ags, election_year, state) %>%
   drop_na(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff)
 
 d_controls <- data %>%
@@ -381,71 +381,182 @@ dens_test_d_rdd_bivariate <- d_rdd_bivariate %>%
   filter(election_year == 1 | year == 2002)
 ```
 
-
-McCrary test for all states pooled:
+McCrary test for all states pooled (with running variable values occuring multiple times):
 ```{r}
 rdd::DCdensity(runvar = data$inhabs_rel_to_cutoff, cutpoint = 0, plot = TRUE, verbose = TRUE)
 ```
+
 ```{r}
 rdd::DCdensity(runvar = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff, cutpoint = 0, plot = TRUE, verbose = TRUE)
-title(xlab = "Running variable")
 ```
 
 
-The pooled sorting test shows for pooled data set as well as the data set used in the analysis a (positive) jump at the discontinuity! This invalidates the research design.
-
-
-McCrary test for each state separately: NW, HE, BW, SN, TH have significant jumps, BY, SL barely do not, and SH, RP do not at all.
+Export plot:
 ```{r}
-all_states <- data %>%
-  distinct(state) %>%
-  filter(state != 3 & state != 12 & state != 13 & state != 15) %>% # Remove state with no/too few obs
-  pull()
-for (i in all_states){
-  print(paste("State:", i))
-  df_subset <- data %>% filter(state == i) %>% drop_na(inhabs_rel_to_cutoff)
-  print(rdd::DCdensity(runvar = df_subset$inhabs_rel_to_cutoff, cutpoint = 0, plot = FALSE))
-}
-rm(all_states, df_subset)
+pdf(file = "plots/mccrary.pdf", width = 10, height = 10*9/16)
+rdd::DCdensity(runvar = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff, cutpoint = 0, plot = TRUE, verbose = TRUE)
+title(xlab = "Running variable (Population relative to thresholds)")
+abline(v=0)
+dev.off()
 ```
-McCrary test for each year separately: No significant discontinuities here.
-```{r}
-all_years <- data %>%
-  distinct(year) %>%
-  pull()
-for (i in all_years){
-  print(paste("Year:", i))
-  df_subset <- data %>% filter(year == i) %>% drop_na(inhabs_rel_to_cutoff)
-  print(rdd::DCdensity(runvar = df_subset$inhabs_rel_to_cutoff, cutpoint = 0, plot = FALSE))
-}
-rm(all_years, df_subset)
-```
-Placebo McCrary (2008) test: Even the placebo thresholds are statistically significant in many cases. Maybe the discontinuities above are just a matter of statistical power?
-```{r}
-cuts <- seq(from = -(2+2/3), to = 2/3, by = 1/3) # Values chosen such that code does run
-for (i in cuts){
-  print(paste("Cutoff at:", i))
-  print(rdd::DCdensity(runvar = data$inhabs_rel_to_cutoff, cutpoint = i, plot = FALSE))
-}
-rm(cuts)
-```
+
+The test for the overall data is significant (i. e. there is a jump at the threshold). But this may be due to almost all values of the running variable occuring multiple times (given the nature of the data set). Hence, the "real" test on the data set is not statistically significant any more.
+
 
 ### `rddensity` discontinuity test
 
 ```{r}
-rddensity_disc_test <- rddensity::rddensity(X = data$inhabs_rel_to_cutoff, c = 0, all = TRUE)
-rddensity_disc_test
+rddensity_disc_test <- rddensity::rddensity(X = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff, c = 0)
 summary(rddensity_disc_test)
-rddensity::rdplotdensity(rddensity_disc_test, X = data$inhabs_rel_to_cutoff)
+p <- rddensity::rdplotdensity(rddensity_disc_test, X = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff, xlabel = "Running variable (Population relative to threshold)")
+```
+
+Export plot
+```{r}
+pdf(file = "plots/rddensity.pdf", width = 10, height = 10*9/16)
+p
+dev.off()
+rm(p)
+```
+
+### Testing for sorting in different entities, time periods, thresholds...
+
+McCrary and `rddensity` tests for each state separately.
+
+- McCrary: HE & TH have (positive) significant jumps at the cutoff.
+- `rddensity`: BW & SA show signs of significant sorting at the cutoff, positively and negatively, respectively.
+
+```{r}
+all_states <- dens_test_d_rdd_bivariate %>%
+  distinct(state) %>%
+  filter(state != 3 & state != 12 & state != 13 & state != 15) %>% # Remove state with no/too few obs
+  pull()
+for (i in all_states){
+  df_subset <- dens_test_d_rdd_bivariate %>% filter(state == i) %>% drop_na(inhabs_rel_to_cutoff)
+  out1 <- rdd::DCdensity(runvar = df_subset$inhabs_rel_to_cutoff, cutpoint = 0, plot = FALSE, ext.out = TRUE)
+  out2 <- rddensity::rddensity(X = df_subset$inhabs_rel_to_cutoff)
+  print(paste0("McCrary -- State: ", i, ", jump: ", out1$theta, ", p value: ", out1$p, ", n: ", length(df_subset$inhabs_rel_to_cutoff)))
+  print(paste0("rddensity -- State: ", i, ", jump: ", out2$hat$diff, ", p value: ", out2$test$p_jk, ", n: ", length(df_subset$inhabs_rel_to_cutoff)))
+}
+rm(all_states, df_subset, out1, out2)
+```
+
+McCrary and `rddensity` tests for each year separately:
+
+- McCrary: No significant discontinuities here.
+- `rddensity`: 2003 and 2004 (the latter was an important election year on the local level) show signs of sorting to the right at the 10% level.
+
+
+```{r}
+all_years <- dens_test_d_rdd_bivariate %>%
+  distinct(year) %>%
+  arrange(year) %>%
+  pull()
+for (i in all_years){
+  df_subset <- dens_test_d_rdd_bivariate %>% filter(year == i) %>% drop_na(inhabs_rel_to_cutoff)
+  out1 <- rdd::DCdensity(runvar = df_subset$inhabs_rel_to_cutoff, cutpoint = 0, plot = FALSE, ext.out = TRUE)
+  out2 <- rddensity::rddensity(X = df_subset$inhabs_rel_to_cutoff)
+  print(paste0("McCrary -- Year: ", i, ", jump: ", out1$theta, ", p value: ", out1$p, ", n: ", length(df_subset$inhabs_rel_to_cutoff)))
+  print(paste0("rddensity -- Year: ", i, ", jump: ", out2$hat$diff, ", p value: ", out2$test$p_jk, ", n: ", length(df_subset$inhabs_rel_to_cutoff)))
+}
+rm(all_years, df_subset, out1, out2)
+```
+
+Testing at every threshold separately:
+
+- McCrary test: 300, 2,000, and 10,000 significant at least at the 10 % significance level.
+- `rddensity` reveals sorting to the left at the 15,000 threshold.
+
+```{r}
+all_th <- dens_test_d_rdd_bivariate %>%
+  filter(inhabitants_treshold <= 30000 | inhabitants_treshold == 50000 |
+           inhabitants_treshold == 100000 | inhabitants_treshold == 150000) %>%
+  # Test works only for those values
+  distinct(inhabitants_treshold) %>%
+  arrange(inhabitants_treshold) %>%
+  pull()
+for (i in all_th){
+  df_subset <- dens_test_d_rdd_bivariate %>%
+    filter(inhabitants_treshold == i) %>%
+    drop_na(inhabs_rel_to_cutoff)
+  state <- unique(df_subset$state) %>% paste(collapse = ",")
+  out1 <- rdd::DCdensity(runvar = df_subset$inhabs_rel_to_cutoff, cutpoint = 0, plot = FALSE, ext.out = TRUE)
+  out2 <- rddensity::rddensity(X = df_subset$inhabs_rel_to_cutoff)
+  print(paste0("McCrary -- Threshold: ", i, ", state(s): ", state, ", jump: ", out1$theta, ", p value: ", out1$p, ", n: ", length(df_subset$inhabs_rel_to_cutoff)))
+  print(paste0("rddensity -- Threshold: ", i, ", state(s): ", state, ", jump: ", out2$hat$diff, ", p value: ", out2$test$p_jk, ", n: ", length(df_subset$inhabs_rel_to_cutoff)))
+}
+rm(all_th, df_subset, out1)
+```
+
+Placebo McCrary (2008) test: Even the placebo thresholds are statistically significant in many cases. Maybe the discontinuities above are just a matter of statistical power?
+```{r}
+# "Structured" approach
+cuts <- seq(from = -(2+2/3), to = 2/3, by = 1/6) # Values chosen such that code does run
+length <- length(cuts)
+cutoff <- list()
+pvalue1 <- list()
+pvalue2 <- list()
+for (i in 1:length){
+  cutoff[i] <- cuts[i]
+  pvalue1[i] <- rdd::DCdensity(runvar = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff,
+                              cutpoint = cuts[i], plot = FALSE)
+  pvalue2[i] <- rddensity::rddensity(X = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff, c = cuts[i])$test$p_jk
+}
+sorting <- tibble(cutoff = cutoff, pvalue_mccrary = pvalue1, pvalue_rddensity = pvalue2) %>%
+  unnest() %>%
+  arrange(pvalue_mccrary)
+sorting
+rm(cutoff, cuts, i, length, pvalue1, pvalue2, sorting)
+```
+```{r}
+# "Random" approach
+set.seed(234) # Value chosen such that rdd:DCdensity actually runs without error -> bias?
+random_z_score <- rnorm(50)/2 # Neither randomly nor z-distributed, but roughly around my cutoff
+cutoff <- list()
+pvalue_mccrary <- list()
+jump_rddensity <- list()
+pvalue_rddensity <- list()
+for (i in 1:50){
+  #print(paste("Cutoff at:", random_z_score[i]))
+  cutoff[i] <- random_z_score[i]
+  pvalue_mccrary[i] <- rdd::DCdensity(runvar = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff,
+                                       cutpoint = random_z_score[i], plot = FALSE)
+  out2 <- rddensity::rddensity(X = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff,
+                               c = random_z_score[i])
+  jump_rddensity[i] <- out2$hat$diff
+  pvalue_rddensity[i] <- out2$test$p_jk
+}
+sorting <- tibble(cutoff, pvalue_mccrary, jump_rddensity, pvalue_rddensity) %>%
+  unnest() %>%
+  arrange(cutoff)
+sorting
+ggplot2::ggplot(sorting) + geom_histogram(aes(pvalue_mccrary))
+ggplot2::ggplot(sorting) + geom_histogram(aes(pvalue_rddensity))
+rm(cutoff, i, out2, pvalues, random_z_score)
 ```
 
 
 
-## Robustness checks
+
+
+
+Strangely, the number of observations with p values smaller than 10 % is higher than one would expect. I do not have an explanation for this.
+
+
+```{r}
+rm(dens_test_d_rdd_bivariate)
+```
+
+### Balance tests
+
+
+# Robustness checks
 
 Different specifications (e. g. varying bandwidth, polynomials), 
 
 placebo etc
+
+## Placebo
 
 ## Sensitivity analysis
 
@@ -503,7 +614,9 @@ rdmulti::rdmcplot(Y = log(data2$gross_expenditure), X = data2$exact_pop, C = dat
 
 
 
+# Concluding Remarks
 
+For references, see the paper.
 
 ```{r}
 

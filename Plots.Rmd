@@ -27,7 +27,7 @@ data <-
 
 ```{r Options}
 options(scipen = 20)
-theme_set(theme_minimal())
+#theme_set(theme_minimal())
 ```
 
 

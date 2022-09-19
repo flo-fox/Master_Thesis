@@ -2,31 +2,18 @@
 
 # This file includes functions used for the main R scripts
 
-# Adjust rdd::DCdensity function
-# https://stackoverflow.com/questions/52334725/how-to-wrap-dcdensity-in-additional-graphical-options-to-modify-the-plot-rd
-DCdensity_plot_mod <- function(runvar, cutpoint, caption = "", xlabel = ""){
-  
-  # get the default plot
-  myplot <- rdd::DCdensity(runvar, cutpoint)
-  
-  # 'additional graphical options to modify the plot'
-  #title(main = my_title)
-  #title(sub = caption)
-  title(xlab = xlabel)
-  
-  # return
-  return(myplot)
+summarize2 <- function(x, na.rm = TRUE) {
+  result <- c(
+    Min = min(x, na.rm = na.rm),
+    Q25 = quantile(x, probs = 0.25, na.rm = na.rm),
+    Median = median(x, na.rm = na.rm),
+    Q75 = quantile(x, probs = 0.75, na.rm = na.rm),
+    Max = max(x, na.rm = na.rm),
+    Mean = mean(x, na.rm = na.rm),
+    SD = sd(x, na.rm = na.rm),
+    No_of_unique_values = n_distinct(x),
+    N = length(x) - sum(is.na(x)),
+    No_NA = sum(is.na(x))
+  )
 }
-
-myDCdensity <- function(runvar, cutpoint, my_abline = 0, my_title = "Default"){
-  
-  # get the default plot
-  myplot <- DCdensity(runvar, cutpoint)
-  
-  # 'additional graphical options to modify the plot'
-  abline(v = my_abline)
-  title(main = my_title)
-  
-  # return
-  return(myplot)
-}
+sum_stats <- c("Min", "1st Quar", "Median", "3rd Quar", "Max", "Mean", "SD", "No of unique values", "n", "No of NA")
