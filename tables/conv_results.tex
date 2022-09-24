@@ -1,0 +1,34 @@
+
+\begin{table}[htbp]
+   \caption{\label{tab:conv_results} Results of the ``Conventional'' Regression Methods}
+   \centering
+   \begin{tabular}{lcccc}
+      \tabularnewline \midrule \midrule
+      Dependent Variable: & \multicolumn{4}{c}{Ln of gross expenditure p. c.}\\
+                    & \acs{OLS}      & \acs{FE} bivariate    & \acs{FE} multivariate  & \acs{IV} multivariate \\    
+      Model:        & (1)            & (2)                   & (3)                    & (4)\\  
+      \midrule
+      \emph{Variables}\\
+      Council size  & 0.0082$^{***}$ & 0.0023$^{'}$          & 0.0025$^{*}$           & -0.0006\\   
+                    & (0.0002)       & (0.0011)              & (0.0011)               & (0.0007)\\   
+      \midrule
+      \emph{Fixed-effects}\\
+      Controls      & Yes            & No                    & Yes                    & Yes\\  
+      year \ac{FE}  &                & Yes                   & Yes                    & Yes\\  
+      ags \ac{FE}   &                & Yes                   & Yes                    & \\  
+      \acs{SE} & \acs{het} & by \acs{yr} \& \acs{mcp} & by \acs{yr} \& \acs{mcp} & by \acs{yr}\\
+      \midrule
+      \emph{Fit statistics}\\
+      Data sample   & All data       & All data              & All data               & \acs{BY} only\\   
+      Observations  & 105,186        & 107,515               & 105,186                & 26,639\\  
+      R$^2$         & 0.20000        & 0.75607               & 0.76159                & 0.20692\\  
+      Within R$^2$  &                & $6.56\times 10^{-5}$  & 0.00153                & 0.04474\\  
+      \midrule \midrule
+      \multicolumn{5}{l}{\emph{Signif. Codes: ***: 0.001, **: 0.01, *: 0.05, ': 0.1}}\\
+   \end{tabular}
+   
+   \par \raggedright 
+   \footnotesize{\textit{Notes:} Results of the ``conventional'' regression methods. Controls, \ac{FE} and \ac{SE} as indicated in the respective tables. Controls, if included and as long as not perfectly collinear: population, share of population over 65 years, unemployment rate, total area, share of working-age population, and dummies for ``district-free'' cities, cities, as well as year in the electoral cycle. The \acl{SE} in parentheses: \ac{het}; if \ac{SE} starts with ``by'', they are clustered at the \ac{yr} and/or \ac{mcp} level. Significance codes: *** p < 0.001, \textbf{ p < 0.01, \textit{ p < 0.05, ' p < 0.10.}}}
+\end{table}
+
+

@@ -15,11 +15,19 @@ output:
 library(tidyverse)
 library(reshape2)
 library(xtable)
+source("functions.R")
 ```
 
 ```{r Data}
 data <-
   readRDS("data/gemeinderatswahlen_alldata.rds")
+```
+
+```{r}
+# similar data set definition as in "Analysis.Rmd"
+d_rdd_bivariate <- data %>%
+  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, inhabitants_treshold, year, ags, election_year, state, closest, exact_pop, kreisfreie_stadt, by_law_seats) %>%
+  drop_na(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff)
 ```
 
 ```{r Options}
@@ -94,7 +102,7 @@ univar_descriptives <- data %>%
     ) %>%
   filter(!(Stat %in% c("Number of unique values", "Missings"))) %>%
   rename(
-    `Log gross expenditure p. c.` = ln_gross_expenditure_pc,
+    `Ln of gross expenditure p. c.` = ln_gross_expenditure_pc,
     `Council size` = total_seats,
     `Running variable` = inhabs_rel_to_cutoff,
     `Population (as of 12-31)` = inh_tot,
@@ -139,13 +147,28 @@ data %>%
 
 
 
-Display correlation between standard council size (as determined (by me) by council size) with actual number of seats. Especially weak in Baden-Württemberg, North-Rhine Westphalia, and Saxony. Strong in Saarland (sharp design here), Thuringia, and Brandenburg (though few data points here).
+Display correlation between standard council size (as determined (by me) by council size) with actual number of seats. (On the overall sample `data`:) Especially weak in Baden-Württemberg, North-Rhine Westphalia, and Saxony. Strong in Saarland (sharp design here), Thuringia, and Brandenburg (though few data points here).
 
 ```{r, rows.print=15}
 data %>%
   group_by(state) %>%
   summarize(n = n(), seat_cor = cor(total_seats, by_law_seats, use = "pairwise.complete.obs")) %>%
   arrange(seat_cor)
+# Main data set used in analysis
+d_rdd_bivariate %>%
+  group_by(state) %>%
+  summarize(n = n(), seat_cor = cor(total_seats, by_law_seats, use = "pairwise.complete.obs")) %>%
+  arrange(seat_cor)
+cor(d_rdd_bivariate$total_seats, d_rdd_bivariate$by_law_seats, use = "pairwise.complete.obs")
+# Main data set used in analysis & close to cutoffs
+d_rdd_bivariate %>%
+  filter(closest <= 0.1) %>%
+  group_by(state) %>%
+  summarize(n = n(), seat_cor = cor(total_seats, by_law_seats, use = "pairwise.complete.obs")) %>%
+  arrange(seat_cor)
+cor(d_rdd_bivariate %>% filter(closest <= 0.1) %>% pull(total_seats),
+    d_rdd_bivariate %>% filter(closest <= 0.1) %>% pull(by_law_seats),
+    use = "pairwise.complete.obs")
 ```
 
 

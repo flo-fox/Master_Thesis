@@ -12,17 +12,23 @@ output:
 # Load data and packages
 
 ```{r Packages}
+time <- Sys.time()
 library(tidyverse)
 library(fixest)
 library(rdrobust)
 library(rdmulti)
 library(rddensity)
 library(rdd) # For the McCrary (2008) test
+library(xtable)
 ```
 
 ```{r Data}
 data <-
-  readRDS("data/gemeinderatswahlen_alldata.rds")
+  readRDS("data/gemeinderatswahlen_alldata.rds") %>%
+  mutate(
+    year = as.factor(year),
+    ags = as.factor(ags)
+  )
 ```
 
 ```{r Options}
@@ -38,23 +44,38 @@ Generating different data sets:
 
 ```{r}
 d_bivariate <- data %>%
-  select(ln_gross_expenditure_pc, total_seats, ags, year) %>% drop_na()
+  select(ln_gross_expenditure_pc, total_seats, ags, year, state) %>% drop_na()
 d_bivariate_iv <- data %>%
   select(ln_gross_expenditure_pc, total_seats, ags, year, total_seats_24_y_ago) %>% drop_na()
 d_rdd_bivariate <- data %>%
-  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, inhabitants_treshold, year, ags, election_year, state) %>%
-  drop_na(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff)
+  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, inhabitants_treshold_factor, inhabitants_treshold, year, ags, election_year, state, closest) %>%
+  drop_na(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff) %>%
+  # Repeat (bandwidth) window calculation for data subsets
+  mutate(
+    closest = base::rank(abs(inhabs_rel_to_cutoff), ties.method = "last"),
+    closest = closest/max(closest),
+  )
 
 d_controls <- data %>%
-  select(ln_gross_expenditure_pc, total_seats, ags, year, inh_tot, unempl_rate, total_area_ha, share_working_age, kreisfreie_stadt, stadt, years_since_last_elec) %>%
+  select(ln_gross_expenditure_pc, total_seats, ags, year, inh_tot, pop_over65, unempl_rate, total_area_ha,
+    share_working_age, kreisfreie_stadt, stadt, years_since_last_elec, state) %>%
   drop_na()
 d_controls_iv <- data %>%
-  select(ln_gross_expenditure_pc, total_seats, ags, year, total_seats_24_y_ago, inh_tot, unempl_rate, total_area_ha, share_working_age, kreisfreie_stadt, stadt, years_since_last_elec) %>%
+  select(ln_gross_expenditure_pc, total_seats, ags, year, total_seats_24_y_ago, inh_tot, pop_over65,
+         unempl_rate, total_area_ha, share_working_age, kreisfreie_stadt, stadt,
+         years_since_last_elec) %>%
   drop_na()
 d_rdd <- data %>%
-  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, inhabitants_treshold, year, ags,
-         inh_tot, unempl_rate, total_area_ha, share_working_age, kreisfreie_stadt, stadt, years_since_last_elec) %>%
-  drop_na()
+  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, closest,
+         inhabitants_treshold_factor, year, ags, state,
+         inh_tot, pop_over65, unempl_rate, total_area_ha,
+         share_working_age, kreisfreie_stadt, stadt, years_since_last_elec) %>%
+  drop_na() %>%
+  # Repeat (bandwidth) window calculation for data subsets
+  mutate(
+    closest = base::rank(abs(inhabs_rel_to_cutoff), ties.method = "last"),
+    closest = closest/max(closest),
+  )
 d_ttest <- data %>%
   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff) %>% drop_na()
 ```
@@ -69,26 +90,70 @@ d_ttest <- data %>%
 
 (Citation from my project study)
 
+First, show the general association of population and council size, respectively, with spending.
+
 ```{r}
-fixest::feols(ln_gross_expenditure_pc ~ total_seats,
+# population as independent variable
+fixest::feols(ln_gross_expenditure_pc ~ sw0(poly(inh_tot, 1), poly(inh_tot, 2),
+                                            poly(inh_tot, 3), poly(inh_tot, 4),
+                                            poly(inh_tot, 5), poly(inh_tot, 6)),
+              vcov = "hetero", # heteroskedasticity-robust SEs
+              data = data %>% drop_na(inh_tot, ln_gross_expenditure_pc))
+# council size as independent variable
+fixest::feols(ln_gross_expenditure_pc ~ sw0(poly(total_seats, 1), poly(total_seats, 2),
+                                            poly(total_seats, 3), poly(total_seats, 4),
+                                            poly(total_seats, 5), poly(total_seats, 6)),
               vcov = "hetero", # heteroskedasticity-robust SEs
               data = d_bivariate)
+```
+
+Running multivariate regressions:
+
+```{r}
 # Adding variables stepwise using the `csw` function
 fixest::feols(
-  ln_gross_expenditure_pc ~ csw0(total_seats, inh_tot, unempl_rate, total_area_ha,
+  ln_gross_expenditure_pc ~ csw0(total_seats, inh_tot, pop_over65, unempl_rate, total_area_ha,
     share_working_age, kreisfreie_stadt, stadt, years_since_last_elec),
   vcov = "hetero",
   data = data
 )
 ols <- fixest::feols(
-  ln_gross_expenditure_pc ~ total_seats + inh_tot + unempl_rate + total_area_ha +
+  ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
     share_working_age + kreisfreie_stadt + stadt + years_since_last_elec,
   vcov = "hetero",
   data = d_controls
 )
 summary(ols, n = 20)
-rm(ols)
+# Main model with Bavarian data only:
+fixest::feols(
+  ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + years_since_last_elec,
+  vcov = "hetero",
+  data = d_controls %>% filter(state == 9)
+)
+# Adding "political" variables
+ols_pol <- fixest::feols(
+  ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + turnout + ward_elections + const_typ_sueddt +
+    years_since_last_elec,
+  vcov = "hetero",
+  data = data
+)
+summary(ols_pol, n = 25)
+# Only Bavarian data:
+ols_pol <- fixest::feols(
+  ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + turnout + ward_elections + const_typ_sueddt +
+    years_since_last_elec +
+    no_parties_in_parliament + absolute_majority + cdu_csu_majority + spd_majority +
+    waehlergruppen_majority + cdu_csu_mayor + spd_mayor,
+  vcov = "hetero",
+  data = data
+)
+summary(ols_pol, n = 25)
+rm(ols_pol)
 ```
+In the multiple-regression case the `total_seats` variable is significantly positive, albeit with a small effect of -1%. Upon including the "political" variables (describing the political and constitutional landscape), the effect turns negative. However, in the latter case the sample size decreases drastically as much information is available for Bavaria only.
 
 
 
@@ -96,7 +161,32 @@ rm(ols)
 
 Ignoring the potential issue of bad controls, I am running some panel regressions with year and municipality as fixed effects.
 
-`stadt` and `kreisfreie_stadt` have been dropped because of collinearity concerns.
+## Bivariate-regression FE models
+
+Association of population and council size, respectively, with spending in the FE case.
+
+```{r}
+# population as independent variable
+reg <- fixest::feols(ln_gross_expenditure_pc ~ sw0(poly(inh_tot, 1), poly(inh_tot, 2),
+                                                   poly(inh_tot, 3), poly(inh_tot, 4),
+                                                   poly(inh_tot, 5), poly(inh_tot, 6)) |
+                       year + ags,
+                     data = data %>% drop_na(inh_tot, ln_gross_expenditure_pc))
+summary(reg, vcov = "hetero")
+summary(reg, vcov = "twoway")
+# council size as independent variable
+reg <- fixest::feols(ln_gross_expenditure_pc ~ sw0(poly(total_seats, 1), poly(total_seats, 2),
+                                                   poly(total_seats, 3), poly(total_seats, 4),
+                                                   poly(total_seats, 5), poly(total_seats, 6)) |
+                       year + ags,
+                     data = d_bivariate)
+summary(reg, vcov = "hetero")
+summary(reg, vcov = "twoway")
+rm(reg)
+```
+After including FE and clustering SE, `total_seats` loses significance at the 5% level (but still significant at 10 %).
+
+## Multiple-regression FE models:
 
 ```{r}
 panel_bivariate <-
@@ -105,29 +195,72 @@ panel_bivariate <-
                 data = d_bivariate)
 summary(panel_bivariate, vcov = "hetero")
 summary(panel_bivariate, vcov = "twoway")
+# Main model with Bavarian data only
+fixest::feols(ln_gross_expenditure_pc ~ total_seats |
+                year + ags,
+              vcov = "twoway",
+              data = d_bivariate %>% filter(state == 9))
+# Run it again with clustered SE for summary
+panel_bivariate <- fixest::feols(ln_gross_expenditure_pc ~ total_seats |
+                                   year + ags,
+                                 vcov = "twoway",
+                                 data = d_bivariate)
 # Adding variables stepwise using the `csw` function
 fixest::feols(
-  ln_gross_expenditure_pc ~ csw0(total_seats, inh_tot, unempl_rate, total_area_ha,
-    share_working_age, years_since_last_elec) |
+  ln_gross_expenditure_pc ~ csw0(total_seats, inh_tot, pop_over65, unempl_rate, total_area_ha,
+    share_working_age, kreisfreie_stadt, stadt, years_since_last_elec) |
     year + ags,
+  vcov = "twoway",
   data = data,
-  vcov = "twoway"
 )
 panel_multivariate <- fixest::feols(
-  ln_gross_expenditure_pc ~ total_seats + inh_tot + unempl_rate + total_area_ha +
-    share_working_age + years_since_last_elec |
+  ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + years_since_last_elec |
     year + ags,
+  vcov = "twoway",
   data = d_controls
 )
-summary(panel_multivariate, vcov = "hetero", n = 20)
-summary(panel_multivariate, vcov = "twoway", n = 20)
+summary(panel_multivariate, n = 30)
+# Main model with Bavarian data only
+fixest::feols(
+  ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + years_since_last_elec |
+    year + ags,
+  vcov = "twoway",
+  data = d_controls %>% filter(state == 9)
+)
 ```
 
-Using heteroskedasticity-robust SE, the coefficient on `total_seats` shrinks by 70-90 %, compared to the OLS model but remains statistically significantly positive. However, once I allow for clustered standard errors, the coefficient is only significant at the 10 % level.
+Using FE, the coefficient on `total_seats` shrinks by 50-75 %, compared to the OLS model but remains statistically significantly positive.
+
+Adding "political" variables:
 
 ```{r}
-rm(list=ls(pattern="^panel_"))
+# Adding "political" variables
+panel_pol <- fixest::feols(
+  ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + turnout + ward_elections + const_typ_sueddt +
+    years_since_last_elec |
+    year + ags,
+  vcov = "twoway",
+  data = data
+)
+summary(panel_pol, n = 25)
+# Only Bavarian data:
+panel_pol <- fixest::feols(
+  ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + turnout + ward_elections + const_typ_sueddt +
+    years_since_last_elec +
+    no_parties_in_parliament + absolute_majority + cdu_csu_majority + spd_majority +
+    waehlergruppen_majority + cdu_csu_mayor + spd_mayor |
+    year + ags,
+  vcov = "twoway",
+  data = data
+)
+summary(panel_pol, n = 25)
 ```
+The effect of council size, conditional on "political" variables, remains insignificant (as in the OLS case).
+
 
 
 
@@ -145,7 +278,15 @@ so formally, this holds. However, I would question whether the correlation indee
 - Validity -- Exclusion:
 - Validity -- Exogeneity:
 
-`years_since_last_elec` has been removed from the equation over collinearity concerns.
+## Bivariate IV
+
+Exploring the relationship between the instrument and the endogenous regressor:
+
+```{r}
+cor(d_bivariate_iv$total_seats, d_bivariate_iv$total_seats_24_y_ago)
+summary(lm(d_bivariate_iv$total_seats ~ d_bivariate_iv$total_seats_24_y_ago))
+ggplot2::ggplot(data = d_bivariate_iv) + geom_point(aes(total_seats, total_seats_24_y_ago))
+```
 
 ```{r}
 iv_bivariate <-
@@ -154,41 +295,155 @@ iv_bivariate <-
                   year + ags | # FE
                   total_seats ~ total_seats_24_y_ago,
                 data = d_bivariate_iv)
-summary(iv_bivariate, vcov = "hetero")
-summary(iv_bivariate, vcov = "twoway")
+summary(iv_bivariate, vcov = "hetero", stage = 1:2)
+summary(iv_bivariate, vcov = "twoway", stage = 1:2)
 ```
-```{r, eval = FALSE}
-# Adding variables stepwise using the `csw` function
-# Not working as desired
+With FE, the effect on the first stage is basically 0. This does not make sense if you look at the relationship between endogenous regressor and instrument. Likely reason: municipality FE, since changes within municipalities occur rarely. This is suggestively confirmed by an IV regression with municipality but not year FE as the effect may be significant but of small magnitude:
+
+```{r}
+iv_bivariate <-
+  fixest::feols(ln_gross_expenditure_pc ~
+                  1 | # 1 is the intercept
+                  ags | # FE
+                  total_seats ~ total_seats_24_y_ago,
+                data = d_bivariate_iv)
+summary(iv_bivariate, vcov = "hetero", stage = 1:2)
+summary(iv_bivariate, vcov = "cluster", stage = 1:2)
+```
+
+```{r}
+iv_bivariate <-
+  fixest::feols(ln_gross_expenditure_pc ~
+                  1 | # 1 is the intercept
+                  year | # FE
+                  total_seats ~ total_seats_24_y_ago,
+                data = d_bivariate_iv)
+summary(iv_bivariate, vcov = "hetero", stage = 1:2)
+summary(iv_bivariate, vcov = "cluster", stage = 1:2)
+```
+Here, we do have an estimate on the instrument that is close to one, which is more plausible. Hence, in the following, I am only using year FE.
+
+
+## Multivariate IV
+```{r}
 fixest::feols(
   ln_gross_expenditure_pc ~
-    csw0(inh_tot + unempl_rate + total_area_ha + share_working_age) | # controls
-    year + ags | # FE
-    total_seats ~ total_seats_24_y_ago,
-  # IV formula for 1st stage
+    csw0(inh_tot, pop_over65, unempl_rate, total_area_ha,
+         share_working_age, kreisfreie_stadt, stadt, years_since_last_elec) | # controls
+    year |#+ ags | # FE
+    total_seats ~ total_seats_24_y_ago, # IV formula for 1st stage
   data = data,
-  vcov = "twoway"
+  vcov = "cluster"
 )
 ```
 ```{r}
+cor(d_controls_iv$total_seats, d_controls_iv$total_seats_24_y_ago)
+# Model with time and year FE
 iv_multivariate <- fixest::feols(
   ln_gross_expenditure_pc ~
-    inh_tot + unempl_rate + total_area_ha + share_working_age | # controls
+    inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + years_since_last_elec | # controls
     year + ags | # FE
-    total_seats ~ total_seats_24_y_ago,
-  # IV formula for 1st stage
+    total_seats ~ total_seats_24_y_ago, # IV formula for 1st stage
   data = d_controls_iv
 )
-summary(iv_multivariate, vcov = "hetero")
-summary(iv_multivariate, vcov = "twoway")
+summary(iv_multivariate, vcov = "twoway", stage = 1:2)
+# "Real" model
+iv_multivariate <- fixest::feols(
+  ln_gross_expenditure_pc ~
+    inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + years_since_last_elec | # controls
+    year |#+ ags | # FE
+    total_seats ~ total_seats_24_y_ago, # IV formula for 1st stage
+  data = d_controls_iv
+)
+summary(iv_multivariate, vcov = "hetero", stage = 1:2)
+summary(iv_multivariate, vcov = "cluster", stage = 1:2)
+-0.000565308 + c(1.96, -1.96) * 0.0007339480 # CI for total_seats in the latter case
+# Run it again with clustered SE for summary
+iv_multivariate <- fixest::feols(
+  ln_gross_expenditure_pc ~
+    inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + years_since_last_elec | # controls
+    year |#+ ags | # FE
+    total_seats ~ total_seats_24_y_ago, # IV formula for 1st stage
+  vcov = "cluster",
+  data = d_controls_iv
+)
 ```
 
-["Wu-Hausman tests that IV is just as consistent as OLS, and since OLS is more efficient, it would be preferable. The null here is that they are equally consistent"](https://stats.stackexchange.com/questions/134789/interpretation-of-ivreg-diagnostics-in-r). The null is rejected at the 10 % level here, which is "good" from the IV perspective.
+["Wu-Hausman tests that IV is just as consistent as OLS, and since OLS is more efficient, it would be preferable. The null here is that they are equally consistent"](https://stats.stackexchange.com/questions/134789/interpretation-of-ivreg-diagnostics-in-r). E. g. if the null is rejected at the 10 % level, this is "good" from the IV perspective.
 
 The IV coefficients on `total_seats` are positive but far from any commonly accepted level of statistical significance. The effect size appears way to large...
 
 
+# Summary of conventional-methods results
+
 ```{r}
+etable(ols, panel_bivariate, panel_multivariate, iv_multivariate)
+```
+
+Test LaTeX export -- note that differences between HTML and TeX output remain.
+```{r}
+# etable(ols, panel_bivariate, panel_multivariate,
+#        # Table settings
+#        drop = "!Council size",
+#        dict = c(total_seats = "Council size",
+#                 ln_gross_expenditure_pc = "Ln of gross expenditure p. c."),
+#        signif.code = c("***"=0.001, "**"=0.01, "*"=0.05, "'"=0.10),
+#        headers = list("OLS", "FE bivariate", "FE multivariate"),
+#        # LaTeX settings
+#        title = "Results of the \"Conventional\" Regression Methods",
+#        label = "tab:conv_results",
+#        notes = "Test notes here",
+#        style.df = style.df(
+#          fixef.suffix = " fixed-effect"
+#        )
+#        )
+```
+
+
+
+## Export to LaTeX
+
+tex notes text
+```{r}
+tex_control_text <- "Controls, \\ac{FE} and \\ac{SE} as indicated in the respective column. Controls, if included and as long as not perfectly collinear: population, share of population over 65 years, unemployment rate, total area, share of working-age population, and dummies for ``district-free'' cities, cities, as well as year in the electoral cycle."
+tex_signif_text <- "Significance codes: *** p < 0.001, ** p < 0.01, * p < 0.05, ' p < 0.10.}"
+```
+
+
+```{r}
+etable(ols, panel_bivariate, panel_multivariate, iv_multivariate,
+       file = "tables/conv_results.tex",
+       replace = TRUE,
+       # Table settings
+       drop = "!Council size",
+       dict = c(total_seats = "Council size",
+                ln_gross_expenditure_pc = "Ln of gross expenditure p. c."),
+       signif.code = c("***"=0.001, "**"=0.01, "*"=0.05, "'"=0.10),
+       headers = c("\\acs{OLS}", "\\acs{FE} bivariate", "\\acs{FE} multivariate", "\\acs{IV} multivariate"),
+       extralines = list(
+         "-^Controls" = c("Yes", "No", "Yes", "Yes"),
+         "-_\\acs{SE}" = c("\\acs{het}", "by \\acs{yr} & \\acs{mcp}", "by \\acs{yr} & \\acs{mcp}", "by \\acs{yr}"),
+         "_^Data sample" = c(rep("All data", 3), "\\acs{BY} only")
+         ),
+       # LaTeX settings
+       title = "Results of the ``Conventional'' Regression Methods",
+       label = "tab:conv_results",
+       notes = paste("\\footnotesize{*Notes:* Results of the ``conventional'' regression methods.",
+                     tex_control_text,
+                     "The \\acl{SE} in parentheses: \\ac{het}; if \\ac{SE} starts with ``by'', they are clustered at the \\ac{yr} and/or \\ac{mcp} level.",
+                     tex_signif_text),
+       style.tex = style.tex(
+         fixef.suffix = " \\ac{FE}"
+       )
+       )
+```
+
+
+```{r}
+rm(list=ls(pattern="^panel_"))
 rm(list=ls(pattern="^iv_"))
 ```
 
@@ -231,7 +486,7 @@ t.test(log(d_ttest2$ln_gross_expenditure_pc[d_ttest2$inhabs_rel_to_cutoff < 0]),
 ```
 
 The results are not really consistent when it comes to statistical significance. The difference between both sides also heavily depends on the bandwidth chosen.
-Keep in mind, however, that a t test is not exactly appropriate due to the fuzzy nature of the setting.
+Keep in mind, however, that a t test is not exactly appropriate due to the fuzzy nature of the setting: Whether or not municipalities actually take treatment is not accounted for in this approach.
 
 ```{r}
 rm(d_ttest2)
@@ -243,60 +498,51 @@ rm(d_ttest2)
 This is how it is done according to ["The Effect" of Nick Huntington-Klein, chapter 20](https://theeffectbook.net/ch-RegressionDiscontinuity.html):
 ```{r}
 df <- d_rdd_bivariate %>%
-  filter(abs(inhabs_rel_to_cutoff) < 0.05) # Choose bandwidth
-nrow(df) / nrow(data) # Share of observations close to threshold
-rdd <- fixest::feols(ln_gross_expenditure_pc ~
-                     1  | # controls
-                     inhabitants_treshold + year + ags | # fixed-effect controls
-                     # First stage regression:
-                     inhabs_rel_to_cutoff*total_seats ~ # Instrument our standard RDD...
-                     inhabs_rel_to_cutoff*above_cutoff, # ... with being above the cutoff
-                     data = df)
-summary(rdd, vcov = "hetero")
-summary(rdd, vcov = "threeway")
-# First stage:
-summary(rdd, stage = 1, vcov = "threeway")
+  filter(closest <= 0.1) # Choose bandwidth window -- similar to Höhmann (2017)
+rdd_bivariate <- fixest::feols(ln_gross_expenditure_pc ~
+                                 1  | # controls
+                                 inhabitants_treshold_factor + year + ags | # fixed-effect controls
+                                 # First stage regression:
+                                 inhabs_rel_to_cutoff*total_seats ~ # Instrument our standard RDD...
+                                 inhabs_rel_to_cutoff*above_cutoff, # ... with being above the cutoff
+                               data = df)
+summary(rdd_bivariate, vcov = "hetero")
+summary(rdd_bivariate, vcov = "threeway", stage = 1:2)
 # More tests:
-fixest::fitstat(rdd, ~ ivf1 + ivwald1 + ivf2 + ivwald2)
-rm(df, rdd)
+#fixest::fitstat(rdd, ~ ivf1 + ivwald1 + ivf2 + ivwald2)
+rm(df)
 ```
 
-This is how I would do it:
+More simplistic version:
 ```{r}
 df <- d_rdd_bivariate %>%
-  filter(abs(inhabs_rel_to_cutoff) < 0.05) # Choose bandwidth
-nrow(df) / nrow(data) # Share of observations close to threshold
+  filter(closest <= 0.1) # Choose bandwidth window -- similar to Höhmann (2017)
 rdd <- fixest::feols(ln_gross_expenditure_pc ~
                      1  | # controls
-                     inhabitants_treshold + year + ags | # fixed-effect controls
+                     inhabitants_treshold_factor + year + ags | # fixed-effect controls
                      # First stage regression:
                      total_seats ~ # Instrument our standard RDD...
                      above_cutoff, # ... with being above the cutoff
                      data = df)
 summary(rdd, vcov = "hetero")
-summary(rdd, vcov = "threeway")
-# First stage:
-summary(rdd, stage = 1, vcov = "threeway")
+summary(rdd, vcov = "threeway", stage = 1:2)
 # More tests:
-fixest::fitstat(rdd, ~ ivf1 + ivwald1 + ivf2 + ivwald2)
+#fixest::fitstat(rdd, ~ ivf1 + ivwald1 + ivf2 + ivwald2)
 rm(df, rdd)
 ```
 
-```{r}
+```{r, eval = FALSE}
 df <- d_rdd_bivariate %>%
-  filter(abs(inhabs_rel_to_cutoff) < 0.05) # Choose bandwidth
-nrow(df) / nrow(data) # Share of observations close to threshold
+  filter(closest <= 0.1) # Choose bandwidth window -- similar to Höhmann (2017)
 rdd <- fixest::feols(ln_gross_expenditure_pc ~
                      inhabs_rel_to_cutoff  | # controls
-                     inhabitants_treshold + year + ags | # fixed-effect controls
+                     inhabitants_treshold_factor + year + ags | # fixed-effect controls
                      # First stage regression:
                      total_seats ~ # Instrument our standard RDD...
                      above_cutoff, # ... with being above the cutoff
                      data = df)
 summary(rdd, vcov = "hetero")
-summary(rdd, vcov = "threeway")
-# First stage:
-summary(rdd, stage = 1, vcov = "threeway")
+summary(rdd, vcov = "threeway", stage = 1:2)
 rm(df, rdd)
 ```
 
@@ -304,45 +550,376 @@ Include polynomials:
 
 ```{r}
 df <- d_rdd_bivariate %>%
-  filter(abs(inhabs_rel_to_cutoff) < 0.05) # Choose bandwidth
-nrow(df) / nrow(data) # Share of observations close to threshold
-rdd <- fixest::feols(ln_gross_expenditure_pc ~
-                     1  | # controls
-                     inhabitants_treshold + year + ags | # fixed-effect controls
-                     # First stage regression:
-                     poly(inhabs_rel_to_cutoff, 6)*total_seats ~ # Instrument our standard RDD...
-                     poly(inhabs_rel_to_cutoff, 6)*above_cutoff, # ... with being above the cutoff
-                     data = df)
-summary(rdd, vcov = "threeway")
-rm(df, rdd)
+  filter(closest <= 0.1) # Choose bandwidth window -- similar to Höhmann (2017)
+# Increasing the degree of polynomials
+fixest::feols(ln_gross_expenditure_pc ~
+                1 | # controls
+                inhabitants_treshold_factor + year + ags | # fixed-effect controls
+                # First stage regression:
+                inhabs_rel_to_cutoff*total_seats ~ # Instrument our standard RDD...
+                inhabs_rel_to_cutoff*above_cutoff, # ... with being above the cutoff
+              #vcov = "threeway",
+              data = df)
+fixest::feols(ln_gross_expenditure_pc ~
+                1  | # controls
+                inhabitants_treshold_factor + year + ags | # fixed-effect controls
+                # First stage regression:
+                poly(inhabs_rel_to_cutoff, 2)*total_seats ~ # Instrument our standard RDD...
+                poly(inhabs_rel_to_cutoff, 2)*above_cutoff, # ... with being above the cutoff
+              vcov = "threeway",
+              data = df)
+fixest::feols(ln_gross_expenditure_pc ~
+                1  | # controls
+                inhabitants_treshold_factor + year + ags | # fixed-effect controls
+                # First stage regression:
+                poly(inhabs_rel_to_cutoff, 3)*total_seats ~ # Instrument our standard RDD...
+                poly(inhabs_rel_to_cutoff, 3)*above_cutoff, # ... with being above the cutoff
+              vcov = "threeway",
+              data = df)
+fixest::feols(ln_gross_expenditure_pc ~
+                1  | # controls
+                inhabitants_treshold_factor + year + ags | # fixed-effect controls
+                # First stage regression:
+                poly(inhabs_rel_to_cutoff, 4)*total_seats ~ # Instrument our standard RDD...
+                poly(inhabs_rel_to_cutoff, 4)*above_cutoff, # ... with being above the cutoff
+              vcov = "threeway",
+              data = df)
+fixest::feols(ln_gross_expenditure_pc ~
+                1  | # controls
+                inhabitants_treshold_factor + year + ags | # fixed-effect controls
+                # First stage regression:
+                poly(inhabs_rel_to_cutoff, 5)*total_seats ~ # Instrument our standard RDD...
+                poly(inhabs_rel_to_cutoff, 5)*above_cutoff, # ... with being above the cutoff
+              vcov = "threeway",
+              data = df)
+fixest::feols(ln_gross_expenditure_pc ~
+                1  | # controls
+                inhabitants_treshold_factor + year + ags | # fixed-effect controls
+                # First stage regression:
+                poly(inhabs_rel_to_cutoff, 6)*total_seats ~ # Instrument our standard RDD...
+                poly(inhabs_rel_to_cutoff, 6)*above_cutoff, # ... with being above the cutoff
+              vcov = "threeway",
+              data = df)
+rm(df)
+```
+The results do not differ in their interpretation. The coefficient of interest, `fit_total_seats`, indicates a single-digit decrease of spending at the cutoff but is never statistically significantly different from zero.
+
+Dropping polynomials but adding controls:
+
+```{r}
+df <- d_rdd %>%
+  filter(closest <= 0.1) # Choose bandwidth window -- similar to Höhmann (2017)
+# Continuously adding covariates
+fixest::feols(ln_gross_expenditure_pc ~
+                csw0(inh_tot, pop_over65, unempl_rate, total_area_ha,
+                     share_working_age, kreisfreie_stadt, stadt, years_since_last_elec) | # controls
+                inhabitants_treshold_factor + year + ags | # fixed-effect controls
+                # First stage regression:
+                inhabs_rel_to_cutoff*total_seats ~ # Instrument our standard RDD...
+                inhabs_rel_to_cutoff*above_cutoff, # ... with being above the cutoff
+              vcov = "threeway",
+              data = df)
+# Model with covariates
+rdd_w_covs <- fixest::feols(ln_gross_expenditure_pc ~
+                              inh_tot + pop_over65 + unempl_rate + total_area_ha + share_working_age +
+                              kreisfreie_stadt + stadt + years_since_last_elec | # controls
+                              inhabitants_treshold_factor + year + ags | # fixed-effect controls
+                              # First stage regression:
+                              inhabs_rel_to_cutoff*total_seats ~ # Instrument our standard RDD...
+                              inhabs_rel_to_cutoff*above_cutoff, # ... with being above the cutoff
+                            data = df)
+summary(rdd_w_covs, vcov = "threeway")
+rm(df)
+```
+Interpretation similar to the polynomial case: decrease in the single digits but not significant.
+
+Varying bandwidth:
+
+```{r}
+# Baseline
+d_rdd_bivariate %>%
+  filter(closest <= 0.1) %>% # Choose bandwidth window -- similar to Höhmann (2017)
+  fixest::feols(ln_gross_expenditure_pc ~
+                  1  | # controls
+                  inhabitants_treshold_factor + year + ags | # fixed-effect controls
+                  # First stage regression:
+                  inhabs_rel_to_cutoff*total_seats ~ # Instrument our standard RDD...
+                  inhabs_rel_to_cutoff*above_cutoff, # ... with being above the cutoff
+                vcov = "threeway")
+# Half the window
+d_rdd_bivariate %>%
+  filter(closest <= 0.05) %>% # Choose bandwidth window
+  fixest::feols(ln_gross_expenditure_pc ~
+                  1  | # controls
+                  inhabitants_treshold_factor + year + ags | # fixed-effect controls
+                  # First stage regression:
+                  inhabs_rel_to_cutoff*total_seats ~ # Instrument our standard RDD...
+                  inhabs_rel_to_cutoff*above_cutoff, # ... with being above the cutoff
+                vcov = "threeway")
+# Double the window size
+d_rdd_bivariate %>%
+  filter(closest <= 0.2) %>% # Choose bandwidth window
+  fixest::feols(ln_gross_expenditure_pc ~
+                  1  | # controls
+                  inhabitants_treshold_factor + year + ags | # fixed-effect controls
+                  # First stage regression:
+                  inhabs_rel_to_cutoff*total_seats ~ # Instrument our standard RDD...
+                  inhabs_rel_to_cutoff*above_cutoff, # ... with being above the cutoff
+                vcov = "threeway")
+# More tests:
+#fixest::fitstat(rdd, ~ ivf1 + ivwald1 + ivf2 + ivwald2)
+#rm(df, rdd)
+```
+Interpretation as before: Non-significant decrease in the single digits.
+
+### Summary
+
+Comparing the two main models:
+```{r}
+etable(rdd_bivariate, rdd_w_covs)
 ```
 
+```{r}
+etable(rdd_bivariate, rdd_w_covs,
+       file = "tables/rdd_iv.tex",
+       replace = TRUE,
+       # Table settings
+       drop = "!Council size",
+       dict = c(total_seats = "Council size",
+                ln_gross_expenditure_pc = "Ln of gross expenditure p. c."),
+       signif.code = c("***"=0.001, "**"=0.01, "*"=0.05, "'"=0.10),
+       headers = c("\\acs{RDD} \\acs{wo} covariates", "\\acs{RDD} \\acs{w} covariates"),
+       extralines = list(
+         "-^Controls" = c("No", "Yes")#,
+         #"-_\\acs{SE}" = rep("by threshold, \\acs{yr} & \\acs{mcp}", 2),
+         #"_^Data sample" = c(rep("All data", 3), "\\acs{BY} only")
+         ),
+       # LaTeX settings
+       title = "Results of the \\ac{IV} \\ac{RDD}",
+       label = "tab:rdd_iv",
+       notes = paste("\\footnotesize{*Notes:* Results of the \\ac{IV} \\ac{RDD}.",
+                     tex_control_text,
+                     "Standard errors clustered at the threshold, year and municipality level in parentheses.",
+                     tex_signif_text),
+       style.tex = style.tex(
+         fixef.suffix = " \\ac{FE}"
+       )
+       )
+```
 
-Vary polynomials, bandwidths etc.
+```{r}
+rm(rdd_bivariate, rdd_w_covs)
+```
 
-Add controls
 
 
 
 ## `rdrobust` package
 
+### Bivariate RDD
+
+Bivariate RDD without FE:
+
 ```{r}
-#df <- d_rdd_bivariate %>%
-#  filter(abs(inhabs_rel_to_cutoff) < 0.05) # Choose bandwidth
-#rdd <- rdrobust::rdrobust(y = log(data2$gross_expenditure), x = data2$inhabs_rel_to_cutoff, fuzzy = data2$jump_in_seats_cutoff)
-#rdd <- rdrobust::rdrobust(y = log(data2$gross_expenditure), x = data2$inhabs_rel_to_cutoff, fuzzy = ifelse(data2$inhabs_rel_to_cutoff>=0,data2$jump_in_seats_cutoff, 0))
-#rdd <- rdrobust::rdrobust(y = log(data2$gross_expenditure), x = data2$inhabs_rel_to_cutoff)
-rdd <- rdrobust::rdrobust(y = d_rdd_bivariate$ln_gross_expenditure_pc, x = d_rdd_bivariate$inhabs_rel_to_cutoff, fuzzy = d_rdd_bivariate$total_seats, all = TRUE)
+rdd <-
+  rdrobust::rdrobust(
+    y = d_rdd_bivariate$ln_gross_expenditure_pc,
+    x = d_rdd_bivariate$inhabs_rel_to_cutoff,
+    fuzzy = d_rdd_bivariate$total_seats
+  )
 summary(rdd)
-#rdrobust::rdplot(y = data2$gross_expenditure, x = data2$inhabs_rel_to_cutoff, fuzzy = data2$total_seats)
+rdd_bi <-
+  rdrobust::rdrobust(
+    y = d_rdd_bivariate$ln_gross_expenditure_pc,
+    x = d_rdd_bivariate$inhabs_rel_to_cutoff,
+    fuzzy = d_rdd_bivariate$total_seats,
+    cluster = d_rdd_bivariate$inhabitants_treshold_factor
+  )
+summary(rdd_bi)
 ```
 
-Second stage interpretation if loglin: coefficient times 100 %.
+Bivariate RDD with one-way FE:
 
-**Explanation of the output required! (which coefficients, SE, CI to read)**
+```{r, eval = FALSE}
+# to do: remove eval = F
+rdd_fe_th <-
+  rdrobust::rdrobust(
+    y = d_rdd_bivariate$ln_gross_expenditure_pc,
+    x = d_rdd_bivariate$inhabs_rel_to_cutoff,
+    fuzzy = d_rdd_bivariate$total_seats,
+    cluster = d_rdd_bivariate$inhabitants_treshold_factor,
+    covs = model.matrix( ~ d_rdd_bivariate$inhabitants_treshold_factor)
+  )
+summary(rdd_fe_th)
+rdd_fe_yr <-
+  rdrobust::rdrobust(
+    y = d_rdd_bivariate$ln_gross_expenditure_pc,
+    x = d_rdd_bivariate$inhabs_rel_to_cutoff,
+    fuzzy = d_rdd_bivariate$total_seats,
+    cluster = d_rdd_bivariate$inhabitants_treshold_factor,
+    covs = model.matrix( ~ d_rdd_bivariate$year)
+  )
+summary(rdd_fe_yr)
+rdd_fe_state <-
+  rdrobust::rdrobust(
+    y = d_rdd_bivariate$ln_gross_expenditure_pc,
+    x = d_rdd_bivariate$inhabs_rel_to_cutoff,
+    fuzzy = d_rdd_bivariate$total_seats,
+    cluster = d_rdd_bivariate$inhabitants_treshold_factor,
+    covs = model.matrix( ~ d_rdd_bivariate$state)
+  )
+summary(rdd_fe_state)
+```
 
-Second stage interpretation if loglog: 1 % increase in council size = $coefficient$ % increase in spending.
 
+The threshold FE appear very important: Without them, barely any effect visible at the first stage. But that makes sense even theoretically as the threshold level indicates on which (sharp) side of the cutoff we are.
+
+Bivariate RDD with threeway FE:
+```{r}
+rdd_bi_fe <-
+  rdrobust::rdrobust(
+    y = d_rdd_bivariate$ln_gross_expenditure_pc,
+    x = d_rdd_bivariate$inhabs_rel_to_cutoff,
+    fuzzy = d_rdd_bivariate$total_seats,
+    cluster = d_rdd_bivariate$inhabitants_treshold_factor,
+    covs = model.matrix( ~ d_rdd_bivariate$inhabitants_treshold_factor + d_rdd_bivariate$year + d_rdd_bivariate$state)
+  )
+summary(rdd_bi_fe)
+```
+
+Using the `rdrobust` package, some things seem either computionally infeasible or impossible by design. Municipality FE take forever to run and are henceforth not considered (but state FE instead).
+
+```{r, eval = FALSE}
+# Takes forever to run
+rdd_fe_ags <-
+  rdrobust::rdrobust(
+    y = d_rdd_bivariate$ln_gross_expenditure_pc,
+    x = d_rdd_bivariate$inhabs_rel_to_cutoff,
+    fuzzy = d_rdd_bivariate$total_seats,
+    cluster = d_rdd_bivariate$inhabitants_treshold_factor,
+    covs = model.matrix( ~ d_rdd_bivariate$ags)
+  )
+summary(rdd_fe_ags)
+```
+
+Choosing multiple cluster variables appears not possible and that is likely by design as the documentation states: "`cluster` indicates the cluster ID variable" in a singular form:
+```{r, eval = FALSE}
+rdd_fe <-
+  rdrobust::rdrobust(
+    y = d_rdd_bivariate$ln_gross_expenditure_pc,
+    x = d_rdd_bivariate$inhabs_rel_to_cutoff,
+    fuzzy = d_rdd_bivariate$total_seats,
+    cluster = model.matrix( ~ d_rdd_bivariate$inhabitants_treshold_factor + d_rdd_bivariate$year)
+  )
+# or:
+rdd_fe <-
+  rdrobust::rdrobust(
+    y = d_rdd_bivariate$ln_gross_expenditure_pc,
+    x = d_rdd_bivariate$inhabs_rel_to_cutoff,
+    fuzzy = d_rdd_bivariate$total_seats,
+    cluster = d_rdd_bivariate$inhabitants_treshold_factor + d_rdd_bivariate$year
+  )
+```
+
+
+### Multivariate RDD
+
+Multivariate RDD without FE:
+```{r}
+rdd <-
+  rdrobust::rdrobust(
+    y = d_rdd$ln_gross_expenditure_pc,
+    x = d_rdd$inhabs_rel_to_cutoff,
+    fuzzy = d_rdd$total_seats,
+    covs = d_rdd$inh_tot + d_rdd$pop_over65 + d_rdd$unempl_rate + # controls
+      d_rdd$total_area_ha + d_rdd$share_working_age + # controls (cont.)
+      model.matrix( ~ d_rdd$kreisfreie_stadt + d_rdd$stadt + d_rdd$years_since_last_elec) # dummy controls
+  )
+summary(rdd)
+rdd_multi <-
+  rdrobust::rdrobust(
+    y = d_rdd$ln_gross_expenditure_pc,
+    x = d_rdd$inhabs_rel_to_cutoff,
+    fuzzy = d_rdd$total_seats,
+    cluster = d_rdd$inhabitants_treshold_factor,
+    covs = d_rdd$inh_tot + d_rdd$pop_over65 + d_rdd$unempl_rate + # controls
+      d_rdd$total_area_ha + d_rdd$share_working_age + # controls (cont.)
+      model.matrix( ~ d_rdd$kreisfreie_stadt + d_rdd$stadt + d_rdd$years_since_last_elec) # dummy controls
+  )
+summary(rdd_multi)
+```
+
+Multivariate threeway RDD:
+```{r}
+rdd_multi_fe <-
+  rdrobust::rdrobust(
+    y = d_rdd$ln_gross_expenditure_pc,
+    x = d_rdd$inhabs_rel_to_cutoff,
+    fuzzy = d_rdd$total_seats,
+    cluster = d_rdd$inhabitants_treshold_factor,
+    covs = model.matrix( ~ d_rdd$inhabitants_treshold_factor + d_rdd$year + d_rdd$state + # FE
+                           d_rdd$kreisfreie_stadt + d_rdd$stadt + d_rdd$years_since_last_elec) + # dummy controls
+      d_rdd$inh_tot + d_rdd$pop_over65 + d_rdd$unempl_rate + # controls
+      d_rdd$total_area_ha + d_rdd$share_working_age # controls (cont.)
+  )
+summary(rdd_multi_fe)
+```
+
+Comparison of the four main models:
+```{r}
+summary(rdd_bi)
+summary(rdd_bi_fe)
+summary(rdd_multi)
+summary(rdd_multi_fe)
+```
+
+### Manual export to LaTeX
+
+```{r}
+# Function to generate significance stars out of p values
+assign_stars <- function(p) {
+  if (p < 0.001) {
+    print("***")
+  }
+  else if (p < 0.01) {
+    print("**")
+  }
+  else if (p < 0.05) {
+    print("*")
+  }
+  else if (p < 0.1) {
+    print("'")
+  }
+}
+round_decimals <- 4
+```
+```{r}
+rdd_tex_export <- tibble(
+  `Dependent variable:` = c("Model", "", "Council size", "", "", "Controls", "Threshold FE", "Year FE", "State FE", "Observations", "Bandwidth", "Observations below", "Observations above"),
+  `Ln of gross expenditure p. c.` = c("RDD w/o covariates", "(1)", paste0(round(rdd_bi$Estimate[1], round_decimals), assign_stars(rdd_bi$pv[3])), paste0("(", round(rdd_bi$se[1], round_decimals), ")"), paste0("[", round(rdd_bi$ci[3,1], 3), ", ", round(rdd_bi$ci[3,2], 3), "]"), rep("No", 4), sum(rdd_bi$N), round(rdd_bi$bws[1,1], round_decimals), rdd_bi$N_h[1], rdd_bi$N_h[2]),
+  `2` = c("FE RDD w/o covariates", "(2)", paste0(round(rdd_bi_fe$Estimate[1], round_decimals), assign_stars(rdd_bi_fe$pv[3])), paste0("(", round(rdd_bi_fe$se[1], round_decimals), ")"), paste0("[", round(rdd_bi_fe$ci[3,1], 3), ", ", round(rdd_bi_fe$ci[3,2], 3), "]"), "No", rep("Yes", 3), sum(rdd_bi_fe$N), round(rdd_bi_fe$bws[1,1], round_decimals), rdd_bi_fe$N_h[1], rdd_bi_fe$N_h[2]),
+  `3` = c("RDD w/ covariates", "(3)", paste0(round(rdd_multi$Estimate[1], round_decimals), assign_stars(rdd_multi$pv[3])), paste0("(", round(rdd_multi$se[1], round_decimals), ")"), paste0("[", round(rdd_multi$ci[3,1], 3), ", ", round(rdd_multi$ci[3,2], 3), "]"), "Yes", rep("No", 3), sum(rdd_multi$N), round(rdd_multi$bws[1,1], round_decimals), rdd_multi$N_h[1], rdd_multi$N_h[2]),
+  `4` = c("FE RDD w/ covariates", "(4)", paste0(round(rdd_multi_fe$Estimate[1], round_decimals), assign_stars(rdd_multi_fe$pv[3])), paste("(", round(rdd_multi_fe$se[1], round_decimals), ")"), paste0("[", round(rdd_multi_fe$ci[3,1], 3), ", ", round(rdd_multi_fe$ci[3,2], 3), "]"), rep("Yes", 4), sum(rdd_multi_fe$N), round(rdd_multi_fe$bws[1,1], round_decimals), rdd_multi_fe$N_h[1], rdd_multi_fe$N_h[2])
+  )
+```
+
+```{r}
+print(
+  xtable::xtable(
+    rdd_tex_export,
+    align = "llcccc"
+    ),
+  file = "tables/rdd_rdrobust.tex",
+  booktabs = TRUE,
+  floating = FALSE,
+  hline.after = c(-1, -1, 2, 5, 9, nrow(rdd_tex_export), nrow(rdd_tex_export)),
+  include.rownames = FALSE
+)
+```
+
+### Plots
+
+Default plots look strange for some reason:
 ```{r}
 rdrobust::rdplot(y = d_rdd_bivariate$ln_gross_expenditure_pc, x = d_rdd_bivariate$inhabs_rel_to_cutoff)
 ggplot(data = d_rdd_bivariate) +
@@ -351,6 +928,117 @@ ggplot(data = d_rdd_bivariate) +
   geom_point(aes(x = inhabs_rel_to_cutoff, y = ln_gross_expenditure_pc))
 ```
 
+Plotting the estimated model from the previous section:
+```{r}
+#https://stackoverflow.com/questions/56884210/rdrobust-plotting-graphs-for-local-polynomial-estimation/57614447
+rdplot <- rdrobust::rdplot(
+  y = d_rdd$ln_gross_expenditure_pc,
+  x = d_rdd$inhabs_rel_to_cutoff,
+  binselect = "es",
+  scale = 5,
+  kernel = tolower(rdd_multi_fe$kernel),
+  p = rdd_multi_fe$p,
+  h = rdd_multi_fe$bws[1],
+  covs = model.matrix( ~ d_rdd$inhabitants_treshold_factor + d_rdd$year + d_rdd$state + # FE
+                         d_rdd$kreisfreie_stadt + d_rdd$stadt + d_rdd$years_since_last_elec) + # dummy controls
+    d_rdd$inh_tot + d_rdd$pop_over65 + d_rdd$unempl_rate + # controls
+    d_rdd$total_area_ha + d_rdd$share_working_age, # controls (cont.)
+  x.lim = c(-rdd_multi_fe$bws[1], rdd_multi_fe$bws[1]),
+  #title = "RD Plot - Senate Elections Data",
+  x.label = "Population",
+  y.label = "Ln of gross expenditure p. c.",
+  ci = 95)
+rdplot
+```
+
+
+to do: fuzzy argument (i. e. treatment indicator) binary; sharp RDD (intention to treat)
+
+
+### Robustness Checks
+
+The RDD FE model without covariates will be regarded as the baseline model. Hence, write a wrapper function to ease the use of the model:
+
+```{r}
+rdrobust_fe_model <- function(pp = NULL, qq = NULL, hh = NULL, bb = NULL) {
+  rdrobust::rdrobust(
+    y = d_rdd_bivariate$ln_gross_expenditure_pc,
+    x = d_rdd_bivariate$inhabs_rel_to_cutoff,
+    fuzzy = d_rdd_bivariate$total_seats,
+    cluster = d_rdd_bivariate$inhabitants_treshold_factor,
+    covs = model.matrix( ~ d_rdd_bivariate$inhabitants_treshold_factor + d_rdd_bivariate$year + d_rdd_bivariate$state),
+    # set parameters to run for robustness tests; set them to rdrobust defaults
+    p = pp,
+    q = qq,
+    h = hh,
+    b = bb
+  )
+}
+rdd <- rdrobust_fe_model()
+summary(rdd) # equal to rdd_bi_fe model
+```
+
+
+#### Different RDD specifications
+
+Vary p, the local polynomial. Conclusions remain. On the first stage, council size jumps by a value somewhat larger than 1 at the threshold (highly statistically significant). The second stage, however, remains insignificant, with some p values around 0.2, the others are (in part way) larger. The coefficient is always slightly positive.
+```{r, eval=FALSE}
+# to do: remove eval = F
+for (vary_p in 0:6) {
+  print(paste("polynomial of degree", vary_p))
+  rdd <- rdrobust_fe_model(pp = vary_p)
+  summary(rdd)
+}
+```
+Vary q, the "local-polynomial used to construct the bias correction". Conclusions similar to varying p: Higly significant first stage across all `q`s, non-significant second stage (p values as low as 0.2) and positive around 1%.
+```{r, eval=FALSE}
+# to do: remove eval = F
+for (vary_q in 2:6) {
+  print(paste("polynomial of degree", vary_q))
+  rdd <- rdrobust_fe_model(qq = vary_q)
+  summary(rdd)
+}
+```
+Vary the bandwidths `h` and `b`, manually set those instead of using a data-driven algorithm. If `h` is manually set to a certain value, the function sets `b` to the very same value. However, since the two are typically not in the same ballpark when calculated automatically (i. e. in a data-driven way), I will run the two loops separately with different values.
+Conclusion: In these cases, varying the parameters does matter for the result (this is not the case with `p` and `q`). The larger the bandwidth, the larger the first-stage coefficient. In addition, the significance level of the second stage coefficient increases (the p value decreases) in the bandwidth. The value of the coefficient of interest is steady at a bit more than 1%. Note, however, that the last models include more than half of the sample size in the calculation, potentially invalidating the research design.
+```{r}
+for (vary_h in seq(0.02, 0.2, 0.03)) {
+  print(paste("polynomial of degree", vary_h))
+  rdd <- rdrobust_fe_model(hh = vary_h)
+  summary(rdd)
+}
+```
+Apparently, the bandwidth `b` cannot be set manually.
+```{r, eval=FALSE}
+for (vary_b in seq(0.15, 0.45, 0.075)) {
+  print(paste("RDD with bandwidth b =", vary_b))
+  rdd <- rdrobust_fe_model(bb = vary_b)
+  summary(rdd)
+}
+```
+
+Bandwidth variation: Windows similar to Höhmann 2017, other data-driven bandwidth algorithms
+
+Vary kernel:
+```{r}
+# to do: remove eval = F
+for (vary_kernel in seq(0.15, 0.45, 0.075)) {
+  print(paste("polynomial of degree", vary_kernel))
+  rdd <- rdrobust_fe_model(kkernel = vary_kernel)
+  summary(rdd)
+}
+```
+
+
+```{r}
+rm(p, rdd)
+```
+
+
+#### Separate years/states
+
+
+#### Mass points
 
 Investigating mass points: to do
 
@@ -372,7 +1060,7 @@ etc.
 
 ## Checking assumptions
 
-### McCrary (2008) Sorting test
+### Density tests
 
 I am only using election years in order to avoid multiple observations on the running variable (also for the `rddensity` check).
 
@@ -380,6 +1068,8 @@ I am only using election years in order to avoid multiple observations on the ru
 dens_test_d_rdd_bivariate <- d_rdd_bivariate %>%
   filter(election_year == 1 | year == 2002)
 ```
+
+#### McCrary (2008) Sorting test
 
 McCrary test for all states pooled (with running variable values occuring multiple times):
 ```{r}
@@ -403,7 +1093,7 @@ dev.off()
 The test for the overall data is significant (i. e. there is a jump at the threshold). But this may be due to almost all values of the running variable occuring multiple times (given the nature of the data set). Hence, the "real" test on the data set is not statistically significant any more.
 
 
-### `rddensity` discontinuity test
+#### `rddensity` discontinuity test
 
 ```{r}
 rddensity_disc_test <- rddensity::rddensity(X = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff, c = 0)
@@ -419,7 +1109,7 @@ dev.off()
 rm(p)
 ```
 
-### Testing for sorting in different entities, time periods, thresholds...
+#### Testing for sorting in different entities, time periods, thresholds...
 
 McCrary and `rddensity` tests for each state separately.
 
@@ -431,14 +1121,26 @@ all_states <- dens_test_d_rdd_bivariate %>%
   distinct(state) %>%
   filter(state != 3 & state != 12 & state != 13 & state != 15) %>% # Remove state with no/too few obs
   pull()
+jump_mccrary <- list()
+p_value_mccrary <- list()
+jump_rddensity <- list()
+p_value_rddensity <- list()
+state <- list()
 for (i in all_states){
   df_subset <- dens_test_d_rdd_bivariate %>% filter(state == i) %>% drop_na(inhabs_rel_to_cutoff)
-  out1 <- rdd::DCdensity(runvar = df_subset$inhabs_rel_to_cutoff, cutpoint = 0, plot = FALSE, ext.out = TRUE)
-  out2 <- rddensity::rddensity(X = df_subset$inhabs_rel_to_cutoff)
-  print(paste0("McCrary -- State: ", i, ", jump: ", out1$theta, ", p value: ", out1$p, ", n: ", length(df_subset$inhabs_rel_to_cutoff)))
-  print(paste0("rddensity -- State: ", i, ", jump: ", out2$hat$diff, ", p value: ", out2$test$p_jk, ", n: ", length(df_subset$inhabs_rel_to_cutoff)))
+  state[i] <- i
+  out_mccrary <- rdd::DCdensity(runvar = df_subset$inhabs_rel_to_cutoff, cutpoint = 0, plot = FALSE, ext.out = TRUE)
+  jump_mccrary[i] <- out_mccrary$theta
+  p_value_mccrary[i] <- out_mccrary$p
+  out_rddensity <- rddensity::rddensity(X = df_subset$inhabs_rel_to_cutoff)
+  jump_rddensity[i] <- out_rddensity$hat$diff
+  p_value_rddensity[i] <- out_rddensity$test$p_jk
 }
-rm(all_states, df_subset, out1, out2)
+sorting <- tibble(state, jump_mccrary, p_value_mccrary, jump_rddensity, p_value_rddensity) %>%
+  unnest() %>%
+  arrange(p_value_rddensity)
+sorting
+rm(all_states, df_subset, jump_mccrary, jump_rddensity, out_mccrary, out_rddensity, p_value_mccrary, p_value_rddensity, state)
 ```
 
 McCrary and `rddensity` tests for each year separately:
@@ -452,14 +1154,28 @@ all_years <- dens_test_d_rdd_bivariate %>%
   distinct(year) %>%
   arrange(year) %>%
   pull()
+year <- list()
+jump_mccrary <- list()
+p_value_mccrary <- list()
+jump_rddensity <- list()
+p_value_rddensity <- list()
 for (i in all_years){
   df_subset <- dens_test_d_rdd_bivariate %>% filter(year == i) %>% drop_na(inhabs_rel_to_cutoff)
-  out1 <- rdd::DCdensity(runvar = df_subset$inhabs_rel_to_cutoff, cutpoint = 0, plot = FALSE, ext.out = TRUE)
-  out2 <- rddensity::rddensity(X = df_subset$inhabs_rel_to_cutoff)
-  print(paste0("McCrary -- Year: ", i, ", jump: ", out1$theta, ", p value: ", out1$p, ", n: ", length(df_subset$inhabs_rel_to_cutoff)))
-  print(paste0("rddensity -- Year: ", i, ", jump: ", out2$hat$diff, ", p value: ", out2$test$p_jk, ", n: ", length(df_subset$inhabs_rel_to_cutoff)))
+  year[i] <- i
+  out_mccrary <- rdd::DCdensity(runvar = df_subset$inhabs_rel_to_cutoff, cutpoint = 0, plot = FALSE, ext.out = TRUE)
+  jump_mccrary[i] <- out_mccrary$theta
+  p_value_mccrary[i] <- out_mccrary$p
+  out_rddensity <- rddensity::rddensity(X = df_subset$inhabs_rel_to_cutoff)
+  jump_rddensity[i] <- out_rddensity$hat$diff
+  p_value_rddensity[i] <- out_rddensity$test$p_jk
+  #print(paste0("McCrary -- Year: ", i, ", jump: ", out1$theta, ", p value: ", out1$p, ", n: ", length(df_subset$inhabs_rel_to_cutoff)))
+  #print(paste0("rddensity -- Year: ", i, ", jump: ", out2$hat$diff, ", p value: ", out2$test$p_jk, ", n: ", length(df_subset$inhabs_rel_to_cutoff)))
 }
-rm(all_years, df_subset, out1, out2)
+sorting <- tibble(year, jump_mccrary, p_value_mccrary, jump_rddensity, p_value_rddensity) %>%
+  unnest() %>%
+  arrange(p_value_rddensity)
+sorting
+rm(all_years, df_subset, jump_mccrary, jump_rddensity, out_mccrary, out_rddensity, p_value_mccrary, p_value_rddensity, year)
 ```
 
 Testing at every threshold separately:
@@ -475,79 +1191,163 @@ all_th <- dens_test_d_rdd_bivariate %>%
   distinct(inhabitants_treshold) %>%
   arrange(inhabitants_treshold) %>%
   pull()
+threshold <- list()
+state <- list()
+jump_mccrary <- list()
+p_value_mccrary <- list()
+jump_rddensity <- list()
+p_value_rddensity <- list()
 for (i in all_th){
   df_subset <- dens_test_d_rdd_bivariate %>%
     filter(inhabitants_treshold == i) %>%
     drop_na(inhabs_rel_to_cutoff)
-  state <- unique(df_subset$state) %>% paste(collapse = ",")
-  out1 <- rdd::DCdensity(runvar = df_subset$inhabs_rel_to_cutoff, cutpoint = 0, plot = FALSE, ext.out = TRUE)
-  out2 <- rddensity::rddensity(X = df_subset$inhabs_rel_to_cutoff)
-  print(paste0("McCrary -- Threshold: ", i, ", state(s): ", state, ", jump: ", out1$theta, ", p value: ", out1$p, ", n: ", length(df_subset$inhabs_rel_to_cutoff)))
-  print(paste0("rddensity -- Threshold: ", i, ", state(s): ", state, ", jump: ", out2$hat$diff, ", p value: ", out2$test$p_jk, ", n: ", length(df_subset$inhabs_rel_to_cutoff)))
+  state[i] <- unique(df_subset$state) %>% paste(collapse = ",")
+  threshold[i] <- i
+  out_mccrary <- rdd::DCdensity(runvar = df_subset$inhabs_rel_to_cutoff, cutpoint = 0, plot = FALSE, ext.out = TRUE)
+  jump_mccrary[i] <- out_mccrary$theta
+  p_value_mccrary[i] <- out_mccrary$p
+  out_rddensity <- rddensity::rddensity(X = df_subset$inhabs_rel_to_cutoff)
+  jump_rddensity[i] <- out_rddensity$hat$diff
+  p_value_rddensity[i] <- out_rddensity$test$p_jk
 }
-rm(all_th, df_subset, out1)
+sorting <- tibble(threshold, state, jump_mccrary, p_value_mccrary, jump_rddensity, p_value_rddensity) %>%
+  unnest() %>%
+  arrange(p_value_rddensity)
+sorting
+rm(all_th, df_subset, jump_mccrary, jump_rddensity, out_mccrary, out_rddensity, p_value_mccrary, p_value_rddensity, state, threshold)
 ```
+
+#### Varying bandwidths
+
+Limiting data set to observations x % closest to the cutoff but maintaining data-driven bandwidth selection:
+```{r}
+bandwidths <- seq(0.025, 0.3, 0.025)
+jump_mccrary <- list()
+p_value_mccrary <- list()
+jump_rddensity <- list()
+p_value_rddensity <- list()
+n <- list()
+for (i in 1:length(bandwidths)){
+  df_subset <- dens_test_d_rdd_bivariate %>% filter(closest <= bandwidths[i])
+  # Filtering not done 100 % correctly, see definition of dens_test_d_rdd_bivariate
+  out_mccrary <- rdd::DCdensity(runvar = df_subset$inhabs_rel_to_cutoff, cutpoint = 0, plot = FALSE, ext.out = TRUE)
+  jump_mccrary[i] <- out_mccrary$theta
+  p_value_mccrary[i] <- out_mccrary$p
+  out_rddensity <- rddensity::rddensity(X = df_subset$inhabs_rel_to_cutoff)
+  jump_rddensity[i] <- out_rddensity$hat$diff
+  p_value_rddensity[i] <- out_rddensity$test$p_jk
+  n[i] <- length(df_subset$inhabs_rel_to_cutoff)
+}
+sorting <- tibble(bandwidths, jump_mccrary, p_value_mccrary, jump_rddensity, p_value_rddensity, n) %>%
+  unnest() %>%
+  arrange(p_value_rddensity)
+sorting
+rm(bandwidths, df_subset, jump_mccrary, jump_rddensity, n, out_mccrary, out_rddensity, p_value_mccrary, p_value_rddensity)
+```
+
+Using all observations in x % window, without further (data-driven) bandwidth selection:
+
+```{r}
+bandwidths <- seq(0.025, 0.3, 0.025)
+jump_mccrary <- list()
+p_value_mccrary <- list()
+jump_rddensity <- list()
+p_value_rddensity <- list()
+n <- list()
+bw <- 100
+for (i in 1:length(bandwidths)){
+  df_subset <- dens_test_d_rdd_bivariate %>% filter(closest <= bandwidths[i])
+  # Filtering not done 100 % correctly, see definition of dens_test_d_rdd_bivariate
+  out_mccrary <- rdd::DCdensity(runvar = df_subset$inhabs_rel_to_cutoff, cutpoint = 0, plot = FALSE, ext.out = TRUE, bw = bw)
+  jump_mccrary[i] <- out_mccrary$theta
+  p_value_mccrary[i] <- out_mccrary$p
+  out_rddensity <- rddensity::rddensity(X = df_subset$inhabs_rel_to_cutoff, h = bw)
+  jump_rddensity[i] <- out_rddensity$hat$diff
+  p_value_rddensity[i] <- out_rddensity$test$p_jk
+  n[i] <- length(df_subset$inhabs_rel_to_cutoff)
+}
+sorting <- tibble(bandwidths, jump_mccrary, p_value_mccrary, jump_rddensity, p_value_rddensity, n) %>%
+  unnest() %>%
+  arrange(p_value_rddensity)
+sorting
+rm(bandwidths, df_subset, jump_mccrary, jump_rddensity, n, out_mccrary, out_rddensity, p_value_mccrary, p_value_rddensity)
+```
+
+For both applications, the McCrary test consistently shows sorting, whereas the `rddensity` test is (with a single exception) unable to detect sorting. Puzzling...
+
+
+#### Placebo density tests
 
 Placebo McCrary (2008) test: Even the placebo thresholds are statistically significant in many cases. Maybe the discontinuities above are just a matter of statistical power?
 ```{r}
 # "Structured" approach
 cuts <- seq(from = -(2+2/3), to = 2/3, by = 1/6) # Values chosen such that code does run
-length <- length(cuts)
+#length <- length(cuts)
 cutoff <- list()
-pvalue1 <- list()
-pvalue2 <- list()
-for (i in 1:length){
+jump_mccrary <- list()
+p_value_mccrary <- list()
+out_rddensity <- list()
+jump_rddensity <- list()
+p_value_rddensity <- list()
+for (i in 1:length(cuts)){
   cutoff[i] <- cuts[i]
-  pvalue1[i] <- rdd::DCdensity(runvar = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff,
-                              cutpoint = cuts[i], plot = FALSE)
-  pvalue2[i] <- rddensity::rddensity(X = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff, c = cuts[i])$test$p_jk
+  out_mccrary <- rdd::DCdensity(runvar = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff,
+                              cutpoint = cuts[i], plot = FALSE, ext.out = TRUE)
+  jump_mccrary[i] <- out_mccrary$theta
+  p_value_mccrary[i] <- out_mccrary$p
+  out_rddensity <- rddensity::rddensity(X = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff,
+                                           c = cuts[i])
+  jump_rddensity[i] <- out_rddensity$hat$diff
+  p_value_rddensity[i] <- out_rddensity$test$p_jk
 }
-sorting <- tibble(cutoff = cutoff, pvalue_mccrary = pvalue1, pvalue_rddensity = pvalue2) %>%
+sorting <- tibble(cutoff, jump_mccrary, p_value_mccrary, jump_rddensity, p_value_rddensity) %>%
   unnest() %>%
-  arrange(pvalue_mccrary)
+  arrange(p_value_mccrary)
 sorting
-rm(cutoff, cuts, i, length, pvalue1, pvalue2, sorting)
+ggplot2::ggplot(sorting) + geom_histogram(aes(p_value_mccrary))
+ggplot2::ggplot(sorting) + geom_histogram(aes(p_value_rddensity))
+rm(cutoff, cuts, i, jump_rddensity, out_mccrary, out_rddensity, p_value_mccrary, p_value_rddensity)
 ```
 ```{r}
 # "Random" approach
 set.seed(234) # Value chosen such that rdd:DCdensity actually runs without error -> bias?
 random_z_score <- rnorm(50)/2 # Neither randomly nor z-distributed, but roughly around my cutoff
 cutoff <- list()
-pvalue_mccrary <- list()
+jump_mccrary <- list()
+p_value_mccrary <- list()
+out_rddensity <- list()
 jump_rddensity <- list()
-pvalue_rddensity <- list()
+p_value_rddensity <- list()
 for (i in 1:50){
-  #print(paste("Cutoff at:", random_z_score[i]))
   cutoff[i] <- random_z_score[i]
-  pvalue_mccrary[i] <- rdd::DCdensity(runvar = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff,
-                                       cutpoint = random_z_score[i], plot = FALSE)
-  out2 <- rddensity::rddensity(X = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff,
+  out_mccrary <- rdd::DCdensity(runvar = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff,
+                                       cutpoint = random_z_score[i], plot = FALSE, ext.out = TRUE)
+  jump_mccrary[i] <- out_mccrary$theta
+  p_value_mccrary[i] <- out_mccrary$p
+  out_rddensity <- rddensity::rddensity(X = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff,
                                c = random_z_score[i])
-  jump_rddensity[i] <- out2$hat$diff
-  pvalue_rddensity[i] <- out2$test$p_jk
+  jump_rddensity[i] <- out_rddensity$hat$diff
+  p_value_rddensity[i] <- out_rddensity$test$p_jk
 }
-sorting <- tibble(cutoff, pvalue_mccrary, jump_rddensity, pvalue_rddensity) %>%
+sorting <- tibble(cutoff, p_value_mccrary, jump_rddensity, p_value_rddensity) %>%
   unnest() %>%
   arrange(cutoff)
 sorting
-ggplot2::ggplot(sorting) + geom_histogram(aes(pvalue_mccrary))
-ggplot2::ggplot(sorting) + geom_histogram(aes(pvalue_rddensity))
-rm(cutoff, i, out2, pvalues, random_z_score)
+ggplot2::ggplot(sorting) + geom_histogram(aes(p_value_mccrary))
+ggplot2::ggplot(sorting) + geom_histogram(aes(p_value_rddensity))
+rm(cutoff, i, jump_mccrary, jump_rddensity, out_mccrary, out_rddensity, p_value_mccrary, p_value_rddensity, random_z_score)
 ```
-
-
-
-
-
-
-Strangely, the number of observations with p values smaller than 10 % is higher than one would expect. I do not have an explanation for this.
+Strangely, the number of observations with p values smaller than 10 % is higher than one would expect, especially with the McCrary test. I do not have an explanation for this.
 
 
 ```{r}
-rm(dens_test_d_rdd_bivariate)
+rm(dens_test_d_rdd_bivariate, sorting)
 ```
 
+
 ### Balance tests
+
+U. a. auch lagged treatment testen
 
 
 # Robustness checks
@@ -583,12 +1383,12 @@ Versuch 1
 set.seed(123)
 data2 <- data %>%
   filter(state == 9, total_seats <= 24) %>%
-  select(ln_gross_expenditure_pc, inhabitants_treshold, exact_pop, total_seats) %>%
+  select(ln_gross_expenditure_pc, inhabitants_treshold_factor, exact_pop, total_seats) %>%
   drop_na() %>%
   slice_sample(n = 8000)
-rdd <- rdmulti::rdms(Y = data2$ln_gross_expenditure_pc, X = data2$exact_pop, fuzzy = data2$total_seats, C = data2$inhabitants_treshold)
-#rdd <- rdmulti::rdms(Y = data2$ln_gross_expenditure_pc, X = data2$exact_pop, C = data$inhabitants_treshold)
-#unique(data2$inhabitants_treshold), fuzzy = data2$total_seats)
+rdd <- rdmulti::rdms(Y = data2$ln_gross_expenditure_pc, X = data2$exact_pop, fuzzy = data2$total_seats, C = data2$inhabitants_treshold_factor)
+#rdd <- rdmulti::rdms(Y = data2$ln_gross_expenditure_pc, X = data2$exact_pop, C = data$inhabitants_treshold_factor)
+#unique(data2$inhabitants_treshold_factor), fuzzy = data2$total_seats)
 ```
 
 Versuch 2:
@@ -596,7 +1396,7 @@ Versuch 2:
 ```{r, eval = FALSE}
 data2 <- data %>%
   filter(gross_expenditure > 0, state == 9) %>%
-  select(gross_expenditure, exact_pop, inhabitants_treshold, total_seats) %>%
+  select(gross_expenditure, exact_pop, inhabitants_treshold_factor, total_seats) %>%
   drop_na() %>%
   slice(50:500)
 rdrobust::rdrobust(y = data2$gross_expenditure, x = data2$exact_pop, c = 0, fuzzy = data2$total_seats, all = TRUE)
@@ -609,7 +1409,7 @@ rdms(Y,X,cvec)
 
 
 ```{r, eval = FALSE}
-rdmulti::rdmcplot(Y = log(data2$gross_expenditure), X = data2$exact_pop, C = data2$inhabitants_treshold)
+rdmulti::rdmcplot(Y = log(data2$gross_expenditure), X = data2$exact_pop, C = data2$inhabitants_treshold_factor)
 ```
 
 
@@ -619,5 +1419,5 @@ rdmulti::rdmcplot(Y = log(data2$gross_expenditure), X = data2$exact_pop, C = dat
 For references, see the paper.
 
 ```{r}
-
+Sys.time() - time
 ```

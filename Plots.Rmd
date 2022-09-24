@@ -18,6 +18,7 @@ library(tidyverse)
 library(plotly)
 library(ggcorrplot)
 library(htmltools)
+library(ggpubr)
 ```
 
 ```{r Data}
@@ -29,6 +30,16 @@ data <-
 options(scipen = 20)
 #theme_set(theme_minimal())
 ```
+
+Create data set used in main RDD analysis.
+
+```{r}
+# similar data set definition as in "Analysis.Rmd"
+d_rdd_bivariate <- data %>%
+  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, inhabitants_treshold, year, ags, election_year, state, closest, exact_pop, kreisfreie_stadt) %>%
+  drop_na(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff)
+```
+
 
 
 # Unvariate Statistics
@@ -220,6 +231,90 @@ plotly::ggplotly(plot)
 ```
 
 12 Brandenburg also has quite a strong relationship but no population data beyond 2019. 15 Saxony-Anhalt may have had some special rules after 2007 county reform (**to do: investigate**)!
+
+### Export to LaTeX
+
+For 01, cutoff change during observation period.
+
+to do: First year shown in plot not yet correct.
+
+```{r}
+# Create data
+th_1 <- c(70, 200, 750, 1250, 5000, 10000, 15000, 25000, 35000, 45000)
+th_1_change <- c(2000, 2500)
+th_15 <- c(1000, 2000, 3000, 5000, 10000, 20000, 30000, 50000, 150000, 300000)
+th_15_change <- c(100, 500)
+plot_list <- list()
+plot_df <- d_rdd_bivariate %>%
+  mutate(
+    year = case_when(
+      state == 1 & year == 2002 ~ 1998,
+      state %in% c(5, 7, 8, 10, 13, 14, 16) & year == 2002 ~ 1999,
+      state == 6 & year == 2002 ~ 2001,
+      TRUE ~ year
+    ),
+    year = as.factor(year)
+    )
+# Plot
+for (s in c(1, 5:10, 13, 14, 15, 16)) {
+  # Specific rules for "kreisfreie Städte" in 01
+  df_subset <- plot_df
+  if (s == 1) {
+    df_subset <- df_subset %>% filter(kreisfreie_stadt == 0)
+  }
+  plot_list[[s]] <- df_subset %>%
+    filter(state == s) %>%
+    filter((election_year == 1 | as.numeric(year) == min(as.numeric(year)))) %>%
+    ggplot() +
+    geom_vline(xintercept = get(paste0("th_", s))) +
+    geom_point(aes(
+      x = exact_pop,
+      y = total_seats#,
+      #colour = year
+    ),
+    size = 0.5) +
+    #labs(title = paste0("State: ", s)) +
+    scale_x_log10() +
+    theme(
+      axis.title.x=element_blank(), # remove x axis label
+      axis.title.y=element_blank(), # remove y axis label
+      legend.title=element_blank() # remove legend title
+      )
+  # Cutoff changes
+  if (s == 1 | s == 15) {
+    plot_list[[s]] <- plot_list[[s]] +
+      geom_vline(xintercept = get(paste0("th_", s, "_change")),
+                 colour = "#F8766D", linetype = "dashed")
+  }
+  # Show plots
+  #print(plot_list[[s]])
+}
+rm(df_subset, th_1, th_1_change, th_15, th_15_change)
+```
+Arrange plots:
+```{r}
+first_stage <- ggpubr::ggarrange(
+  plot_list[[1]], plot_list[[5]], plot_list[[6]], plot_list[[7]], plot_list[[8]],
+  plot_list[[9]], plot_list[[10]], plot_list[[13]], plot_list[[14]], plot_list[[16]],
+  # labels = c("SH", "NW", "Hesse", "Rhineland-Palatinate", "Baden-Württemberg",
+  #            "Bavaria", "Saarland", "Mecklenburg-Vorpommern", "Saxony", "Thuringia"),
+  labels = paste(" ", c("SH", "NW", "HE", "RP", "BW", "BY", "SL", "MV", "SN", "TH")),
+  #label.x = "Population",
+  #label.y = "Council size",
+  #common.legend = TRUE,
+  ncol = 2, nrow = 5) %>%
+  annotate_figure(
+    # See https://github.com/kassambara/ggpubr/issues/78
+    left = text_grob("Council size", rot = 90),
+    bottom = text_grob("Population")
+)
+first_stage
+```
+Export plots:
+```{r}
+ggpubr::ggexport(first_stage, filename = "plots/rdd_first_stage.pdf")
+```
+
 
 
 ## "Expected" number of seats vs. actual seats number
