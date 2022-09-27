@@ -1,0 +1,458 @@
+---
+author: "Florian Fox"
+date: "`r Sys.Date()`"
+title: 'Master Thesis: A Causal Test of the Law of 1/n and its Mechanisms -- Analysis: Conventional Regressions'
+output:
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: true
+---
+
+# Load data and packages
+
+```{r Packages}
+time <- Sys.time()
+library(tidyverse)
+library(fixest)
+#library(rdrobust)
+#library(rdmulti)
+#library(rddensity)
+#library(rdd) # For the McCrary (2008) test
+library(xtable)
+#library(scales)
+#library(janitor)
+```
+
+```{r Data}
+data <-
+  readRDS("data/gemeinderatswahlen_alldata.rds") %>%
+  mutate(
+    year = as.factor(year),
+    ags = as.factor(ags)
+  )
+```
+
+```{r Options}
+options(scipen = 20)
+theme_set(theme_minimal())
+```
+
+Generating different data sets:
+
+```{r}
+d_bivariate <- data %>%
+  select(ln_gross_expenditure_pc, total_seats, ags, year, state) %>% drop_na()
+d_bivariate_iv <- data %>%
+  select(ln_gross_expenditure_pc, total_seats, ags, year, total_seats_24_y_ago) %>% drop_na()
+# d_rdd_bivariate <- data %>%
+#   select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, inhabitants_treshold_factor, inhabitants_treshold, year, ags, election_year, state, closest, clean_disc_acc_Höhmann, clean_disc_acc_to_my_research) %>%
+#   drop_na(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff) %>%
+#   # Repeat (bandwidth) window calculation for data subsets
+#   mutate(
+#     closest = base::rank(abs(inhabs_rel_to_cutoff), ties.method = "last"),
+#     closest = closest/max(closest),
+#   )
+
+d_controls <- data %>%
+  select(ln_gross_expenditure_pc, total_seats, ags, year, inh_tot, pop_over65, unempl_rate, total_area_ha,
+    share_working_age, kreisfreie_stadt, stadt, years_since_last_elec, state) %>%
+  drop_na()
+d_controls_iv <- data %>%
+  select(ln_gross_expenditure_pc, total_seats, ags, year, total_seats_24_y_ago, inh_tot, pop_over65,
+         unempl_rate, total_area_ha, share_working_age, kreisfreie_stadt, stadt,
+         years_since_last_elec) %>%
+  drop_na()
+# d_rdd <- data %>%
+#   select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, closest,
+#          inhabitants_treshold_factor, year, ags, state,
+#          inh_tot, pop_over65, unempl_rate, total_area_ha,
+#          share_working_age, kreisfreie_stadt, stadt, years_since_last_elec) %>%
+#   drop_na() %>%
+#   # Repeat (bandwidth) window calculation for data subsets
+#   mutate(
+#     closest = base::rank(abs(inhabs_rel_to_cutoff), ties.method = "last"),
+#     closest = closest/max(closest),
+#   )
+# d_ttest <- data %>%
+#   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff) %>% drop_na()
+```
+
+
+
+# OLS regression
+
+**Biases in OLS regression**
+
+"However, this regression potentially suffers from reverse causality as well as omitted variable bias. Reverse causality may arise from the fact that a municipality with a larger public budget faces more complex budget negotiations and hence may need more councilors ([Pettersson-Lidbom, 2012](https://doi.org/10.1016/j.jpubeco.2011.07.004), p. 269). If this is indeed the case, one would expect β to overestimate the true causal effect of council size. Omitted variable bias may also be at play because even with a large number of control variables one can not completely rule out confounders ([Höhmann, 2017](https://doi.org/10.1007/s11127-017-0484-2), p. 347). Depending on the sign of the association with council size and public spending, this bias could go either way. More precisely, if voters who prefer a larger number of councilors also want higher spending, the relationship between council size and government size might be spuriously correlated ([Egger & Koethenbuerger, 2010](https://www.doi.org/10.1257/app.2.4.200), pp. 201, 204), again resulting in an overestimate of the true effect."
+
+(Citation from my project study)
+
+First, show the general association of population and council size, respectively, with spending.
+
+```{r}
+# population as independent variable
+fixest::feols(ln_gross_expenditure_pc ~ sw0(poly(inh_tot, 1), poly(inh_tot, 2),
+                                            poly(inh_tot, 3), poly(inh_tot, 4),
+                                            poly(inh_tot, 5), poly(inh_tot, 6)),
+              vcov = "hetero", # heteroskedasticity-robust SEs
+              data = data %>% drop_na(inh_tot, ln_gross_expenditure_pc))
+# council size as independent variable
+fixest::feols(ln_gross_expenditure_pc ~ sw0(poly(total_seats, 1), poly(total_seats, 2),
+                                            poly(total_seats, 3), poly(total_seats, 4),
+                                            poly(total_seats, 5), poly(total_seats, 6)),
+              vcov = "hetero", # heteroskedasticity-robust SEs
+              data = d_bivariate)
+```
+
+Running multivariate regressions:
+
+```{r}
+# Adding variables stepwise using the `csw` function
+fixest::feols(
+  ln_gross_expenditure_pc ~ csw0(total_seats, inh_tot, pop_over65, unempl_rate, total_area_ha,
+    share_working_age, kreisfreie_stadt, stadt, years_since_last_elec),
+  vcov = "hetero",
+  data = data
+)
+ols <- fixest::feols(
+  ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + years_since_last_elec,
+  vcov = "hetero",
+  data = d_controls
+)
+summary(ols, n = 20)
+# Main model with Bavarian data only:
+fixest::feols(
+  ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + years_since_last_elec,
+  vcov = "hetero",
+  data = d_controls %>% filter(state == 9)
+)
+# Adding "political" variables
+ols_pol <- fixest::feols(
+  ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + turnout + ward_elections + const_typ_sueddt +
+    years_since_last_elec,
+  vcov = "hetero",
+  data = data
+)
+summary(ols_pol, n = 25)
+# Only Bavarian data:
+ols_pol <- fixest::feols(
+  ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + turnout + ward_elections + const_typ_sueddt +
+    years_since_last_elec +
+    no_parties_in_parliament + absolute_majority + cdu_csu_majority + spd_majority +
+    waehlergruppen_majority + cdu_csu_mayor + spd_mayor,
+  vcov = "hetero",
+  data = data
+)
+summary(ols_pol, n = 25)
+rm(ols_pol)
+```
+In the multiple-regression case the `total_seats` variable is significantly positive, albeit with a small effect of -1%. Upon including the "political" variables (describing the political and constitutional landscape), the effect turns negative. However, in the latter case the sample size decreases drastically as much information is available for Bavaria only.
+
+
+
+# Panel regression
+
+Ignoring the potential issue of bad controls, I am running some panel regressions with year and municipality as fixed effects.
+
+## Bivariate-regression FE models
+
+Association of population and council size, respectively, with spending in the FE case.
+
+```{r}
+# population as independent variable
+reg <- fixest::feols(ln_gross_expenditure_pc ~ sw0(poly(inh_tot, 1), poly(inh_tot, 2),
+                                                   poly(inh_tot, 3), poly(inh_tot, 4),
+                                                   poly(inh_tot, 5), poly(inh_tot, 6)) |
+                       year + ags,
+                     data = data %>% drop_na(inh_tot, ln_gross_expenditure_pc))
+summary(reg, vcov = "hetero")
+summary(reg, vcov = "twoway")
+# council size as independent variable
+reg <- fixest::feols(ln_gross_expenditure_pc ~ sw0(poly(total_seats, 1), poly(total_seats, 2),
+                                                   poly(total_seats, 3), poly(total_seats, 4),
+                                                   poly(total_seats, 5), poly(total_seats, 6)) |
+                       year + ags,
+                     data = d_bivariate)
+summary(reg, vcov = "hetero")
+summary(reg, vcov = "twoway")
+rm(reg)
+```
+After including FE and clustering SE, `total_seats` loses significance at the 5% level (but still significant at 10 %).
+
+## Multiple-regression FE models:
+
+```{r}
+panel_bivariate <-
+  fixest::feols(ln_gross_expenditure_pc ~ total_seats |
+                  year + ags,
+                data = d_bivariate)
+summary(panel_bivariate, vcov = "hetero")
+summary(panel_bivariate, vcov = "twoway")
+# Main model with Bavarian data only
+fixest::feols(ln_gross_expenditure_pc ~ total_seats |
+                year + ags,
+              vcov = "twoway",
+              data = d_bivariate %>% filter(state == 9))
+# Run it again with clustered SE for summary
+panel_bivariate <- fixest::feols(ln_gross_expenditure_pc ~ total_seats |
+                                   year + ags,
+                                 vcov = "twoway",
+                                 data = d_bivariate)
+# Adding variables stepwise using the `csw` function
+fixest::feols(
+  ln_gross_expenditure_pc ~ csw0(total_seats, inh_tot, pop_over65, unempl_rate, total_area_ha,
+    share_working_age, kreisfreie_stadt, stadt, years_since_last_elec) |
+    year + ags,
+  vcov = "twoway",
+  data = data,
+)
+panel_multivariate <- fixest::feols(
+  ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + years_since_last_elec |
+    year + ags,
+  vcov = "twoway",
+  data = d_controls
+)
+summary(panel_multivariate, n = 30)
+# Main model with Bavarian data only
+fixest::feols(
+  ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + years_since_last_elec |
+    year + ags,
+  vcov = "twoway",
+  data = d_controls %>% filter(state == 9)
+)
+```
+
+Using FE, the coefficient on `total_seats` shrinks by 50-75 %, compared to the OLS model but remains statistically significantly positive.
+
+Adding "political" variables:
+
+```{r}
+# Adding "political" variables
+panel_pol <- fixest::feols(
+  ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + turnout + ward_elections + const_typ_sueddt +
+    years_since_last_elec |
+    year + ags,
+  vcov = "twoway",
+  data = data
+)
+summary(panel_pol, n = 25)
+# Only Bavarian data:
+panel_pol <- fixest::feols(
+  ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + turnout + ward_elections + const_typ_sueddt +
+    years_since_last_elec +
+    no_parties_in_parliament + absolute_majority + cdu_csu_majority + spd_majority +
+    waehlergruppen_majority + cdu_csu_mayor + spd_mayor |
+    year + ags,
+  vcov = "twoway",
+  data = data
+)
+summary(panel_pol, n = 25)
+```
+The effect of council size, conditional on "political" variables, remains insignificant (as in the OLS case).
+
+
+
+
+# Instrumental variables regression
+
+Try an an IV regression based on [R. Baqir (2002)](https://doi.org/10.1086/342804), using council size 24 years ago (Baqir: 30 years ago) as an instrument.
+
+The analysis in this section is exclusively based on Bavaria data.
+
+For the IV to be a valid research design, three assumptions need to hold:
+
+- Relevance: The instrument $Z_i$ needs to be correlated with the endogenous regressor $W_i$, $cov(Z_i, W_i) \neq 0$. The correlation (Pearson) coefficient is $r=$
+`r round(cor(data$total_seats, data$total_seats_24_y_ago, use = "pairwise.complete.obs"),2)`
+so formally, this holds. However, I would question whether the correlation indeed is *too strong* as the first-stage fitted values might pick up some of the endogenous character of the endogenous regressor, yielding biased results.
+- Validity -- Exclusion:
+- Validity -- Exogeneity:
+
+## Bivariate IV
+
+Exploring the relationship between the instrument and the endogenous regressor:
+
+```{r}
+cor(d_bivariate_iv$total_seats, d_bivariate_iv$total_seats_24_y_ago)
+summary(lm(d_bivariate_iv$total_seats ~ d_bivariate_iv$total_seats_24_y_ago))
+ggplot2::ggplot(data = d_bivariate_iv) + geom_point(aes(total_seats, total_seats_24_y_ago))
+```
+
+```{r}
+iv_bivariate <-
+  fixest::feols(ln_gross_expenditure_pc ~
+                  1 | # 1 is the intercept
+                  year + ags | # FE
+                  total_seats ~ total_seats_24_y_ago,
+                data = d_bivariate_iv)
+summary(iv_bivariate, vcov = "hetero", stage = 1:2)
+summary(iv_bivariate, vcov = "twoway", stage = 1:2)
+```
+With FE, the effect on the first stage is basically 0. This does not make sense if you look at the relationship between endogenous regressor and instrument. Likely reason: municipality FE, since changes within municipalities occur rarely. This is suggestively confirmed by an IV regression with municipality but not year FE as the effect may be significant but of small magnitude:
+
+```{r}
+iv_bivariate <-
+  fixest::feols(ln_gross_expenditure_pc ~
+                  1 | # 1 is the intercept
+                  ags | # FE
+                  total_seats ~ total_seats_24_y_ago,
+                data = d_bivariate_iv)
+summary(iv_bivariate, vcov = "hetero", stage = 1:2)
+summary(iv_bivariate, vcov = "cluster", stage = 1:2)
+```
+
+```{r}
+iv_bivariate <-
+  fixest::feols(ln_gross_expenditure_pc ~
+                  1 | # 1 is the intercept
+                  year | # FE
+                  total_seats ~ total_seats_24_y_ago,
+                data = d_bivariate_iv)
+summary(iv_bivariate, vcov = "hetero", stage = 1:2)
+summary(iv_bivariate, vcov = "cluster", stage = 1:2)
+```
+Here, we do have an estimate on the instrument that is close to one, which is more plausible. Hence, in the following, I am only using year FE.
+
+
+## Multivariate IV
+```{r}
+fixest::feols(
+  ln_gross_expenditure_pc ~
+    csw0(inh_tot, pop_over65, unempl_rate, total_area_ha,
+         share_working_age, kreisfreie_stadt, stadt, years_since_last_elec) | # controls
+    year |#+ ags | # FE
+    total_seats ~ total_seats_24_y_ago, # IV formula for 1st stage
+  data = data,
+  vcov = "cluster"
+)
+```
+```{r}
+cor(d_controls_iv$total_seats, d_controls_iv$total_seats_24_y_ago)
+# Model with time and year FE
+iv_multivariate <- fixest::feols(
+  ln_gross_expenditure_pc ~
+    inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + years_since_last_elec | # controls
+    year + ags | # FE
+    total_seats ~ total_seats_24_y_ago, # IV formula for 1st stage
+  data = d_controls_iv
+)
+summary(iv_multivariate, vcov = "twoway", stage = 1:2)
+# "Real" model
+iv_multivariate <- fixest::feols(
+  ln_gross_expenditure_pc ~
+    inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + years_since_last_elec | # controls
+    year |#+ ags | # FE
+    total_seats ~ total_seats_24_y_ago, # IV formula for 1st stage
+  data = d_controls_iv
+)
+summary(iv_multivariate, vcov = "hetero", stage = 1:2)
+summary(iv_multivariate, vcov = "cluster", stage = 1:2)
+-0.000565308 + c(1.96, -1.96) * 0.0007339480 # CI for total_seats in the latter case
+# Run it again with clustered SE for summary
+iv_multivariate <- fixest::feols(
+  ln_gross_expenditure_pc ~
+    inh_tot + pop_over65 + unempl_rate + total_area_ha +
+    share_working_age + kreisfreie_stadt + stadt + years_since_last_elec | # controls
+    year |#+ ags | # FE
+    total_seats ~ total_seats_24_y_ago, # IV formula for 1st stage
+  vcov = "cluster",
+  data = d_controls_iv
+)
+```
+
+["Wu-Hausman tests that IV is just as consistent as OLS, and since OLS is more efficient, it would be preferable. The null here is that they are equally consistent"](https://stats.stackexchange.com/questions/134789/interpretation-of-ivreg-diagnostics-in-r). E. g. if the null is rejected at the 10 % level, this is "good" from the IV perspective.
+
+The IV coefficients on `total_seats` are positive but far from any commonly accepted level of statistical significance. The effect size appears way to large...
+
+
+# Summary of conventional-methods results
+
+```{r}
+etable(ols, panel_bivariate, panel_multivariate, iv_multivariate)
+```
+
+Test LaTeX export -- note that differences between HTML and TeX output remain.
+```{r}
+# etable(ols, panel_bivariate, panel_multivariate,
+#        # Table settings
+#        drop = "!Council size",
+#        dict = c(total_seats = "Council size",
+#                 ln_gross_expenditure_pc = "Ln of gross expenditure p. c."),
+#        signif.code = c("***"=0.001, "**"=0.01, "*"=0.05, "'"=0.10),
+#        headers = list("OLS", "FE bivariate", "FE multivariate"),
+#        # LaTeX settings
+#        title = "Results of the \"Conventional\" Regression Methods",
+#        label = "tab:conv_results",
+#        notes = "Test notes here",
+#        style.df = style.df(
+#          fixef.suffix = " fixed-effect"
+#        )
+#        )
+```
+
+
+
+## Export to LaTeX
+
+tex notes text
+```{r}
+tex_control_text <- "Controls, \\ac{FE} and \\ac{SE} as indicated in the respective column. Controls, if included and as long as not perfectly collinear: population, share of population over 65 years, unemployment rate, total area, share of working-age population, and dummies for ``district-free'' cities, cities, as well as year in the electoral cycle."
+tex_signif_text <- "Significance codes: *** p < 0.001, ** p < 0.01, * p < 0.05, ' p < 0.10.}"
+```
+
+
+```{r}
+etable(ols, panel_bivariate, panel_multivariate, iv_multivariate,
+       file = "tables/conv_results.tex",
+       replace = TRUE,
+       # Table settings
+       drop = "!Council size",
+       dict = c(total_seats = "Council size",
+                ln_gross_expenditure_pc = "Ln of gross expenditure p. c."),
+       signif.code = c("***"=0.001, "**"=0.01, "*"=0.05, "'"=0.10),
+       headers = c("\\acs{OLS}", "\\acs{FE} bivariate", "\\acs{FE} multivariate", "\\acs{IV} multivariate"),
+       extralines = list(
+         "-^Controls" = c("Yes", "No", "Yes", "Yes"),
+         "-_\\acs{SE}" = c("\\acs{het}", "by \\acs{yr} & \\acs{mcp}", "by \\acs{yr} & \\acs{mcp}", "by \\acs{yr}"),
+         "_^Data sample" = c(rep("All data", 3), "\\acs{BY} only")
+         ),
+       # LaTeX settings
+       title = "Results of the ``Conventional'' Regression Methods",
+       label = "tab:conv_results",
+       notes = paste("\\footnotesize{*Notes:* Results of the ``conventional'' regression methods.",
+                     tex_control_text,
+                     "The \\acl{SE} in parentheses: \\ac{het}; if \\ac{SE} starts with ``by'', they are clustered at the \\ac{yr} and/or \\ac{mcp} level.",
+                     tex_signif_text),
+       style.tex = style.tex(
+         fixef.suffix = " \\ac{FE}"
+       )
+       )
+```
+
+
+```{r}
+rm(list=ls(pattern="^panel_"))
+rm(list=ls(pattern="^iv_"))
+```
+
+
+
+
+
+# Concluding Remarks
+
+For references, see the paper.
+
+```{r}
+Sys.time() - time
+```

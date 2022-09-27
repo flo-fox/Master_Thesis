@@ -1,0 +1,131 @@
+---
+author: "Florian Fox"
+date: "`r Sys.Date()`"
+title: 'Master Thesis: A Causal Test of the Law of 1/n and its Mechanisms -- Analysis: RDD, Normalized Cutoff'
+output:
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: true
+---
+
+# Load data and packages
+
+```{r Packages}
+time <- Sys.time()
+library(tidyverse)
+#library(fixest)
+library(rdrobust)
+library(rdmulti)
+library(rddensity)
+library(rdd) # For the McCrary (2008) test
+#library(xtable)
+#library(scales)
+#library(janitor)
+```
+
+```{r Data}
+data <-
+  readRDS("data/gemeinderatswahlen_alldata.rds") %>%
+  mutate(
+    year = as.factor(year),
+    ags = as.factor(ags)
+  )
+```
+
+```{r Options}
+options(scipen = 20)
+theme_set(theme_minimal())
+```
+
+Generating different data sets:
+
+```{r}
+# d_bivariate <- data %>%
+#   select(ln_gross_expenditure_pc, total_seats, ags, year, state) %>% drop_na()
+# d_bivariate_iv <- data %>%
+#   select(ln_gross_expenditure_pc, total_seats, ags, year, total_seats_24_y_ago) %>% drop_na()
+d_rdd_bivariate <- data %>%
+  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, inhabitants_treshold_factor, inhabitants_treshold, year, ags, election_year, state, closest, clean_disc_acc_Höhmann, clean_disc_acc_to_my_research) %>%
+  drop_na(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff) %>%
+  # Repeat (bandwidth) window calculation for data subsets
+  mutate(
+    closest = base::rank(abs(inhabs_rel_to_cutoff), ties.method = "last"),
+    closest = closest/max(closest),
+  )
+
+# d_controls <- data %>%
+#   select(ln_gross_expenditure_pc, total_seats, ags, year, inh_tot, pop_over65, unempl_rate, total_area_ha,
+#     share_working_age, kreisfreie_stadt, stadt, years_since_last_elec, state) %>%
+#   drop_na()
+# d_controls_iv <- data %>%
+#   select(ln_gross_expenditure_pc, total_seats, ags, year, total_seats_24_y_ago, inh_tot, pop_over65,
+#          unempl_rate, total_area_ha, share_working_age, kreisfreie_stadt, stadt,
+#          years_since_last_elec) %>%
+#   drop_na()
+d_rdd <- data %>%
+  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, closest,
+         inhabitants_treshold_factor, year, ags, state,
+         inh_tot, pop_over65, unempl_rate, total_area_ha,
+         share_working_age, kreisfreie_stadt, stadt, years_since_last_elec) %>%
+  drop_na() %>%
+  # Repeat (bandwidth) window calculation for data subsets
+  mutate(
+    closest = base::rank(abs(inhabs_rel_to_cutoff), ties.method = "last"),
+    closest = closest/max(closest),
+  )
+d_ttest <- data %>%
+  select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff) %>% drop_na()
+```
+
+
+
+
+
+
+# Regression Discontinuity Design -- Exploiting the multiple-cutoff setting
+
+Versuch 1
+
+```{r, eval = FALSE}
+set.seed(123)
+data2 <- data %>%
+  filter(state == 9, total_seats <= 24) %>%
+  select(ln_gross_expenditure_pc, inhabitants_treshold_factor, exact_pop, total_seats) %>%
+  drop_na() %>%
+  slice_sample(n = 8000)
+rdd <- rdmulti::rdms(Y = data2$ln_gross_expenditure_pc, X = data2$exact_pop, fuzzy = data2$total_seats, C = data2$inhabitants_treshold_factor)
+#rdd <- rdmulti::rdms(Y = data2$ln_gross_expenditure_pc, X = data2$exact_pop, C = data$inhabitants_treshold_factor)
+#unique(data2$inhabitants_treshold_factor), fuzzy = data2$total_seats)
+```
+
+Versuch 2:
+
+```{r, eval = FALSE}
+data2 <- data %>%
+  filter(gross_expenditure > 0, state == 9) %>%
+  select(gross_expenditure, exact_pop, inhabitants_treshold_factor, total_seats) %>%
+  drop_na() %>%
+  slice(50:500)
+rdrobust::rdrobust(y = data2$gross_expenditure, x = data2$exact_pop, c = 0, fuzzy = data2$total_seats, all = TRUE)
+```
+
+```{r, eval=FALSE}
+rdms(Y,X,cvec)
+```
+
+
+
+```{r, eval = FALSE}
+rdmulti::rdmcplot(Y = log(data2$gross_expenditure), X = data2$exact_pop, C = data2$inhabitants_treshold_factor)
+```
+
+
+
+# Concluding Remarks
+
+For references, see the paper.
+
+```{r}
+Sys.time() - time
+```

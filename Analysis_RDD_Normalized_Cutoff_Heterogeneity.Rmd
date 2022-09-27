@@ -1,0 +1,101 @@
+---
+author: "Florian Fox"
+date: "`r Sys.Date()`"
+title: 'Master Thesis: A Causal Test of the Law of 1/n and its Mechanisms -- Analysis: RDD, Normalized Cutoff, Investigating the Heterogeneity'
+output:
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: true
+---
+
+# Load data and packages
+
+```{r Packages}
+time <- Sys.time()
+library(tidyverse)
+#library(fixest)
+library(rdrobust)
+#library(rdmulti)
+library(rddensity)
+library(rdd) # For the McCrary (2008) test
+#library(xtable)
+#library(scales)
+#library(janitor)
+```
+
+```{r Data}
+data <-
+  readRDS("data/gemeinderatswahlen_alldata.rds") %>%
+  mutate(
+    year = as.factor(year),
+    ags = as.factor(ags)
+  )
+```
+
+```{r Options}
+options(scipen = 20)
+theme_set(theme_minimal())
+```
+
+Generating different data sets:
+
+```{r}
+# d_bivariate <- data %>%
+#   select(ln_gross_expenditure_pc, total_seats, ags, year, state) %>% drop_na()
+# d_bivariate_iv <- data %>%
+#   select(ln_gross_expenditure_pc, total_seats, ags, year, total_seats_24_y_ago) %>% drop_na()
+d_rdd_bivariate <- data %>%
+  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, inhabitants_treshold_factor, inhabitants_treshold, year, ags, election_year, state, closest, clean_disc_acc_Höhmann, clean_disc_acc_to_my_research) %>%
+  drop_na(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff) %>%
+  # Repeat (bandwidth) window calculation for data subsets
+  mutate(
+    closest = base::rank(abs(inhabs_rel_to_cutoff), ties.method = "last"),
+    closest = closest/max(closest),
+  )
+
+# d_controls <- data %>%
+#   select(ln_gross_expenditure_pc, total_seats, ags, year, inh_tot, pop_over65, unempl_rate, total_area_ha,
+#     share_working_age, kreisfreie_stadt, stadt, years_since_last_elec, state) %>%
+#   drop_na()
+# d_controls_iv <- data %>%
+#   select(ln_gross_expenditure_pc, total_seats, ags, year, total_seats_24_y_ago, inh_tot, pop_over65,
+#          unempl_rate, total_area_ha, share_working_age, kreisfreie_stadt, stadt,
+#          years_since_last_elec) %>%
+#   drop_na()
+d_rdd <- data %>%
+  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, closest,
+         inhabitants_treshold_factor, year, ags, state,
+         inh_tot, pop_over65, unempl_rate, total_area_ha,
+         share_working_age, kreisfreie_stadt, stadt, years_since_last_elec) %>%
+  drop_na() %>%
+  # Repeat (bandwidth) window calculation for data subsets
+  mutate(
+    closest = base::rank(abs(inhabs_rel_to_cutoff), ties.method = "last"),
+    closest = closest/max(closest),
+  )
+d_ttest <- data %>%
+  select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff) %>% drop_na()
+```
+
+
+
+
+
+## Treatment Effect Heterogeneity & Mechanisms -- Introduction
+
+
+## Different fiscal policy variables
+
+
+
+Hsu Shen nd
+
+
+# Concluding Remarks
+
+For references, see the paper.
+
+```{r}
+Sys.time() - time
+```
