@@ -41,5 +41,8 @@ vignettes/*.pdf
 # Do not upload data
 data/
 
+# Do not upload external functions
+functions/Hsu_Shen_functions/
+
 # Ignore additional information (e. g. MWE)
 trashcan/
