@@ -22,6 +22,7 @@ library(rdd) # For the McCrary (2008) test
 library(xtable)
 library(scales)
 library(janitor)
+source("functions.R")
 ```
 
 ```{r Data}
@@ -87,7 +88,7 @@ Sharp RDD mit "intention-to-treat" effect?
 Treating all of the cutoffs as one requires a harmonization. This happens according to Egger and Koethenbuerger (2010):
 
 Using the Egger and Koethenbuerger (2010) calculation steps:
-$$\tilde{N_i} = N_i/N_d$$
+$$\tilde{N_i} = ln( N_i/N_d )$$
 with $N_i$ as the relevant actual population size and $N_d$ as the respective thresholds.
 
 
@@ -328,7 +329,7 @@ etable(rdd_bivariate, rdd_w_covs,
        # LaTeX settings
        title = "Results of the \\ac{IV} \\ac{RDD}",
        label = "tab:rdd_iv",
-       notes = paste("\\footnotesize{*Notes:* Results of the \\ac{IV} \\ac{RDD}.",
+       notes = paste("\\footnotesize{*Notes:* Results of the \\ac{IV} \\ac{RDD}, in a ten-percent window around the cutoffs.",
                      tex_control_text,
                      "Standard errors clustered at the threshold, year and municipality level in parentheses.",
                      tex_signif_text),
@@ -349,9 +350,10 @@ rm(rdd_bivariate, rdd_w_covs)
 
 ## Bivariate RDD
 
-Bivariate RDD without FE:
+Understanding the `rdrobust::rdrobust()` command:
 
-```{r rdd_bi_wo_fe}
+```{r, eval=FALSE}
+# to do: remove eval=FALSE
 rdd <-
   rdrobust::rdrobust(
     y = d_rdd_bivariate$ln_gross_expenditure_pc,
@@ -359,6 +361,18 @@ rdd <-
     fuzzy = d_rdd_bivariate$total_seats
   )
 summary(rdd)
+rdd <-
+  rdrobust::rdrobust(
+    y = d_rdd_bivariate$ln_gross_expenditure_pc,
+    x = d_rdd_bivariate$inhabs_rel_to_cutoff,
+    fuzzy = d_rdd_bivariate$total_seats,
+    covs = model.matrix( ~  d_rdd_bivariate$inhabitants_treshold_factor)
+  )
+summary(rdd)
+```
+
+Bivariate RDD without FE:
+```{r, rdd_bi_wo_fe}
 rdd_bi <-
   rdrobust::rdrobust(
     y = d_rdd_bivariate$ln_gross_expenditure_pc,
@@ -373,7 +387,7 @@ Bivariate RDD with one-way FE:
 
 ```{r, eval=FALSE}
 # to do: remove eval=FALSE
-rdd_fe_th <-
+rdd <-
   rdrobust::rdrobust(
     y = d_rdd_bivariate$ln_gross_expenditure_pc,
     x = d_rdd_bivariate$inhabs_rel_to_cutoff,
@@ -381,8 +395,8 @@ rdd_fe_th <-
     cluster = d_rdd_bivariate$inhabitants_treshold_factor,
     covs = model.matrix( ~ d_rdd_bivariate$inhabitants_treshold_factor)
   )
-summary(rdd_fe_th)
-rdd_fe_yr <-
+summary(rdd)
+rdd <-
   rdrobust::rdrobust(
     y = d_rdd_bivariate$ln_gross_expenditure_pc,
     x = d_rdd_bivariate$inhabs_rel_to_cutoff,
@@ -390,8 +404,8 @@ rdd_fe_yr <-
     cluster = d_rdd_bivariate$inhabitants_treshold_factor,
     covs = model.matrix( ~ d_rdd_bivariate$year)
   )
-summary(rdd_fe_yr)
-rdd_fe_state <-
+summary(rdd)
+rdd <-
   rdrobust::rdrobust(
     y = d_rdd_bivariate$ln_gross_expenditure_pc,
     x = d_rdd_bivariate$inhabs_rel_to_cutoff,
@@ -399,14 +413,21 @@ rdd_fe_state <-
     cluster = d_rdd_bivariate$inhabitants_treshold_factor,
     covs = model.matrix( ~ d_rdd_bivariate$state)
   )
-summary(rdd_fe_state)
+summary(rdd)
 ```
 
-
-The threshold FE appear very important: Without them, barely any effect visible at the first stage. But that makes sense even theoretically as the threshold level indicates on which (sharp) side of the cutoff we are.
+The threshold FE appear very important: Without them, barely any effect is visible at the first stage. But that makes sense even theoretically as the threshold level indicates on which (sharp) side of the cutoff we are.
 
 Bivariate RDD with threeway FE:
-```{r}
+```{r, rdd_bi_fe}
+rdd <-
+  rdrobust::rdrobust(
+    y = d_rdd_bivariate$ln_gross_expenditure_pc,
+    x = d_rdd_bivariate$inhabs_rel_to_cutoff,
+    fuzzy = d_rdd_bivariate$total_seats,
+    covs = model.matrix( ~ d_rdd_bivariate$inhabitants_treshold_factor + d_rdd_bivariate$year + d_rdd_bivariate$state)
+  )
+summary(rdd)
 rdd_bi_fe <-
   rdrobust::rdrobust(
     y = d_rdd_bivariate$ln_gross_expenditure_pc,
@@ -482,6 +503,17 @@ summary(rdd_multi)
 
 Multivariate threeway RDD:
 ```{r, rdd_multi_fe}
+rdd <-
+  rdrobust::rdrobust(
+    y = d_rdd$ln_gross_expenditure_pc,
+    x = d_rdd$inhabs_rel_to_cutoff,
+    fuzzy = d_rdd$total_seats,
+    covs = model.matrix( ~ d_rdd$inhabitants_treshold_factor + d_rdd$year + d_rdd$state + # FE
+                           d_rdd$kreisfreie_stadt + d_rdd$stadt + d_rdd$years_since_last_elec) + # dummy controls
+      d_rdd$inh_tot + d_rdd$pop_over65 + d_rdd$unempl_rate + # controls
+      d_rdd$total_area_ha + d_rdd$share_working_age # controls (cont.)
+  )
+summary(rdd)
 rdd_multi_fe <-
   rdrobust::rdrobust(
     y = d_rdd$ln_gross_expenditure_pc,
@@ -506,35 +538,42 @@ summary(rdd_multi_fe)
 
 ## Manual export to LaTeX
 
+First stage:
 ```{r}
-# Function to generate significance stars out of p values
-assign_stars <- function(p) {
-  if (p < 0.001) {
-    print("***")
-  }
-  else if (p < 0.01) {
-    print("**")
-  }
-  else if (p < 0.05) {
-    print("*")
-  }
-  else if (p < 0.1) {
-    print("'")
-  }
-}
-round_decimals <- 4
+rdd_tex_export_stage1 <- tibble(
+  `Dependent variable:` = c("Model", "", "Running variable", "", "", "Controls", "Threshold FE", "Year FE", "State FE"),
+  `Council size` = c("RDD w/o covariates", "(1)", paste0(round(rdd_bi$tau_T[1], round_decimals), assign_stars(rdd_bi$pv_T[3])), paste0("(", round(rdd_bi$se_T[1], round_decimals), ")"), paste0("[", round(rdd_bi$ci_T[3,1], 3), ", ", round(rdd_bi$ci_T[3,2], 3), "]"), rep("No", 4)),
+  `2` = c("FE RDD w/o covariates", "(2)", paste0(round(rdd_bi_fe$tau_T[1], round_decimals), assign_stars(rdd_bi_fe$pv_T[3])), paste0("(", round(rdd_bi_fe$se_T[1], round_decimals), ")"), paste0("[", round(rdd_bi_fe$ci_T[3,1], 3), ", ", round(rdd_bi_fe$ci_T[3,2], 3), "]"), "No", rep("Yes", 3)),
+  `3` = c("RDD w/ covariates", "(3)", paste0(round(rdd_multi$tau_T[1], round_decimals), assign_stars(rdd_multi$pv_T[3])), paste0("(", round(rdd_multi$se_T[1], round_decimals), ")"), paste0("[", round(rdd_multi$ci_T[3,1], 3), ", ", round(rdd_multi$ci_T[3,2], 3), "]"), "Yes", rep("No", 3)),
+  `4` = c("FE RDD w/ covariates", "(4)", paste0(round(rdd_multi_fe$tau_T[1], round_decimals), assign_stars(rdd_multi_fe$pv_T[3])), paste0("(", round(rdd_multi_fe$se_T[1], round_decimals), ")"), paste0("[", round(rdd_multi_fe$ci_T[3,1], 3), ", ", round(rdd_multi_fe$ci_T[3,2], 3), "]"), rep("Yes", 4))
+  )
 ```
+
+Second stage:
 ```{r}
 rdd_tex_export <- tibble(
   `Dependent variable:` = c("Model", "", "Council size", "", "", "Controls", "Threshold FE", "Year FE", "State FE", "Observations", "Bandwidth", "Observations below", "Observations above"),
   `Ln of gross expenditure p. c.` = c("RDD w/o covariates", "(1)", paste0(round(rdd_bi$Estimate[1], round_decimals), assign_stars(rdd_bi$pv[3])), paste0("(", round(rdd_bi$se[1], round_decimals), ")"), paste0("[", round(rdd_bi$ci[3,1], 3), ", ", round(rdd_bi$ci[3,2], 3), "]"), rep("No", 4), sum(rdd_bi$N), round(rdd_bi$bws[1,1], round_decimals), rdd_bi$N_h[1], rdd_bi$N_h[2]),
   `2` = c("FE RDD w/o covariates", "(2)", paste0(round(rdd_bi_fe$Estimate[1], round_decimals), assign_stars(rdd_bi_fe$pv[3])), paste0("(", round(rdd_bi_fe$se[1], round_decimals), ")"), paste0("[", round(rdd_bi_fe$ci[3,1], 3), ", ", round(rdd_bi_fe$ci[3,2], 3), "]"), "No", rep("Yes", 3), sum(rdd_bi_fe$N), round(rdd_bi_fe$bws[1,1], round_decimals), rdd_bi_fe$N_h[1], rdd_bi_fe$N_h[2]),
   `3` = c("RDD w/ covariates", "(3)", paste0(round(rdd_multi$Estimate[1], round_decimals), assign_stars(rdd_multi$pv[3])), paste0("(", round(rdd_multi$se[1], round_decimals), ")"), paste0("[", round(rdd_multi$ci[3,1], 3), ", ", round(rdd_multi$ci[3,2], 3), "]"), "Yes", rep("No", 3), sum(rdd_multi$N), round(rdd_multi$bws[1,1], round_decimals), rdd_multi$N_h[1], rdd_multi$N_h[2]),
-  `4` = c("FE RDD w/ covariates", "(4)", paste0(round(rdd_multi_fe$Estimate[1], round_decimals), assign_stars(rdd_multi_fe$pv[3])), paste("(", round(rdd_multi_fe$se[1], round_decimals), ")"), paste0("[", round(rdd_multi_fe$ci[3,1], 3), ", ", round(rdd_multi_fe$ci[3,2], 3), "]"), rep("Yes", 4), sum(rdd_multi_fe$N), round(rdd_multi_fe$bws[1,1], round_decimals), rdd_multi_fe$N_h[1], rdd_multi_fe$N_h[2])
+  `4` = c("FE RDD w/ covariates", "(4)", paste0(round(rdd_multi_fe$Estimate[1], round_decimals), assign_stars(rdd_multi_fe$pv[3])), paste0("(", round(rdd_multi_fe$se[1], round_decimals), ")"), paste0("[", round(rdd_multi_fe$ci[3,1], 3), ", ", round(rdd_multi_fe$ci[3,2], 3), "]"), rep("Yes", 4), sum(rdd_multi_fe$N), round(rdd_multi_fe$bws[1,1], round_decimals), rdd_multi_fe$N_h[1], rdd_multi_fe$N_h[2])
   )
 ```
 
 ```{r}
+# First-stage export
+print(
+  xtable::xtable(
+    rdd_tex_export_stage1,
+    align = "llcccc"
+    ),
+  file = "tables/rdd_rdrobust_stage1.tex",
+  booktabs = TRUE,
+  floating = FALSE,
+  hline.after = c(-1, -1, 2, 5, nrow(rdd_tex_export_stage1), nrow(rdd_tex_export_stage1)),
+  include.rownames = FALSE
+)
+# Second-stage export
 print(
   xtable::xtable(
     rdd_tex_export,
@@ -567,14 +606,14 @@ rdplot <- rdrobust::rdplot(
   x = d_rdd$inhabs_rel_to_cutoff,
   binselect = "es",
   scale = 5,
-  kernel = tolower(rdd_multi_fe$kernel),
-  p = rdd_multi_fe$p,
-  h = rdd_multi_fe$bws[1],
+  kernel = tolower(rdd_bi_fe$kernel),
+  p = rdd_bi_fe$p,
+  h = rdd_bi_fe$bws[1],
   covs = model.matrix( ~ d_rdd$inhabitants_treshold_factor + d_rdd$year + d_rdd$state + # FE
                          d_rdd$kreisfreie_stadt + d_rdd$stadt + d_rdd$years_since_last_elec) + # dummy controls
     d_rdd$inh_tot + d_rdd$pop_over65 + d_rdd$unempl_rate + # controls
     d_rdd$total_area_ha + d_rdd$share_working_age, # controls (cont.)
-  x.lim = c(-rdd_multi_fe$bws[1], rdd_multi_fe$bws[1]),
+  x.lim = c(-rdd_bi_fe$bws[1], rdd_bi_fe$bws[1]),
   #title = "RD Plot - Senate Elections Data",
   x.label = "Population",
   y.label = "Ln of gross expenditure p. c.",
@@ -582,10 +621,73 @@ rdplot <- rdrobust::rdplot(
 rdplot
 ```
 
-to do: Manual plot instead?
+Manual plots:
+
+`rdd_bi_fe` model: Jump at the cutoff (`r rdd_bi_fe$beta_p_r[1] - rdd_bi_fe$beta_p_l[1]`) somehow not equivalent to jump displayed in the output (e. g. in `summary()`: `r rdd_bi_fe$coef[1]`), especially given that the latter is *positive*...
+```{r}
+# Following Huntington-Klein, https://theeffectbook.net/ch-RegressionDiscontinuity.html
+d_rdd_bivariate %>%
+  mutate(inhabs_bins = cut(
+    inhabs_rel_to_cutoff,
+    breaks = seq(
+      -rdd_bi_fe$bws[1, 1]*2,
+      rdd_bi_fe$bws[1, 2]*2,
+      (rdd_bi_fe$bws[1, 1] + rdd_bi_fe$bws[1, 2]) / 20 # Must break at 0
+    )
+  )) %>% 
+    group_by(inhabs_bins) %>%
+    summarize(ln_gross_expenditure_pc = mean(ln_gross_expenditure_pc),
+              inhabs_mean = mean(inhabs_rel_to_cutoff)) %>%
+  # "Taking the mean of running variable lets us plot data roughly at the bin midpoints"
+  ggplot() + 
+  geom_point(aes(x = inhabs_mean, y = ln_gross_expenditure_pc)) +
+  geom_vline(aes(xintercept = 0), linetype = "dotted") +
+  geom_segment(aes(x = -rdd_bi_fe$bws[1, 1],
+                   y = rdd_bi_fe$beta_p_l[1]+rdd_bi_fe$beta_p_l[2]*(-rdd_bi_fe$bws[1, 1]),
+                   xend = 0, yend = rdd_bi_fe$beta_p_l[1])) +
+  geom_segment(aes(x = 0,
+                   yend = rdd_bi_fe$beta_p_r[1]+rdd_bi_fe$beta_p_r[2]*(rdd_bi_fe$bws[1, 1]),
+                   xend = rdd_bi_fe$bws[1, 1],
+                   y = rdd_bi_fe$beta_p_r[1])) +
+  labs(x = "Running variable", y = "Ln of gross expenditure per capita")
+```
+
+Hence, use `rdd_bi` model:
+```{r}
+binned <- d_rdd_bivariate %>%
+  mutate(inhabs_bins = cut(
+    inhabs_rel_to_cutoff,
+    breaks = seq(
+      -rdd_bi$bws[1, 1]*2,
+      rdd_bi$bws[1, 2]*2,
+      (rdd_bi$bws[1, 1] + rdd_bi$bws[1, 2]) / 20 # Must break at 0
+    )
+  )) %>% 
+    group_by(inhabs_bins) %>%
+    summarize(ln_gross_expenditure_pc = mean(ln_gross_expenditure_pc),
+              inhabs_mean = mean(inhabs_rel_to_cutoff),
+              n = n()) %>%
+  drop_na(inhabs_bins)
+ggplot(data = binned) + 
+  geom_point(aes(x = inhabs_mean, y = ln_gross_expenditure_pc, size = n)) +
+  scale_size_continuous(range = c(1, 2)) + # Reduced overall point size
+  geom_vline(aes(xintercept = 0), linetype = "dotted") +
+  geom_segment(aes(x = -rdd_bi$bws[1, 1],
+                   y = rdd_bi$beta_p_l[1]+rdd_bi$beta_p_l[2]*(-rdd_bi$bws[1, 1]),
+                   xend = 0, yend = rdd_bi$beta_p_l[1])) +
+  geom_segment(aes(x = 0,
+                   yend = rdd_bi$beta_p_r[1]+rdd_bi$beta_p_r[2]*(rdd_bi$bws[1, 1]),
+                   xend = rdd_bi$bws[1, 1],
+                   y = rdd_bi$beta_p_r[1])) +
+  labs(x = "Running variable", y = "Ln of gross expenditure per capita")
+# to do in ggplot: add big mark to ggplot legend
+summary(binned$n)
+sum(binned$n)
+#rm(binned)
+ggsave(filename = "plots/rdd_plot.pdf", width = 6, height = 6*9/16)
+```
 
 
-to do: fuzzy argument (i. e. treatment indicator) binary; sharp RDD (intention to treat)
 
 
 ## Robustness Checks
@@ -624,40 +726,133 @@ summary(rdd) # equal to rdd_bi_fe model
 Vary p, the local polynomial. Conclusions remain. On the first stage, council size jumps by a value somewhat larger than 1 at the threshold (highly statistically significant). The second stage, however, remains insignificant, with some p values around 0.2, the others are (in part way) larger. The coefficient is always slightly positive.
 ```{r, eval=FALSE}
 # to do: remove eval=FALSE
+rdd_vary_p_df <-
+  tibble(polynomial = "", point_estimate = "", se = "", se_robust = "",
+         ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
+  mutate(across(everything(), as.numeric))
 for (vary_p in 0:6) {
   print(paste("polynomial of degree", vary_p))
   rdd <- rdrobust_fe_model(pp = vary_p)
   summary(rdd)
+  rdd_vary_p_df <- rdd_vary_p_df %>%
+    dplyr::add_row(
+      polynomial = vary_p,
+      point_estimate = rdd$coef[1],
+      se = rdd$se[1],
+      se_robust = rdd$se[3],
+      ci_lower = rdd$ci[3,1],
+      ci_upper = rdd$ci[3,2],
+      p = rdd$pv[3],
+      bw = rdd$bws[1,1],
+      obs_below = rdd$N_h[1],
+      obs_above = rdd$N_h[2]
+  )
 }
+rdd_vary_p_df <- rdd_vary_p_df %>% drop_na()
+save(rdd_vary_p_df, file = "tables_robustness_checks/rdd_vary_p_df.Rdata")
 ```
-Vary q, the "local-polynomial used to construct the bias correction". Conclusions similar to varying p: Higly significant first stage across all `q`s, non-significant second stage (p values as low as 0.2) and positive around 1%.
+```{r}
+load(file = "tables_robustness_checks/rdd_vary_p_df.Rdata")
+rdd_vary_p_df
+```
+
+Vary q, the "local-polynomial used to construct the bias correction". Conclusions similar to varying p: Highly significant first stage across all `q`s, non-significant second stage (p values as low as 0.2) and positive around 1%.
 ```{r, rdd_vary_q, eval=FALSE}
 # to do: remove eval=FALSE
+rdd_vary_q_df <-
+  tibble(polynomial = "", point_estimate = "", se = "", se_robust = "",
+         ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
+  mutate(across(everything(), as.numeric))
 for (vary_q in 2:6) {
   print(paste("polynomial of degree", vary_q))
   rdd <- rdrobust_fe_model(qq = vary_q)
   summary(rdd)
+  rdd_vary_q_df <- rdd_vary_q_df %>%
+    dplyr::add_row(
+      polynomial = vary_q,
+      point_estimate = rdd$coef[1],
+      se = rdd$se[1],
+      se_robust = rdd$se[3],
+      ci_lower = rdd$ci[3,1],
+      ci_upper = rdd$ci[3,2],
+      p = rdd$pv[3],
+      bw = rdd$bws[1,1],
+      obs_below = rdd$N_h[1],
+      obs_above = rdd$N_h[2]
+  )
 }
+rdd_vary_q_df <- rdd_vary_q_df %>% drop_na()
+save(rdd_vary_q_df, file = "tables_robustness_checks/rdd_vary_q_df.Rdata")
+```
+```{r}
+load(file = "tables_robustness_checks/rdd_vary_q_df.Rdata")
+rdd_vary_q_df
 ```
 
 Vary kernel: No large differences between kernels.
 ```{r, rdd_vary_kernel, eval=FALSE}
 # to do: remove eval=FALSE
+rdd_vary_kernel_df <-
+  tibble(kernel = "", point_estimate = "", se = "", se_robust = "",
+         ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
+  mutate(across(2:last_col(), as.numeric))
 for (vary_kernel in c("tri", "epa", "uni")) {
   print(paste("kernel:", vary_kernel))
   rdd <- rdrobust_fe_model(kkernel = vary_kernel)
   summary(rdd)
+  rdd_vary_kernel_df <- rdd_vary_kernel_df %>%
+    dplyr::add_row(
+      kernel = vary_kernel,
+      point_estimate = rdd$coef[1],
+      se = rdd$se[1],
+      se_robust = rdd$se[3],
+      ci_lower = rdd$ci[3,1],
+      ci_upper = rdd$ci[3,2],
+      p = rdd$pv[3],
+      bw = rdd$bws[1,1],
+      obs_below = rdd$N_h[1],
+      obs_above = rdd$N_h[2]
+  )
 }
+rdd_vary_kernel_df <- rdd_vary_kernel_df %>% drop_na()
+save(rdd_vary_kernel_df, file = "tables_robustness_checks/rdd_vary_kernel_df.Rdata")
+```
+```{r}
+load(file = "tables_robustness_checks/rdd_vary_kernel_df.Rdata")
+rdd_vary_kernel_df
 ```
 
 Vary variance-covariance matrix: The `hc` vce appear extremely similar. Conclusions, however, are not altered.
 ```{r, rdd_vary_vcov, eval=FALSE}
 # to do: remove eval=FALSE
+rdd_vary_vcov_df <-
+  tibble(vcov = "", point_estimate = "", se = "", se_robust = "",
+         ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
+  mutate(across(2:last_col(), as.numeric))
 for (vary_vcov in c("nn", "hc0", "hc1", "hc2", "hc3")) {
   print(paste("vce:", vary_vcov))
   rdd <- rdrobust_fe_model(vvce = vary_vcov)
   summary(rdd)
+  rdd_vary_vcov_df <- rdd_vary_vcov_df %>%
+    dplyr::add_row(
+      vcov = vary_vcov,
+      point_estimate = rdd$coef[1],
+      se = rdd$se[1],
+      se_robust = rdd$se[3],
+      ci_lower = rdd$ci[3,1],
+      ci_upper = rdd$ci[3,2],
+      p = rdd$pv[3],
+      bw = rdd$bws[1,1],
+      obs_below = rdd$N_h[1],
+      obs_above = rdd$N_h[2]
+  )
 }
+rdd_vary_vcov_df <- rdd_vary_vcov_df %>% drop_na()
+save(rdd_vary_vcov_df, file = "tables_robustness_checks/rdd_vary_vcov_df.Rdata")
+```
+```{r}
+load(file = "tables_robustness_checks/rdd_vary_vcov_df.Rdata")
+rdd_vary_vcov_df
 ```
 
 ### Sensitivity analysis
@@ -666,12 +861,36 @@ Vary the bandwidths `h` and `b`, manually set those instead of using a data-driv
 Conclusion: In these cases, varying the parameters does matter for the result (this is not the case with `p` and `q`). The larger the bandwidth, the larger the first-stage coefficient. In addition, the significance level of the second stage coefficient increases (the p value decreases) in the bandwidth. The value of the coefficient of interest is steady at a bit more than 1%. Note, however, that the last models include more than half of the sample size in the calculation, potentially invalidating the research design.
 ```{r, rdd_bw_manual, eval=FALSE}
 # to do: remove eval=FALSE
+rdd_vary_h_df <-
+  tibble(h = "", point_estimate = "", se = "", se_robust = "",
+         ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
+  mutate(across(everything(), as.numeric))
 for (vary_h in seq(0.02, 0.2, 0.03)) {
-  print(paste("polynomial of degree", vary_h))
+  print(paste("h = ", vary_h))
   rdd <- rdrobust_fe_model(hh = vary_h)
   summary(rdd)
+  rdd_vary_h_df <- rdd_vary_h_df %>%
+    dplyr::add_row(
+      h = vary_h,
+      point_estimate = rdd$coef[1],
+      se = rdd$se[1],
+      se_robust = rdd$se[3],
+      ci_lower = rdd$ci[3,1],
+      ci_upper = rdd$ci[3,2],
+      p = rdd$pv[3],
+      bw = rdd$bws[1,1],
+      obs_below = rdd$N_h[1],
+      obs_above = rdd$N_h[2]
+  )
 }
+rdd_vary_h_df <- rdd_vary_h_df %>% drop_na()
+save(rdd_vary_h_df, file = "tables_robustness_checks/rdd_vary_h_df.Rdata")
 ```
+```{r}
+load(file = "tables_robustness_checks/rdd_vary_h_df.Rdata")
+rdd_vary_h_df
+```
+
 Apparently, the bandwidth `b` cannot be set manually. Perhaps change `rho` parameter or set `b` manually and `b` via the `bwselect()` function.
 ```{r, eval=FALSE}
 for (vary_b in seq(0.15, 0.45, 0.075)) {
@@ -685,7 +904,8 @@ Window bandwidth selection (similar to Höhmann, 2017; i. e. do not use automati
 ```{r, rdd_window, eval=FALSE}
 # to do: remove eval=FALSE
 rdd_vary_window <-
-  tibble(window = "", point_estimate = "", ci_lower = "", ci_upper = "") %>%
+  tibble(window = "", point_estimate = "", se = "", se_robust = "",
+         ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
   mutate(across(everything(), as.numeric))
 for (vary_window in seq(0.01, 0.25, 0.01)) {
   print(paste("RDD with window: ", vary_window))
@@ -706,18 +926,32 @@ for (vary_window in seq(0.01, 0.25, 0.01)) {
     dplyr::add_row(
       window = vary_window,
       point_estimate = rdd$coef[1],
+      se = rdd$se[1],
+      se_robust = rdd$se[3],
       ci_lower = rdd$ci[3,1],
-      ci_upper = rdd$ci[3,2]
+      ci_upper = rdd$ci[3,2],
+      p = rdd$pv[3],
+      bw = rdd$bws[1,1],
+      obs_below = rdd$N_h[1],
+      obs_above = rdd$N_h[2]
   )
 }
 rdd_vary_window <- rdd_vary_window %>% drop_na()
+save(rdd_vary_window, file = "tables_robustness_checks/rdd_vary_window.Rdata")
+```
+```{r}
+load(file = "tables_robustness_checks/rdd_vary_window.Rdata")
+rdd_vary_window
 ```
 Plot windows. Coefficients and CIs need not overlap because standard coefficients are paired with robust-corrected CIs.
-```{r, rdd_window_plot, eval=FALSE}
-# to do: remove eval=FALSE
+
+```{r, rdd_window_plot}
 ggplot2::ggplot(data = rdd_vary_window, aes(x = window, y = point_estimate)) +
-  geom_point(size = 1.5) +
-  geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), width = 0.005) +
+  geom_point(size = 1.5, color = ifelse(rdd_vary_window$p <= 0.05, 2, 1)) +
+  geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
+                color = ifelse(rdd_vary_window$p <= 0.05, 2, 1),
+                width = 0.005) +
+  geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_x_continuous(labels = scales::percent) +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "Window around the threshold", y = "Increase in spending at the threshold")
@@ -729,35 +963,51 @@ Different `rdbwselect` options: Most bandwidth selection algorithms yield simila
 ```{r, eval=FALSE}
 # to do: remove eval=FALSE
 rdd_vary_bwselect <-
-  tibble(bw_sel_algo = "", point_estimate = "", ci_lower = "", ci_upper = "") %>%
-  mutate(across(2:4, as.numeric))
+  tibble(bw_sel_algo = "", point_estimate = "", se = "", se_robust = "",
+         ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
+  mutate(across(2:last_col(), as.numeric))
 for (vary_bwselect in c("mserd", "msetwo", "msesum", "msecomb1", "msecomb2", "cerrd", "certwo", "cersum", "cercomb1", "cercomb2")) {
   print(paste("Bandwidth selection algorithm:", vary_bwselect))
   rdd <- rdrobust_fe_model(bbwselect = vary_bwselect)
-  summary(rdd)
+  #summary(rdd)
   rdd_vary_bwselect <- rdd_vary_bwselect %>%
     dplyr::add_row(
       bw_sel_algo = vary_bwselect,
       point_estimate = rdd$coef[1],
+      se = rdd$se[1],
+      se_robust = rdd$se[3],
       ci_lower = rdd$ci[3,1],
-      ci_upper = rdd$ci[3,2]
+      ci_upper = rdd$ci[3,2],
+      p = rdd$pv[3],
+      bw = rdd$bws[1,1],
+      obs_below = rdd$N_h[1],
+      obs_above = rdd$N_h[2]
   )
 }
 rdd_vary_bwselect <- rdd_vary_bwselect %>% drop_na()
+save(rdd_vary_bwselect, file = "tables_robustness_checks/rdd_vary_bwselect")
 ```
+```{r}
+load(file = "tables_robustness_checks/rdd_vary_bwselect")
+rdd_vary_bwselect
+```
+
 Plot bandwidth selection algorithms. Coefficients and CIs need not overlap because standard coefficients are paired with robust-corrected CIs.
 Note: In general may be a good idea, but hard to explain all bandwidth selectors in the paper just for the purpose of this plot...
 ```{r, rdd_window_plot2, eval=FALSE}
 # to do: remove eval=FALSE
 ggplot2::ggplot(data = rdd_vary_bwselect, aes(x = bw_sel_algo, y = point_estimate)) +
-  geom_point(size = 1.5) +
-  geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), width = 0.005) +
+  geom_point(size = 1.5, color = ifelse(rdd_vary_bwselect$p <= 0.05, 2, 1)) +
+  geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
+                color = ifelse(rdd_vary_bwselect$p <= 0.05, 2, 1),
+                width = 0.5) +
+  geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "Bandwidth selection procedure", y = "Increase in spending at the threshold")
 ```
 
 ```{r}
-rm(list=ls(pattern="^panel_"), rdd)
+rm(rdd)
 ```
 
 
@@ -831,7 +1081,8 @@ First attempt
 ```{r, rdrobust_place1, eval=FALSE}
 # to do: remove eval=FALSE
 rdd_placebo <-
-  tibble(placebo_c = "", point_estimate = "", ci_lower = "", ci_upper = "", p = "", effective_n = "") %>%
+  tibble(placebo_c = "", point_estimate = "", se = "", se_robust = "",
+         ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
   mutate(across(everything(), as.numeric))
 vector <- seq(from = -(2+2/3), to = 2/3, by = 1/6) # Choose vector of arbitrary placebo cutoffs
 #vector <- vector[!vector %in% (-2-1/3)]
@@ -844,13 +1095,23 @@ for (i in vector) {
     dplyr::add_row(
       placebo_c = i,
       point_estimate = rdd$coef[1],
+      se = rdd$se[1],
+      se_robust = rdd$se[3],
       ci_lower = rdd$ci[3,1],
       ci_upper = rdd$ci[3,2],
       p = rdd$pv[3],
-      effective_n = sum(rdd$N_h)
+      bw = rdd$bws[1,1],
+      obs_below = rdd$N_h[1],
+      obs_above = rdd$N_h[2]
   )
 }
 rdd_placebo <- rdd_placebo %>% drop_na()
+rm(vector)
+save(rdd_placebo, file = "tables_robustness_checks/rdd_placebo_1.Rdata")
+```
+```{r}
+load(file = "tables_robustness_checks/rdd_placebo_1.Rdata")
+rdd_placebo
 ```
 Visualization of placebo cutoffs:
 ```{r, rdrobust_placebo_viz1, eval=FALSE}
@@ -858,7 +1119,7 @@ Visualization of placebo cutoffs:
 df <- rdd_placebo %>%
   #tidyr::drop_na() %>%
   filter(abs(ci_upper) < 100 | abs(ci_lower) < 100) %>%
-  mutate(effective_n = trimws(format(effective_n, big.mark = ",") ) ) # add big mark
+  mutate(effective_n = trimws(format(sum(obs_below, obs_above), big.mark = ",") ) ) # add big mark
 ggplot2::ggplot(df) +
   geom_point(aes(x = placebo_c, y = point_estimate), size = 1.5, colour = ifelse(df$p <= 0.05, 2, 1)) +
   geom_errorbar(aes(x = placebo_c, ymin = ci_lower, ymax = ci_upper),
@@ -866,10 +1127,12 @@ ggplot2::ggplot(df) +
                 linetype = ifelse(df$p <= 0.05, 2, 1)) +
   geom_text(aes(x = placebo_c, y = ci_lower, label = effective_n),
             colour = ifelse(df$p <= 0.05, 2, 1), vjust = 1, size = 2.3, check_overlap = TRUE) +
+  geom_hline(aes(yintercept = 0), linetype = "dotted") +
+  geom_vline(aes(xintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "Cutoff of the running variable", y = "Increase in spending at the threshold")
 ggsave(filename = "plots/rdrobust_placebo_wide.pdf", width = 6, height = 6*9/16)
-rm(df, vector)
+rm(df)
 ```
 
 Second attempt: Regular cutoffs within the inter-quartile range.
@@ -877,7 +1140,8 @@ Second attempt: Regular cutoffs within the inter-quartile range.
 ```{r, rdrobust_place2, eval=FALSE}
 # to do: remove eval=FALSE
 rdd_placebo <-
-  tibble(placebo_c = "", point_estimate = "", ci_lower = "", ci_upper = "", p = "", effective_n = "") %>%
+  tibble(placebo_c = "", point_estimate = "", se = "", se_robust = "",
+         ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
   mutate(across(everything(), as.numeric))
 vector <- seq(from = (-0.15), to = (0.18), by = 0.03) # Choose vector of arbitrary placebo cutoffs
 for (i in vector) {
@@ -888,13 +1152,23 @@ for (i in vector) {
     dplyr::add_row(
       placebo_c = i,
       point_estimate = rdd$coef[1],
+      se = rdd$se[1],
+      se_robust = rdd$se[3],
       ci_lower = rdd$ci[3,1],
       ci_upper = rdd$ci[3,2],
       p = rdd$pv[3],
-      effective_n = sum(rdd$N_h)
+      bw = rdd$bws[1,1],
+      obs_below = rdd$N_h[1],
+      obs_above = rdd$N_h[2]
   )
 }
 rdd_placebo <- rdd_placebo %>% drop_na()
+rm(vector)
+save(rdd_placebo, file = "tables_robustness_checks/rdd_placebo_2.Rdata")
+```
+```{r}
+load(file = "tables_robustness_checks/rdd_placebo_2.Rdata")
+rdd_placebo
 ```
 Visualization of placebo cutoffs:
 ```{r, rdrobust_placebo_viz2, eval=FALSE}
@@ -902,7 +1176,7 @@ Visualization of placebo cutoffs:
 df <- rdd_placebo %>%
   #tidyr::drop_na() %>%
   #filter(abs(ci_upper) < 100 | abs(ci_lower) < 100) %>%
-  mutate(effective_n = paste0("n=", trimws(format(effective_n, big.mark = ",") ) ) ) # add big mark
+  mutate(effective_n = paste0("n=", trimws(format(sum(obs_below, obs_above), big.mark = ",") ) ) ) # add big mark
 ggplot2::ggplot(df) +
   geom_point(aes(x = placebo_c, y = point_estimate), size = 1.5, colour = ifelse(df$p <= 0.05, 2, 1)) +
   geom_errorbar(aes(x = placebo_c, ymin = ci_lower, ymax = ci_upper),
@@ -910,10 +1184,12 @@ ggplot2::ggplot(df) +
                 linetype = ifelse(df$p <= 0.05, 2, 1)) +
   geom_text(aes(x = placebo_c, y = ci_lower, label = effective_n),
             colour = ifelse(df$p <= 0.05, 2, 1), vjust = 1) +
+  geom_hline(aes(yintercept = 0), linetype = "dotted") +
+  geom_vline(aes(xintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "Cutoff of the running variable", y = "Increase in spending at the threshold")
 ggsave(filename = "plots/rdrobust_placebo1.pdf", width = 6, height = 6*9/16)
-rm(df, vector)
+rm(df)
 ```
 
 Third attempt: Random cutoffs within the inter-quartile range.
@@ -921,7 +1197,8 @@ Third attempt: Random cutoffs within the inter-quartile range.
 ```{r, rdrobust_place3, eval=FALSE}
 # to do: remove eval=FALSE
 rdd_placebo <-
-  tibble(placebo_c = "", point_estimate = "", ci_lower = "", ci_upper = "", p = "", effective_n = "") %>%
+  tibble(placebo_c = "", point_estimate = "", se = "", se_robust = "",
+         ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
   mutate(across(everything(), as.numeric))
 set.seed(1234)
 vector <- runif(n = 10, min = -0.15, max = 0.18) # Choose vector of random placebo cutoffs
@@ -933,13 +1210,23 @@ for (i in vector) {
     dplyr::add_row(
       placebo_c = i,
       point_estimate = rdd$coef[1],
+      se = rdd$se[1],
+      se_robust = rdd$se[3],
       ci_lower = rdd$ci[3,1],
       ci_upper = rdd$ci[3,2],
       p = rdd$pv[3],
-      effective_n = sum(rdd$N_h)
+      bw = rdd$bws[1,1],
+      obs_below = rdd$N_h[1],
+      obs_above = rdd$N_h[2]
   )
 }
-rdd_placebo <- rdd_placebo %>% drop_na()
+rdd_placebo <- rdd_placebo %>% drop_na() %>% arrange(placebo_c)
+rm(vector)
+save(rdd_placebo, file = "tables_robustness_checks/rdd_placebo_3.Rdata")
+```
+```{r}
+load(file = "tables_robustness_checks/rdd_placebo_3.Rdata")
+rdd_placebo
 ```
 Visualization of placebo cutoffs:
 ```{r, rdrobust_placebo_viz3, eval=FALSE}
@@ -947,7 +1234,7 @@ Visualization of placebo cutoffs:
 df <- rdd_placebo %>%
   #tidyr::drop_na() %>%
   #filter(abs(ci_upper) < 100 | abs(ci_lower) < 100) %>%
-  mutate(effective_n = paste0("n=", trimws(format(effective_n, big.mark = ",") ) ) ) # add big mark
+  mutate(effective_n = paste0("n=", trimws(format(sum(obs_below, obs_above), big.mark = ",") ) ) ) # add big mark
 ggplot2::ggplot(df) +
   geom_point(aes(x = placebo_c, y = point_estimate), size = 1.5, colour = ifelse(df$p <= 0.05, 2, 1)) +
   geom_errorbar(aes(x = placebo_c, ymin = ci_lower, ymax = ci_upper),
@@ -955,10 +1242,12 @@ ggplot2::ggplot(df) +
                 linetype = ifelse(df$p <= 0.05, 2, 1)) +
   geom_text(aes(x = placebo_c, y = ci_lower, label = effective_n),
             colour = ifelse(df$p <= 0.05, 2, 1), vjust = 1) +
+  geom_hline(aes(yintercept = 0), linetype = "dotted") +
+  geom_vline(aes(xintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "Cutoff of the running variable", y = "Increase in spending at the threshold")
 ggsave(filename = "plots/rdrobust_placebo2.pdf", width = 6, height = 6*9/16)
-rm(df, vector)
+rm(df)
 ```
 
 
@@ -1009,7 +1298,7 @@ for (i in all_states) {
 
 
 ```{r}
-rm(list=ls(pattern="^panel_"), all_years, all_states, rdd)
+rm(all_years, all_states, rdd)
 ```
 
 

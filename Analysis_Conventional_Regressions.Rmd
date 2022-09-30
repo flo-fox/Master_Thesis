@@ -22,6 +22,7 @@ library(fixest)
 library(xtable)
 #library(scales)
 #library(janitor)
+source("functions.R")
 ```
 
 ```{r Data}
@@ -403,13 +404,6 @@ Test LaTeX export -- note that differences between HTML and TeX output remain.
 
 
 ## Export to LaTeX
-
-tex notes text
-```{r}
-tex_control_text <- "Controls, \\ac{FE} and \\ac{SE} as indicated in the respective column. Controls, if included and as long as not perfectly collinear: population, share of population over 65 years, unemployment rate, total area, share of working-age population, and dummies for ``district-free'' cities, cities, as well as year in the electoral cycle."
-tex_signif_text <- "Significance codes: *** p < 0.001, ** p < 0.01, * p < 0.05, ' p < 0.10.}"
-```
-
 
 ```{r}
 etable(ols, panel_bivariate, panel_multivariate, iv_multivariate,

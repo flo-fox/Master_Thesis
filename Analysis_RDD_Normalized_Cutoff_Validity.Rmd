@@ -22,6 +22,7 @@ library(rdd) # For the McCrary (2008) test
 library(xtable)
 library(scales)
 library(janitor)
+source("functions.R")
 ```
 
 ```{r Data}
@@ -391,13 +392,14 @@ d_rdd_balance_test <- data %>%
     ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff,
     inhabitants_treshold_factor, inhabitants_treshold, year, ags, election_year, state, # standard variables
     inh_tot, pop_over65, unempl_rate, total_area_ha,
-    share_working_age, kreisfreie_stadt, stadt # Balance test variables
+    share_working_age, kreisfreie_stadt, stadt, lag_total_seats # Balance test variables
     ) %>%
   drop_na(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff) %>%
-  group_by(ags) %>%
-  mutate(total_seats_lagged = dplyr::lag(total_seats, 5),
-         across(c(kreisfreie_stadt, stadt), as.numeric)) %>% # create lagged treatment variable
-  ungroup()
+  mutate(across(c(kreisfreie_stadt, stadt), ~ as.numeric(.)-1))
+  # group_by(ags) %>%
+  # mutate(total_seats_lagged = dplyr::lag(total_seats, 5),
+  #        across(c(kreisfreie_stadt, stadt), as.numeric)) %>% # create lagged treatment variable
+  # ungroup()
 ```
 
 Run balance test in both sharp and fuzzy design for non-dummy variables:
@@ -407,7 +409,7 @@ rdd_balance_tests <-
   tibble(variable = "", method = "", bw_procedure = "", point_estimate = "", se = "", se_robust = "",
          ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
   mutate(across(4:last_col(), as.numeric))
-bal_vars <- c("inh_tot", "pop_over65", "unempl_rate", "total_area_ha", "share_working_age", "kreisfreie_stadt", "stadt", "total_seats_lagged")
+bal_vars <- c("inh_tot", "pop_over65", "unempl_rate", "total_area_ha", "share_working_age", "kreisfreie_stadt", "stadt", "lag_total_seats")
 for (i in bal_vars) {
   for (j in c("mserd", "cerrd")) {
   print(paste("Sharp,", i, j))
@@ -452,7 +454,12 @@ for (i in bal_vars) {
   }
 }
 rdd_balance_tests <- rdd_balance_tests %>% drop_na()
+save(rdd_balance_tests, file = "tables_robustness_checks/rdd_balance_tests.Rdata")
 rm(bal_vars, i, rdd_bt)
+```
+```{r}
+load(file = "tables_robustness_checks/rdd_balance_tests.Rdata")
+rdd_balance_tests
 ```
 Visualization of balance tests -- does not make much sense considering the large variation:
 ```{r, rdrobust_balance_test_viz, eval=FALSE}
@@ -471,18 +478,23 @@ ggplot2::ggplot(df) +
                 linetype = ifelse(df$p <= 0.05, 2, 1)) +
   # geom_text(aes(x = variable, y = ci_lower, label = effective_n),
   #           colour = ifelse(df$p <= 0.05, 2, 1), vjust = 1) +
-  scale_y_continuous(labels = scales::percent) +
+  #scale_y_continuous(labels = scales::percent) +
   labs(x = "Covariates", y = "Jump at the threshold")
 #ggsave(filename = "plots/rdrobust_balance_test.pdf", width = 6, height = 6*9/16)
 rm(df)
 ```
 Table of balance test regressions:
-```{r, rdrobust_balance_test_table, eval=FALSE}
-# to do: remove eval=FALSE
+```{r, rdrobust_balance_test_table}
+# Correlations to test similarity of methods
 cor(rdd_balance_tests %>% filter(method == "sharp") %>% pull(p),
     rdd_balance_tests %>% filter(method == "fuzzy") %>% pull(p))
 cor(rdd_balance_tests %>% filter(bw_procedure == "mserd") %>% pull(p),
     rdd_balance_tests %>% filter(bw_procedure == "cerrd") %>% pull(p))
+cor(rdd_balance_tests %>% filter(method == "fuzzy", bw_procedure == "mserd") %>% pull(p),
+    rdd_balance_tests %>% filter(method == "fuzzy", bw_procedure == "cerrd") %>% pull(p))
+cor(rdd_balance_tests %>% filter(method == "fuzzy", bw_procedure == "mserd") %>% pull(point_estimate),
+    rdd_balance_tests %>% filter(method == "fuzzy", bw_procedure == "cerrd") %>% pull(point_estimate))
+# Table
 df <- rdd_balance_tests %>%
   mutate(across(where(is.numeric), ~ round(., digits = round_decimals))) %>%
   rowwise() %>%
@@ -497,7 +509,7 @@ df <- rdd_balance_tests %>%
   janitor::row_to_names(row_number = 1) %>%
   mutate(`Dependent variable` = c("Point estimate", "SE", "CI", "Bandwidth", "Obs. below", "Obs. above"),
          .before = 1) %>%
-  dplyr::rename(`Population (as of 12-31)` = inh_tot, `Share of poplation aged > 65 years` = pop_over65, `Unemployment rate` = unempl_rate, `Total area in ha` = total_area_ha, `Share of working-age population` = share_working_age, `Dummy: district-free city` = kreisfreie_stadt, `Dummy: city` = stadt, `Lagged council size` = total_seats_lagged)
+  dplyr::rename(`Population (as of 12-31)` = inh_tot, `Share of poplation aged > 65 years` = pop_over65, `Unemployment rate` = unempl_rate, `Total area in ha` = total_area_ha, `Share of working-age population` = share_working_age, `Dummy: district-free city` = kreisfreie_stadt, `Dummy: city` = stadt, `Lagged council size` = lag_total_seats)
 df
 print(
   xtable::xtable(
@@ -526,22 +538,8 @@ rm(df)
 ```
 
 
-```{r, rdrobust_balance_test_table_delete, eval=FALSE}
-rdd_tex_export <- tibble(
-  `Dependent variable:` = c("Model", "", "Council size", "", "", "Controls", "Threshold FE", "Year FE", "State FE", "Observations", "Bandwidth", "Observations below", "Observations above"),
-  `Ln of gross expenditure p. c.` = c("RDD w/o covariates", "(1)", paste0(round(rdd_bi$Estimate[1], round_decimals), assign_stars(rdd_bi$pv[3])), paste0("(", round(rdd_bi$se[1], round_decimals), ")"), paste0("[", round(rdd_bi$ci[3,1], 3), ", ", round(rdd_bi$ci[3,2], 3), "]"), rep("No", 4), sum(rdd_bi$N), round(rdd_bi$bws[1,1], round_decimals), rdd_bi$N_h[1], rdd_bi$N_h[2]),
-  `2` = c("FE RDD w/o covariates", "(2)", paste0(round(rdd_bi_fe$Estimate[1], round_decimals), assign_stars(rdd_bi_fe$pv[3])), paste0("(", round(rdd_bi_fe$se[1], round_decimals), ")"), paste0("[", round(rdd_bi_fe$ci[3,1], 3), ", ", round(rdd_bi_fe$ci[3,2], 3), "]"), "No", rep("Yes", 3), sum(rdd_bi_fe$N), round(rdd_bi_fe$bws[1,1], round_decimals), rdd_bi_fe$N_h[1], rdd_bi_fe$N_h[2]),
-  `3` = c("RDD w/ covariates", "(3)", paste0(round(rdd_multi$Estimate[1], round_decimals), assign_stars(rdd_multi$pv[3])), paste0("(", round(rdd_multi$se[1], round_decimals), ")"), paste0("[", round(rdd_multi$ci[3,1], 3), ", ", round(rdd_multi$ci[3,2], 3), "]"), "Yes", rep("No", 3), sum(rdd_multi$N), round(rdd_multi$bws[1,1], round_decimals), rdd_multi$N_h[1], rdd_multi$N_h[2]),
-  `4` = c("FE RDD w/ covariates", "(4)", paste0(round(rdd_multi_fe$Estimate[1], round_decimals), assign_stars(rdd_multi_fe$pv[3])), paste("(", round(rdd_multi_fe$se[1], round_decimals), ")"), paste0("[", round(rdd_multi_fe$ci[3,1], 3), ", ", round(rdd_multi_fe$ci[3,2], 3), "]"), rep("Yes", 4), sum(rdd_multi_fe$N), round(rdd_multi_fe$bws[1,1], round_decimals), rdd_multi_fe$N_h[1], rdd_multi_fe$N_h[2])
-  )
-```
-
-
-
 
 Alternative approach: Run t tests on both sides of the cutoff with values close to it.
-
-
 
 
 # Concluding Remarks

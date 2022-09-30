@@ -2808,7 +2808,8 @@ library(tidyverse)</code></pre>
 #library(rdd) # For the McCrary (2008) test
 library(xtable)
 #library(scales)
-#library(janitor)</code></pre>
+#library(janitor)
+source(&quot;functions.R&quot;)</code></pre>
 <pre class="r"><code>data &lt;-
   readRDS(&quot;data/gemeinderatswahlen_alldata.rds&quot;) %&gt;%
   mutate(
@@ -4314,9 +4315,6 @@ remain.</p>
 #        )</code></pre>
 <div id="export-to-latex" class="section level2">
 <h2>Export to LaTeX</h2>
-<p>tex notes text</p>
-<pre class="r"><code>tex_control_text &lt;- &quot;Controls, \\ac{FE} and \\ac{SE} as indicated in the respective column. Controls, if included and as long as not perfectly collinear: population, share of population over 65 years, unemployment rate, total area, share of working-age population, and dummies for ``district-free&#39;&#39; cities, cities, as well as year in the electoral cycle.&quot;
-tex_signif_text &lt;- &quot;Significance codes: *** p &lt; 0.001, ** p &lt; 0.01, * p &lt; 0.05, &#39; p &lt; 0.10.}&quot;</code></pre>
 <pre class="r"><code>etable(ols, panel_bivariate, panel_multivariate, iv_multivariate,
        file = &quot;tables/conv_results.tex&quot;,
        replace = TRUE,
@@ -4350,7 +4348,7 @@ rm(list=ls(pattern=&quot;^iv_&quot;))</code></pre>
 <h1>Concluding Remarks</h1>
 <p>For references, see the paper.</p>
 <pre class="r"><code>Sys.time() - time</code></pre>
-<pre><code>## Time difference of 15.59629 secs</code></pre>
+<pre><code>## Time difference of 16.31499 secs</code></pre>
 </div>
 
 

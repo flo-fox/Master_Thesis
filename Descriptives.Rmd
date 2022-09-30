@@ -14,6 +14,7 @@ output:
 ```{r Packages}
 library(tidyverse)
 library(reshape2)
+library(ggcorrplot)
 library(xtable)
 source("functions.R")
 ```
@@ -170,6 +171,34 @@ cor(d_rdd_bivariate %>% filter(closest <= 0.1) %>% pull(total_seats),
     d_rdd_bivariate %>% filter(closest <= 0.1) %>% pull(by_law_seats),
     use = "pairwise.complete.obs")
 ```
+
+
+# Investigating covariate imbalance
+
+Three RDD covariates have been shown to have a statistically significant jump at the threshold. Dummy "kreisfreie_stadt" and the share of population of working aged > 65 jump positively, the population share of working-age people jumps negatively.
+
+```{r}
+d_rdd_balance_test <- data %>%
+  select(
+    ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff,
+    inhabitants_treshold_factor, inhabitants_treshold, year, ags, election_year, state, # standard variables
+    inh_tot, pop_over65, unempl_rate, total_area_ha,
+    share_working_age, kreisfreie_stadt, stadt, lag_total_seats # Balance test variables
+    ) %>%
+  drop_na(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff) %>%
+  mutate(across(c(kreisfreie_stadt, stadt), ~ as.numeric(.)-1))
+```
+```{r}
+d_rdd_balance_test %>%
+  select(-c(inhabitants_treshold_factor, year, ags)) %>%
+  cor(., use = "pairwise.complete.obs") %>%
+  ggcorrplot::ggcorrplot(type = "lower", lab = TRUE, digits = 1)
+d_rdd_balance_test %>%
+  select(kreisfreie_stadt, share_working_age, pop_over65) %>%
+  cor(., use = "pairwise.complete.obs") %>%
+  ggcorrplot::ggcorrplot(type = "lower", lab = TRUE)
+```
+
 
 
 ```{r}
