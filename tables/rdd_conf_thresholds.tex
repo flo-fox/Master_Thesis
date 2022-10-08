@@ -1,0 +1,30 @@
+
+\begin{table}[htbp]
+   \caption{\label{tab:rdd_conf_thresholds} Results of the interacted \ac{RDD}s to investigate (non)confounded thresholds}
+   \centering
+   \begin{tabular}{lcc}
+      \tabularnewline \midrule \midrule
+      Dependent Variable: & \multicolumn{2}{c}{Ln of gross expenditure p. c.}\\
+                                                                              & Confounded thresholds based on my reserach & Confounded thresholds based on \citeauthor{Hohmann.2017}'s \parencite*{Hohmann.2017} reserach \\     
+      Model:                                                                  & (1)                                        & (2)\\  
+      \midrule
+      \emph{Variables}\\
+      Council size baseline for nonconfounded thresholds                      & 0.0197                                     & -0.0282$^{*}$\\   
+                                                                              & (0.0228)                                   & (0.0120)\\   
+      Additional TE for confounded thresholds                                 & -0.0120                                    & 0.0705$^{'}$\\   
+                                                                              & (0.0415)                                   & (0.0312)\\   
+      \midrule
+      \emph{Fit statistics}\\
+      Observations                                                            & 12,520                                     & 12,486\\  
+      R$^2$                                                                   & -0.01105                                   & 0.29635\\  
+      Within R$^2$                                                            & -0.80032                                   & -0.24909\\  
+      \midrule \midrule
+      \multicolumn{3}{l}{\emph{Clustered (inhabitants\_treshold\_factor \     & state \                                    & year) standard-errors in parentheses}}\\  
+      \multicolumn{3}{l}{\emph{Signif. Codes: ***: 0.001, **: 0.01, *: 0.05, ': 0.1}}\\
+   \end{tabular}
+   
+   \par \raggedright 
+   \footnotesize{\textit{Notes:} Results of the \ac{IV} \ac{RDD}, in a ten-percent window around the cutoffs. No control variables but threshold, state, and year \ac{FE}. Standard errors clustered at the threshold, year and municipality level in parentheses. Significance codes: *** p < 0.001, \textbf{ p < 0.01, \textit{ p < 0.05, ' p < 0.10.}}}
+\end{table}
+
+

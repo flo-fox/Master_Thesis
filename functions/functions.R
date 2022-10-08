@@ -1,6 +1,13 @@
 #### functions.R ####
 
-# This file includes functions used for the main R scripts
+# This file includes functions and options used for the main R scripts
+
+#### Options ####
+options(scipen = 20)
+theme_set(theme_minimal())
+p_value_cutoff <- 0.01
+
+#### Functions ####
 
 #### Customed summarize() function
 summarize2 <- function(x, na.rm = TRUE) {

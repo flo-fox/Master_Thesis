@@ -22,7 +22,7 @@ library(rdd) # For the McCrary (2008) test
 library(xtable)
 library(scales)
 library(janitor)
-source("functions.R")
+source("functions/functions.R")
 ```
 
 ```{r Data}
@@ -32,11 +32,6 @@ data <-
     year = as.factor(year),
     ags = as.factor(ags)
   )
-```
-
-```{r Options}
-options(scipen = 20)
-theme_set(theme_minimal())
 ```
 
 Generating different data sets:
@@ -950,6 +945,7 @@ ggplot2::ggplot(data = rdd_vary_window, aes(x = window, y = point_estimate)) +
   geom_point(size = 1.5, color = ifelse(rdd_vary_window$p <= 0.05, 2, 1)) +
   geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
                 color = ifelse(rdd_vary_window$p <= 0.05, 2, 1),
+                linetype = ifelse(rdd_vary_window$p <= 0.05, 2, 1),
                 width = 0.005) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_x_continuous(labels = scales::percent) +
@@ -1000,6 +996,7 @@ ggplot2::ggplot(data = rdd_vary_bwselect, aes(x = bw_sel_algo, y = point_estimat
   geom_point(size = 1.5, color = ifelse(rdd_vary_bwselect$p <= 0.05, 2, 1)) +
   geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
                 color = ifelse(rdd_vary_bwselect$p <= 0.05, 2, 1),
+                linetype = ifelse(rdd_vary_bwselect$p <= 0.05, 2, 1),
                 width = 0.5) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
@@ -1015,63 +1012,202 @@ rm(rdd)
 
 Dropping confounded thresholds as determined by my own legal research: The conclusions are quite similar for both "Höhmann's" and "my" thresholds -- the effect of council size is small and positive (in the really small single-digits) but nonsignificant for both counfounded as well as nonconfounded thresholds.
 
-Note: (to do) maybe you could also solve this by interacting `clean_dis_acc_to_my_research`.
+#### "My" research variable `clean_disc_acc_to_my_research`
 
-```{r, rdd_confounded_th_my}
-# Effect for confounded thresholds
-df <- d_rdd_bivariate %>%
-    filter(clean_disc_acc_to_my_research == 0)
-rdd <-
-  rdrobust::rdrobust(
-    y = df$ln_gross_expenditure_pc,
-    x = df$inhabs_rel_to_cutoff,
-    fuzzy = df$total_seats,
-    cluster = df$inhabitants_treshold_factor,
-    covs = model.matrix(~ df$inhabitants_treshold_factor + df$year + df$state)
+... is first up.
+
+Subsample method:
+
+```{r, eval=FALSE}
+# to do: remove eval=FALSE
+data_subset <- data %>% # prepare data set used for analysis
+  select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year, clean_disc_acc_to_my_research) %>%
+  drop_na()
+all_values <- data_subset %>% distinct(clean_disc_acc_to_my_research) %>% pull() # vector of values
+rdd_vary_clean_disc1 <- # prepare data set to store the results
+  tibble(value = "", point_estimate = "", se = "", se_robust = "",
+         ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
+  mutate(across(everything(), as.numeric))
+for (i in all_values) {
+  print(paste("clean_disc_acc_to_my_research:", i))
+  df <- data_subset %>%
+    filter(clean_disc_acc_to_my_research == i)
+  rdd <-
+    rdrobust_wrapper(
+      ccluster = df$inhabitants_treshold_factor,
+      ccovs = model.matrix( ~ df$inhabitants_treshold_factor + df$state + df$year) # FE
   )
-summary(rdd)
-# Effect for noncounfounded thresholds
-df <- d_rdd_bivariate %>%
-    filter(clean_disc_acc_to_my_research == 1)
-rdd <-
-  rdrobust::rdrobust(
-    y = df$ln_gross_expenditure_pc,
-    x = df$inhabs_rel_to_cutoff,
-    fuzzy = df$total_seats,
-    cluster = df$inhabitants_treshold_factor,
-    covs = model.matrix(~ df$inhabitants_treshold_factor + df$year + df$state)
+  #summary(rdd)
+  rdd_vary_clean_disc1 <- rdd_vary_clean_disc1 %>%
+    dplyr::add_row(
+      value = i,
+      point_estimate = rdd$coef[1],
+      se = rdd$se[1],
+      se_robust = rdd$se[3],
+      ci_lower = rdd$ci[3,1],
+      ci_upper = rdd$ci[3,2],
+      p = rdd$pv[3],
+      bw = rdd$bws[1,1],
+      obs_below = rdd$N_h[1],
+      obs_above = rdd$N_h[2]
   )
-summary(rdd)
+}
+rdd_vary_clean_disc1 <- rdd_vary_clean_disc1 %>% drop_na()
+save(rdd_vary_clean_disc1, file = "tables_robustness_checks/rdd_vary_clean_disc1.Rdata")
+rm(all_values, data_subset, df, i, rdd)
+```
+```{r}
+load(file = "tables_robustness_checks/rdd_vary_clean_disc1.Rdata")
+rdd_vary_clean_disc1
 ```
 
-Dropping confounded thresholds as determined by Höhmann (2017):
-
-```{r rdd_confounded_th_hohmann}
-# Effect for confounded thresholds
-df <- d_rdd_bivariate %>%
-    filter(clean_disc_acc_Höhmann == 0)
-rdd <-
-  rdrobust::rdrobust(
-    y = df$ln_gross_expenditure_pc,
-    x = df$inhabs_rel_to_cutoff,
-    fuzzy = df$total_seats,
-    cluster = df$inhabitants_treshold_factor,
-    covs = model.matrix(~ df$inhabitants_treshold_factor + df$year + df$state)
-  )
-summary(rdd)
-# Effect for noncounfounded thresholds
-df <- d_rdd_bivariate %>%
-    filter(clean_disc_acc_Höhmann == 1)
-rdd <-
-  rdrobust::rdrobust(
-    y = df$ln_gross_expenditure_pc,
-    x = df$inhabs_rel_to_cutoff,
-    fuzzy = df$total_seats,
-    cluster = df$inhabitants_treshold_factor,
-    covs = model.matrix(~ df$inhabitants_treshold_factor + df$year + df$state)
-  )
-summary(rdd)
+```{r}
+ggplot2::ggplot(data = rdd_vary_clean_disc1, aes(x = value, y = point_estimate)) +
+  geom_point(size = 1.5, color = ifelse(rdd_vary_clean_disc1$p <= p_value_cutoff, 2, 1)) +
+  geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
+                color = ifelse(rdd_vary_clean_disc1$p <= p_value_cutoff, 2, 1),
+                linetype = ifelse(rdd_vary_clean_disc1$p <= p_value_cutoff, 2, 1),
+                width = 0.5) +
+  geom_hline(aes(yintercept = 0), linetype = "dotted") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(y = "Increase in spending at the threshold")
 ```
+
+Looks like there is no difference.
+
+
+Interaction-term method using an IV approach:
+
+```{r}
+df <- data %>%
+  filter(closest <= 0.1)
+rdd_conf_1 <- fixest::feols(ln_gross_expenditure_pc ~
+                       1  | # controls
+                       inhabitants_treshold_factor + state + year | # fixed-effect controls
+                       # First stage regression:
+                       inhabs_rel_to_cutoff*total_seats*clean_disc_acc_to_my_research ~
+                       inhabs_rel_to_cutoff*above_cutoff*clean_disc_acc_to_my_research,
+                     vcov = "threeway",
+                     data = df)
+summary(rdd_conf_1)
+rm(df)
+```
+
+
+
+#### Höhmann's (2017) research variable `clean_disc_acc_Höhmann`
+
+Next up are the reevaluation of what Höhmann (2017) determines as confounded thresholds.
+
+Subsample method:
+
+```{r, eval=FALSE}
+# to do: remove eval=FALSE
+data_subset <- data %>% # prepare data set used for analysis
+  select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year, clean_disc_acc_Höhmann) %>%
+  drop_na()
+all_values <- data_subset %>% distinct(clean_disc_acc_Höhmann) %>% pull() # vector of values
+rdd_vary_clean_disc2 <- # prepare data set to store the results
+  tibble(value = "", point_estimate = "", se = "", se_robust = "",
+         ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
+  mutate(across(everything(), as.numeric))
+for (i in all_values) {
+  print(paste("clean_disc_acc_Höhmann:", i))
+  df <- data_subset %>%
+    filter(clean_disc_acc_Höhmann == i)
+  rdd <-
+    rdrobust_wrapper(
+      ccluster = df$inhabitants_treshold_factor,
+      ccovs = model.matrix( ~ df$inhabitants_treshold_factor + df$state + df$year) # FE
+  )
+  #summary(rdd)
+  rdd_vary_clean_disc2 <- rdd_vary_clean_disc2 %>%
+    dplyr::add_row(
+      value = i,
+      point_estimate = rdd$coef[1],
+      se = rdd$se[1],
+      se_robust = rdd$se[3],
+      ci_lower = rdd$ci[3,1],
+      ci_upper = rdd$ci[3,2],
+      p = rdd$pv[3],
+      bw = rdd$bws[1,1],
+      obs_below = rdd$N_h[1],
+      obs_above = rdd$N_h[2]
+  )
+}
+rdd_vary_clean_disc2 <- rdd_vary_clean_disc2 %>% drop_na()
+save(rdd_vary_clean_disc2, file = "tables_robustness_checks/rdd_vary_clean_disc2.Rdata")
+rm(all_values, data_subset, df, i, rdd)
+```
+```{r}
+load(file = "tables_robustness_checks/rdd_vary_clean_disc2.Rdata")
+rdd_vary_clean_disc2
+```
+
+```{r}
+ggplot2::ggplot(data = rdd_vary_clean_disc2, aes(x = value, y = point_estimate)) +
+  geom_point(size = 1.5, color = ifelse(rdd_vary_clean_disc2$p <= p_value_cutoff, 2, 1)) +
+  geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
+                color = ifelse(rdd_vary_clean_disc2$p <= p_value_cutoff, 2, 1),
+                linetype = ifelse(rdd_vary_clean_disc2$p <= p_value_cutoff, 2, 1),
+                width = 0.5) +
+  geom_hline(aes(yintercept = 0), linetype = "dotted") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(y = "Increase in spending at the threshold")
+```
+
+Looks like there is no difference, again.
+
+Interaction-term method using an IV approach:
+
+```{r}
+df <- data %>%
+  filter(closest <= 0.1)
+rdd_conf_2 <- fixest::feols(ln_gross_expenditure_pc ~
+                       1  | # controls
+                       inhabitants_treshold_factor + state + year | # fixed-effect controls
+                       # First stage regression:
+                       inhabs_rel_to_cutoff*total_seats*clean_disc_acc_Höhmann ~
+                       inhabs_rel_to_cutoff*above_cutoff*clean_disc_acc_Höhmann,
+                     vcov = "threeway",
+                     data = df)
+summary(rdd_conf_2)
+rm(df)
+```
+
+Looks like there is a difference after all.
+
+```{r}
+etable(rdd_conf_1, rdd_conf_2,
+       file = "tables/rdd_conf_thresholds.tex",
+       replace = TRUE,
+       # Table settings
+       keep = c("Council size baseline for nonconfounded thresholds",
+                "Additional TE for confounded thresholds"),
+       dict = c(total_seats = "Council size baseline for nonconfounded thresholds",
+                `total_seats:clean_disc_acc_to_my_research` = "Additional TE for confounded thresholds",
+                `total_seats:clean_disc_acc_Höhmann` = "Additional TE for confounded thresholds",
+                ln_gross_expenditure_pc = "Ln of gross expenditure p. c."),
+       drop.section = "fixef",
+       signif.code = c("***"=0.001, "**"=0.01, "*"=0.05, "'"=0.10),
+       headers = c("Confounded thresholds based on my reserach",
+                   "Confounded thresholds based on \\citeauthor{Hohmann.2017}'s \\parencite*{Hohmann.2017} reserach"),
+       # extralines = list(
+       #   "-^Controls" = c("No", "Yes")#,
+       #   #"-_\\acs{SE}" = rep("by threshold, \\acs{yr} & \\acs{mcp}", 2),
+       #   #"_^Data sample" = c(rep("All data", 3), "\\acs{BY} only")
+       #   ),
+       # LaTeX settings
+       title = "Results of the interacted \\ac{RDD}s to investigate (non)confounded thresholds",
+       label = "tab:rdd_conf_thresholds",
+       notes = paste("\\footnotesize{*Notes:* Results of the \\ac{IV} \\ac{RDD}, in a ten-percent window around the cutoffs. No control variables but threshold, state, and year \\ac{FE}. Standard errors clustered at the threshold, year and municipality level in parentheses.",
+                     tex_signif_text)#,
+       # style.tex = style.tex(
+       #   fixef.suffix = " \\ac{FE}"
+       # )
+       )
+```
+
 
 
 ### Placebo thresholds
@@ -1252,54 +1388,6 @@ rm(df)
 
 
 ### Donut-hole RDD
-
-
-### Separate years/states
-
-**This section should be sorted into heterogeneity**
-
-For each year: Not much variation in the results here (as expected)
-```{r}
-all_years <- d_rdd_bivariate %>% distinct(year) %>% pull()
-for (i in all_years) {
-  print(paste("year:", i))
-  df <- d_rdd_bivariate %>%
-    filter(year == i)
-  rdd <-
-    rdrobust::rdrobust(
-      y = df$ln_gross_expenditure_pc,
-      x = df$inhabs_rel_to_cutoff,
-      fuzzy = df$total_seats,
-      cluster = df$inhabitants_treshold_factor,
-      covs = model.matrix( ~ df$inhabitants_treshold_factor + df$state) # Dropping year FE, obviously
-  )
-  summary(rdd)
-}
-```
-For each state:
-```{r}
-# to do: remove eval = F
-all_states <- d_rdd_bivariate %>% distinct(state) %>% filter(state != 15) %>% pull() # issues with 15...
-for (i in all_states) {
-  print(paste("state:", i))
-  df <- d_rdd_bivariate %>%
-    filter(state == i)
-  rdd <-
-    rdrobust::rdrobust(
-      y = df$ln_gross_expenditure_pc,
-      x = df$inhabs_rel_to_cutoff,
-      fuzzy = df$total_seats,
-      cluster = df$inhabitants_treshold_factor,
-      covs = model.matrix( ~ df$inhabitants_treshold_factor + df$year) # Dropping state FE, obviously
-  )
-  summary(rdd)
-}
-```
-
-
-```{r}
-rm(all_years, all_states, rdd)
-```
 
 
 ### Mass points
