@@ -22,7 +22,7 @@ library(rdd) # For the McCrary (2008) test
 library(xtable)
 library(scales)
 library(janitor)
-source("functions.R")
+source("functions/functions.R")
 ```
 
 ```{r Data}
@@ -34,10 +34,6 @@ data <-
   )
 ```
 
-```{r Options}
-options(scipen = 20)
-theme_set(theme_minimal())
-```
 
 Generating different data sets:
 
@@ -104,7 +100,7 @@ rdd::DCdensity(runvar = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff, cutpoint
 
 Export plot:
 ```{r}
-pdf(file = "plots/mccrary.pdf", width = 10, height = 10*9/16)
+pdf(file = "plots/mccrary.pdf", width = 7, height = 7*9/16)
 rdd::DCdensity(runvar = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff, cutpoint = 0, plot = TRUE, verbose = TRUE)
 title(xlab = "Running variable (Population relative to thresholds)")
 abline(v=0)
@@ -124,7 +120,7 @@ p <- rddensity::rdplotdensity(rddensity_disc_test, X = dens_test_d_rdd_bivariate
 
 Export plot
 ```{r}
-pdf(file = "plots/rddensity.pdf", width = 10, height = 10*9/16)
+pdf(file = "plots/rddensity.pdf", width = 6, height = 6*9/16)
 p
 dev.off()
 rm(p)

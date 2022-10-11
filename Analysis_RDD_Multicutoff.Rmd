@@ -22,6 +22,7 @@ library(rdd) # For the McCrary (2008) test
 #library(xtable)
 #library(scales)
 #library(janitor)
+source("functions/functions.R")
 ```
 
 ```{r Data}
@@ -33,10 +34,6 @@ data <-
   )
 ```
 
-```{r Options}
-options(scipen = 20)
-theme_set(theme_minimal())
-```
 
 Generating different data sets:
 
@@ -119,6 +116,43 @@ rdms(Y,X,cvec)
 ```{r, eval = FALSE}
 rdmulti::rdmcplot(Y = log(data2$gross_expenditure), X = data2$exact_pop, C = data2$inhabitants_treshold_factor)
 ```
+
+
+
+# Bavarian data only
+
+```{r}
+data_by <- data %>%
+  filter(state == 9) %>%
+  select(
+    ln_gross_revenue_pc, exact_pop,
+    state, year, inhabitants_treshold
+    ) %>%
+  drop_na()
+```
+
+```{r, eval = FALSE}
+rdd <-
+  rdmulti::rdms(
+    Y = data_by$ln_gross_revenue_pc,
+    X = data_by$exact_pop,
+    C = data_by$inhabitants_treshold
+  )
+summary(rdd)
+```
+```{r, eval = FALSE}
+df <- data_by %>% filter(inhabitants_treshold < 100000) # After this threshold, error
+rdd <-
+  rdmulti::rdms(
+    Y = data_by$ln_gross_revenue_pc,
+    X = data_by$exact_pop,
+    C = sort(unique(data_by$inhabitants_treshold))
+  )
+summary(rdd)
+rm(df)
+```
+
+Does not even work for Bavarian sharp case. I have no clue why.
 
 
 
