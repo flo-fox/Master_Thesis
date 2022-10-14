@@ -47,5 +47,25 @@ assign_stars <- function(p) {
   }
 }
 
+#### Function to label p values ####
+# tweaked from https://stackoverflow.com/questions/23018256/printing-p-values-with-0-001
+p_value <- function(pvals, sig.limit = .001, digits = 3, cutoff_more_detailed = .1) {
+  
+  roundr <- function(x, digits = 1) {
+    res <- sprintf(paste0('%.', digits, 'f'), x)
+    zzz <- paste0('0.', paste(rep('0', digits), collapse = ''))
+    res[res == paste0('-', zzz)] <- zzz
+    res
+  }
+  
+  sapply(pvals, function(x, sig.limit) {
+    if (x < sig.limit)
+      return(sprintf('p<%s', format(sig.limit)))
+    if (x > cutoff_more_detailed)
+      return(paste0("p=", roundr(x, digits = 2))) else
+        return(paste0("p=", roundr(x, digits = digits)))
+  }, sig.limit = sig.limit)
+}
+
 #### Rounding of decimals ####
 round_decimals <- 4

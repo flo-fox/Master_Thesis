@@ -22,7 +22,7 @@ library(fixest)
 library(xtable)
 #library(scales)
 #library(janitor)
-source("functions.R")
+source("functions/functions.R")
 ```
 
 ```{r Data}
@@ -32,11 +32,6 @@ data <-
     year = as.factor(year),
     ags = as.factor(ags)
   )
-```
-
-```{r Options}
-options(scipen = 20)
-theme_set(theme_minimal())
 ```
 
 Generating different data sets:

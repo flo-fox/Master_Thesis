@@ -1,11 +1,11 @@
 
-\begin{table}[htbp]
+\begin{table}
    \caption{\label{tab:rdd_conf_thresholds} Results of the interacted \ac{RDD}s to investigate (non)confounded thresholds}
    \centering
    \begin{tabular}{lcc}
       \tabularnewline \midrule \midrule
       Dependent Variable: & \multicolumn{2}{c}{Ln of gross expenditure p. c.}\\
-                                                                              & Confounded thresholds based on my reserach & Confounded thresholds based on \citeauthor{Hohmann.2017}'s \parencite*{Hohmann.2017} reserach \\     
+                                                                              & Confounded thresholds based on my research & Confounded thresholds based on \citeauthor{Hohmann.2017}'s \parencite*{Hohmann.2017} research \\     
       Model:                                                                  & (1)                                        & (2)\\  
       \midrule
       \emph{Variables}\\
@@ -15,11 +15,15 @@
                                                                               & (0.0415)                                   & (0.0312)\\   
       \midrule
       \emph{Fit statistics}\\
+      Window around the threshold & 10\% & 10\%\\
+      Observations                                                            & 103,618                                    & 103,618\\  
+      Observations below                                                      & 11,518                                     & 11,518\\  
+      Observations above                                                      & 11,675                                     & 11,675\\  
       Observations                                                            & 12,520                                     & 12,486\\  
       R$^2$                                                                   & -0.01105                                   & 0.29635\\  
       Within R$^2$                                                            & -0.80032                                   & -0.24909\\  
       \midrule \midrule
-      %\multicolumn{3}{l}{\emph{Clustered (inhabitants\_treshold\_factor \     & state \                                    & year) standard-errors in parentheses}}\\  
+%      \multicolumn{3}{l}{\emph{Clustered (inhabitants\_treshold\_factor \     & state \                                    & year) standard-errors in parentheses}}\\  
       \multicolumn{3}{l}{\emph{Signif. Codes: ***: 0.001, **: 0.01, *: 0.05, ': 0.1}}\\
    \end{tabular}
    

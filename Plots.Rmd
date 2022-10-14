@@ -19,16 +19,12 @@ library(plotly)
 library(ggcorrplot)
 library(htmltools)
 library(ggpubr)
+source("functions/functions.R")
 ```
 
 ```{r Data}
 data <-
   readRDS("data/gemeinderatswahlen_alldata.rds")
-```
-
-```{r Options}
-options(scipen = 20)
-#theme_set(theme_minimal())
 ```
 
 Create data set used in main RDD analysis.
@@ -242,6 +238,7 @@ to do: First year shown in plot not yet correct.
 # Create data
 th_1 <- c(70, 200, 750, 1250, 5000, 10000, 15000, 25000, 35000, 45000)
 th_1_change <- c(2000, 2500)
+th_1 <- c(70, 200, 750, 1250, 2000, 5000, 10000, 15000, 25000, 35000, 45000)
 th_15 <- c(1000, 2000, 3000, 5000, 10000, 20000, 30000, 50000, 150000, 300000)
 th_15_change <- c(100, 500)
 plot_list <- list()
@@ -281,11 +278,11 @@ for (s in c(1, 5:10, 13, 14, 15, 16)) {
       legend.title=element_blank() # remove legend title
       )
   # Cutoff changes
-  if (s == 1 | s == 15) {
-    plot_list[[s]] <- plot_list[[s]] +
-      geom_vline(xintercept = get(paste0("th_", s, "_change")),
-                 colour = "#F8766D", linetype = "dashed")
-  }
+  # if (s == 1 | s == 15) {
+  #   plot_list[[s]] <- plot_list[[s]] +
+  #     geom_vline(xintercept = get(paste0("th_", s, "_change")),
+  #                colour = "#F8766D", linetype = "dashed")
+  # }
   # Show plots
   #print(plot_list[[s]])
 }

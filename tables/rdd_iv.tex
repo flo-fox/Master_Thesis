@@ -2,29 +2,33 @@
 \begin{table}[htbp]
    \caption{\label{tab:rdd_iv} Results of the \ac{IV} \ac{RDD}}
    \centering
-   \begin{tabular}{lcc}
+   \begin{tabular}{lcccc}
       \tabularnewline \midrule \midrule
-      Dependent Variable: & \multicolumn{2}{c}{Ln of gross expenditure p. c.}\\
-                                               & \acs{RDD} \acs{wo} covariates   & \acs{RDD} \acs{w} covariates \\     
-      Model:                                   & (1)                             & (2)\\  
+      Dependent Variable: & \multicolumn{4}{c}{Ln of gross expenditure p. c.}\\
+       & \acs{wo} covariates \& \acs{wo} \ac{FE} & \acs{wo} covariates \& \acs{w} \ac{FE} & \acs{w} covariates \& \acs{wo} \ac{FE} & \acs{w} covariates \& \acs{w} \ac{FE} \\ 
+      Model:                                   & (1)      & (2)      & (3)      & (4)\\  
       \midrule
       \emph{Variables}\\
-      Council size                             & -0.0176                         & -0.0128\\   
-                                               & (0.0198)                        & (0.0173)\\   
+      Council size                             & 0.0125   & -0.0176  & 0.0092   & -0.0128\\   
+                                               & (0.0256) & (0.0150) & (0.0243) & (0.0118)\\   
       \midrule
       \emph{Fixed-effects}\\
-      Controls                                 & No                              & Yes\\  
-      inhabitants\_treshold\_factor \ac{FE}    & Yes                             & Yes\\  
-      year \ac{FE}                             & Yes                             & Yes\\  
-      ags \ac{FE}                              & Yes                             & Yes\\  
+      Controls                                 & No       & No       & Yes      & Yes\\  
+      inhabitants\_treshold\_factor \ac{FE}    & Yes      & Yes      & Yes      & Yes\\  
+      year \ac{FE}                             &          & Yes      &          & Yes\\  
+      ags \ac{FE}                              &          & Yes      &          & Yes\\  
+      \acs{SE} & by \acs{thr} & by \acs{mcp}, \acs{yr} \& \acs{thr} & by \acs{thr} & by \acs{mcp}, \acs{yr} \& \acs{thr}\\
       \midrule
       \emph{Fit statistics}\\
-      Observations                             & 10,361                          & 10,140\\  
-      R$^2$                                    & 0.79239                         & 0.79896\\  
-      Within R$^2$                             & -0.01326                        & -0.02461\\  
+      Window around the threshold              & 10\%     & 10\%     & 10\%     & 10\%\\   
+      Observations                             & 103,618  & 103,618  & 101,409  & 101,409\\  
+      Observations below                       & 5,073    & 5,073    & 4,933    & 4,933\\  
+      Observations above                       & 5,288    & 5,288    & 5,207    & 5,207\\  
+      Observations                             & 10,361   & 10,361   & 10,140   & 10,140\\  
+      R$^2$                                    & 0.23358  & 0.79239  & 0.30944  & 0.79896\\  
+      Within R$^2$                             & -0.05329 & -0.01326 & 0.04450  & -0.02461\\  
       \midrule \midrule
-      \multicolumn{3}{l}{\emph{Clustered (inhabitants\_treshold\_factor) standard-errors in parentheses}}\\
-      \multicolumn{3}{l}{\emph{Signif. Codes: ***: 0.001, **: 0.01, *: 0.05, ': 0.1}}\\
+      \multicolumn{5}{l}{\emph{Signif. Codes: ***: 0.001, **: 0.01, *: 0.05, ': 0.1}}\\
    \end{tabular}
    
    \par \raggedright 

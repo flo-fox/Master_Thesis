@@ -19,6 +19,7 @@ library(rdrobust)
 #library(rdmulti)
 library(rddensity)
 library(rdd) # For the McCrary (2008) test
+library(RDHonest)
 library(xtable)
 library(scales)
 library(janitor)
@@ -135,6 +136,19 @@ rdd_bivariate <- fixest::feols(ln_gross_expenditure_pc ~
                                data = df)
 summary(rdd_bivariate, vcov = "hetero")
 summary(rdd_bivariate, vcov = "threeway", stage = 1:2)
+# For "publication":
+rdd_bivariate <- fixest::feols(ln_gross_expenditure_pc ~
+                                 1  | # controls
+                                 inhabitants_treshold_factor + year + ags | # fixed-effect controls
+                                 # First stage regression:
+                                 inhabs_rel_to_cutoff*total_seats ~ # Instrument our standard RDD...
+                                 inhabs_rel_to_cutoff*above_cutoff, # ... with being above the cutoff
+                               vcov = "threeway",
+                               data = df)
+# Observations below and above:
+rdd_bivariate_obs <- d_rdd_bivariate %>% nrow()
+rdd_bivariate_below <- df %>% filter(above_cutoff == 0) %>% nrow()
+rdd_bivariate_above <- df %>% filter(above_cutoff == 1) %>% nrow()
 # More tests:
 #fixest::fitstat(rdd, ~ ivf1 + ivwald1 + ivf2 + ivwald2)
 rm(df)
@@ -172,6 +186,28 @@ summary(rdd, vcov = "hetero")
 summary(rdd, vcov = "threeway", stage = 1:2)
 rm(df, rdd)
 ```
+
+Models without municipality & year FE:
+
+```{r}
+df <- d_rdd_bivariate %>%
+  filter(closest <= 0.1) # Choose bandwidth window -- similar to Höhmann (2017)
+rdd_bivariate_wo_fe <- fixest::feols(ln_gross_expenditure_pc ~
+                                       1  | # controls
+                                       inhabitants_treshold_factor | # fixed-effect controls
+                                       # First stage regression:
+                                       inhabs_rel_to_cutoff*total_seats ~ # Instrument our standard RDD...
+                                       inhabs_rel_to_cutoff*above_cutoff, # ... with being above the cutoff
+                                     vcov = "cluster",
+                                     data = df)
+summary(rdd_bivariate_wo_fe)
+# Observations below and above:
+rdd_bivariate_wo_fe_obs <- d_rdd_bivariate %>% nrow()
+rdd_bivariate_wo_fe_below <- df %>% filter(above_cutoff == 0) %>% nrow()
+rdd_bivariate_wo_fe_above <- df %>% filter(above_cutoff == 1) %>% nrow()
+rm(df)
+```
+
 
 Include polynomials:
 
@@ -254,8 +290,28 @@ rdd_w_covs <- fixest::feols(ln_gross_expenditure_pc ~
                               # First stage regression:
                               inhabs_rel_to_cutoff*total_seats ~ # Instrument our standard RDD...
                               inhabs_rel_to_cutoff*above_cutoff, # ... with being above the cutoff
+                            vcov = "threeway",
                             data = df)
-summary(rdd_w_covs, vcov = "threeway")
+summary(rdd_w_covs)
+# Observations below and above:
+rdd_w_covs_obs <- d_rdd %>% nrow()
+rdd_w_covs_below <- df %>% filter(above_cutoff == 0) %>% nrow()
+rdd_w_covs_above <- df %>% filter(above_cutoff == 1) %>% nrow()
+
+rdd_w_covs_wo_fe <- fixest::feols(ln_gross_expenditure_pc ~
+                              inh_tot + pop_over65 + unempl_rate + total_area_ha + share_working_age +
+                              kreisfreie_stadt + stadt + years_since_last_elec | # controls
+                              inhabitants_treshold_factor | # fixed-effect controls
+                              # First stage regression:
+                              inhabs_rel_to_cutoff*total_seats ~ # Instrument our standard RDD...
+                              inhabs_rel_to_cutoff*above_cutoff, # ... with being above the cutoff
+                            vcov = "threeway",
+                            data = df)
+summary(rdd_w_covs_wo_fe)
+# Observations below and above:
+rdd_w_covs_wo_fe_obs <- d_rdd %>% nrow()
+rdd_w_covs_wo_fe_below <- df %>% filter(above_cutoff == 0) %>% nrow()
+rdd_w_covs_wo_fe_above <- df %>% filter(above_cutoff == 1) %>% nrow()
 rm(df)
 ```
 Interpretation similar to the polynomial case: decrease in the single digits but not significant.
@@ -303,11 +359,12 @@ Interpretation as before: Non-significant decrease in the single digits.
 
 Comparing the two main models:
 ```{r}
-etable(rdd_bivariate, rdd_w_covs)
+etable(rdd_bivariate_wo_fe, rdd_bivariate, rdd_w_covs_wo_fe, rdd_w_covs)
 ```
 
 ```{r}
-etable(rdd_bivariate, rdd_w_covs,
+etable(#rdd_bivariate, rdd_w_covs,
+       rdd_bivariate_wo_fe, rdd_bivariate, rdd_w_covs_wo_fe, rdd_w_covs,
        file = "tables/rdd_iv.tex",
        replace = TRUE,
        # Table settings
@@ -315,11 +372,21 @@ etable(rdd_bivariate, rdd_w_covs,
        dict = c(total_seats = "Council size",
                 ln_gross_expenditure_pc = "Ln of gross expenditure p. c."),
        signif.code = c("***"=0.001, "**"=0.01, "*"=0.05, "'"=0.10),
-       headers = c("\\acs{RDD} \\acs{wo} covariates", "\\acs{RDD} \\acs{w} covariates"),
+       headers = c("\\acs{wo} covariates \\& \\acs{wo} \\ac{FE}",
+                   "\\acs{wo} covariates \\& \\acs{w} \\ac{FE}",
+                   "\\acs{w} covariates \\& \\acs{wo} \\ac{FE}",
+                   "\\acs{w} covariates \\& \\acs{w} \\ac{FE}"),
        extralines = list(
-         "-^Controls" = c("No", "Yes")#,
-         #"-_\\acs{SE}" = rep("by threshold, \\acs{yr} & \\acs{mcp}", 2),
+         "-^Controls" = c("No", "No", "Yes", "Yes"),
+         "-_\\acs{SE}" = rep(c("by \\acs{thr}", "by \\acs{mcp}, \\acs{yr} & \\acs{thr}"), 2),
          #"_^Data sample" = c(rep("All data", 3), "\\acs{BY} only")
+         "_^Observations above" = c(rdd_bivariate_wo_fe_above, rdd_bivariate_above,
+                                    rdd_w_covs_wo_fe_above, rdd_w_covs_above),
+         "_^Observations below" = c(rdd_bivariate_wo_fe_below, rdd_bivariate_below,
+                                    rdd_w_covs_wo_fe_below, rdd_w_covs_below),
+         "_^Observations" = c(rdd_bivariate_wo_fe_obs, rdd_bivariate_obs,
+                              rdd_w_covs_wo_fe_obs, rdd_w_covs_obs),
+         "_^Window around the threshold" = rep("10%", 4)
          ),
        # LaTeX settings
        title = "Results of the \\ac{IV} \\ac{RDD}",
@@ -852,6 +919,8 @@ rdd_vary_vcov_df
 
 ### Sensitivity analysis
 
+#### Ad-hoc chosen bandwidths
+
 Vary the bandwidths `h` and `b`, manually set those instead of using a data-driven algorithm. If `h` is manually set to a certain value, the function sets `b` to the very same value. However, since the two are typically not in the same ballpark when calculated automatically (i. e. in a data-driven way), I will run the two loops separately with different values.
 Conclusion: In these cases, varying the parameters does matter for the result (this is not the case with `p` and `q`). The larger the bandwidth, the larger the first-stage coefficient. In addition, the significance level of the second stage coefficient increases (the p value decreases) in the bandwidth. The value of the coefficient of interest is steady at a bit more than 1%. Note, however, that the last models include more than half of the sample size in the calculation, potentially invalidating the research design.
 ```{r, rdd_bw_manual, eval=FALSE}
@@ -942,6 +1011,13 @@ Plot windows. Coefficients and CIs need not overlap because standard coefficient
 
 ```{r, rdd_window_plot}
 ggplot2::ggplot(data = rdd_vary_window, aes(x = window, y = point_estimate)) +
+  geom_line(size = 1.5, color = ifelse(rdd_vary_window$p <= 0.05, 2, 1)) +
+  geom_ribbon(aes(ymin = ci_lower, ymax = ci_upper), alpha = 0.3) +
+  geom_hline(aes(yintercept = 0), linetype = "dotted") +
+  scale_x_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Window around the threshold", y = "Increase in spending at the threshold")
+ggplot2::ggplot(data = rdd_vary_window, aes(x = window, y = point_estimate)) +
   geom_point(size = 1.5, color = ifelse(rdd_vary_window$p <= 0.05, 2, 1)) +
   geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
                 color = ifelse(rdd_vary_window$p <= 0.05, 2, 1),
@@ -954,6 +1030,7 @@ ggplot2::ggplot(data = rdd_vary_window, aes(x = window, y = point_estimate)) +
 ggsave(filename = "plots/rdrobust_bw_window.pdf", width = 6, height = 6*9/16)
 ```
 
+#### `rdbwselect` automatic bandwidth selection procedures
 
 Different `rdbwselect` options: Most bandwidth selection algorithms yield similar results to the default one. One or two, however, gain statistical significance for the regressor of interest by virtue of a larger bandwidth.
 ```{r, eval=FALSE}
@@ -990,8 +1067,7 @@ rdd_vary_bwselect
 
 Plot bandwidth selection algorithms. Coefficients and CIs need not overlap because standard coefficients are paired with robust-corrected CIs.
 Note: In general may be a good idea, but hard to explain all bandwidth selectors in the paper just for the purpose of this plot...
-```{r, rdd_window_plot2, eval=FALSE}
-# to do: remove eval=FALSE
+```{r, rdd_window_plot2}
 ggplot2::ggplot(data = rdd_vary_bwselect, aes(x = bw_sel_algo, y = point_estimate)) +
   geom_point(size = 1.5, color = ifelse(rdd_vary_bwselect$p <= 0.05, 2, 1)) +
   geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
@@ -1089,6 +1165,10 @@ rdd_conf_1 <- fixest::feols(ln_gross_expenditure_pc ~
                        inhabs_rel_to_cutoff*above_cutoff*clean_disc_acc_to_my_research,
                      vcov = "threeway",
                      data = df)
+# Observations below and above:
+rdd_conf_1_obs <- d_rdd_bivariate %>% nrow()
+rdd_conf_1_below <- df %>% filter(above_cutoff == 0) %>% nrow()
+rdd_conf_1_above <- df %>% filter(above_cutoff == 1) %>% nrow()
 summary(rdd_conf_1)
 rm(df)
 ```
@@ -1171,7 +1251,12 @@ rdd_conf_2 <- fixest::feols(ln_gross_expenditure_pc ~
                        inhabs_rel_to_cutoff*above_cutoff*clean_disc_acc_Höhmann,
                      vcov = "threeway",
                      data = df)
+# Observations below and above:
+rdd_conf_2_obs <- d_rdd_bivariate %>% nrow()
+rdd_conf_2_below <- df %>% filter(above_cutoff == 0) %>% nrow()
+rdd_conf_2_above <- df %>% filter(above_cutoff == 1) %>% nrow()
 summary(rdd_conf_2)
+rdd_conf_2$coefficients[2] + rdd_conf_2$coefficients[6]
 rm(df)
 ```
 
@@ -1190,13 +1275,18 @@ etable(rdd_conf_1, rdd_conf_2,
                 ln_gross_expenditure_pc = "Ln of gross expenditure p. c."),
        drop.section = "fixef",
        signif.code = c("***"=0.001, "**"=0.01, "*"=0.05, "'"=0.10),
-       headers = c("Confounded thresholds based on my reserach",
-                   "Confounded thresholds based on \\citeauthor{Hohmann.2017}'s \\parencite*{Hohmann.2017} reserach"),
-       # extralines = list(
+       headers = c("Confounded thresholds based on my research",
+                   "Confounded thresholds based on \\citeauthor{Hohmann.2017}'s \\parencite*{Hohmann.2017} research"),
+        extralines = list(
        #   "-^Controls" = c("No", "Yes")#,
        #   #"-_\\acs{SE}" = rep("by threshold, \\acs{yr} & \\acs{mcp}", 2),
        #   #"_^Data sample" = c(rep("All data", 3), "\\acs{BY} only")
-       #   ),
+          "_^Observations above" = c(rdd_conf_1_above, rdd_conf_2_above),
+         "_^Observations below" = c(rdd_conf_1_below, rdd_conf_2_below),
+         "_^Observations" = c(rdd_conf_1_obs, rdd_conf_2_obs),
+         "_^Window around the threshold" = rep("10%", 2)
+
+          ),
        # LaTeX settings
        title = "Results of the interacted \\ac{RDD}s to investigate (non)confounded thresholds",
        label = "tab:rdd_conf_thresholds",
@@ -1211,6 +1301,8 @@ etable(rdd_conf_1, rdd_conf_2,
 
 
 ### Placebo thresholds
+
+#### Overall sample
 
 First attempt
 
@@ -1271,7 +1363,7 @@ ggsave(filename = "plots/rdrobust_placebo_wide.pdf", width = 6, height = 6*9/16)
 rm(df)
 ```
 
-Second attempt: Regular cutoffs within the inter-quartile range.
+Second attempt -- main approach: Regular cutoffs within the inter-quartile range.
 
 ```{r, rdrobust_place2, eval=FALSE}
 # to do: remove eval=FALSE
@@ -1307,25 +1399,34 @@ load(file = "tables_robustness_checks/rdd_placebo_2.Rdata")
 rdd_placebo
 ```
 Visualization of placebo cutoffs:
-```{r, rdrobust_placebo_viz2, eval=FALSE}
-# to do: remove eval=FALSE
+```{r, rdrobust_placebo_viz2}
 df <- rdd_placebo %>%
   #tidyr::drop_na() %>%
   #filter(abs(ci_upper) < 100 | abs(ci_lower) < 100) %>%
-  mutate(effective_n = paste0("n=", trimws(format(sum(obs_below, obs_above), big.mark = ",") ) ) ) # add big mark
+  rowwise() %>%
+  mutate(note = paste0("n=",
+                       trimws(format(sum(obs_below, obs_above), big.mark = ",") ),
+                       "\np=",
+                       round(p, 2) ) ) %>% # add big mark
+  ungroup()
+even_number <- round(abs(df$placebo_c*100) %% 2, 0) %% 2
 ggplot2::ggplot(df) +
   geom_point(aes(x = placebo_c, y = point_estimate), size = 1.5, colour = ifelse(df$p <= 0.05, 2, 1)) +
   geom_errorbar(aes(x = placebo_c, ymin = ci_lower, ymax = ci_upper),
                 colour = ifelse(df$p <= 0.05, 2, 1),
                 linetype = ifelse(df$p <= 0.05, 2, 1)) +
-  geom_text(aes(x = placebo_c, y = ci_lower, label = effective_n),
-            colour = ifelse(df$p <= 0.05, 2, 1), vjust = 1) +
+  geom_text(aes(x = placebo_c,
+                y = ifelse(even_number == 0, -0.8, -1),
+                label = note),
+            colour = ifelse(df$p <= 0.05, 2, 1),
+            size = 2.7,
+            vjust = 0) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   geom_vline(aes(xintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "Cutoff of the running variable", y = "Increase in spending at the threshold")
-ggsave(filename = "plots/rdrobust_placebo1.pdf", width = 6, height = 6*9/16)
-rm(df)
+ggsave(filename = "plots/rdrobust_placebo.pdf", width = 6, height = 6*9/16)
+rm(df, even_number)
 ```
 
 Third attempt: Random cutoffs within the inter-quartile range.
@@ -1365,8 +1466,7 @@ load(file = "tables_robustness_checks/rdd_placebo_3.Rdata")
 rdd_placebo
 ```
 Visualization of placebo cutoffs:
-```{r, rdrobust_placebo_viz3, eval=FALSE}
-# to do: remove eval=FALSE
+```{r, rdrobust_placebo_viz3}
 df <- rdd_placebo %>%
   #tidyr::drop_na() %>%
   #filter(abs(ci_upper) < 100 | abs(ci_lower) < 100) %>%
@@ -1382,17 +1482,236 @@ ggplot2::ggplot(df) +
   geom_vline(aes(xintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "Cutoff of the running variable", y = "Increase in spending at the threshold")
-ggsave(filename = "plots/rdrobust_placebo2.pdf", width = 6, height = 6*9/16)
 rm(df)
+```
+
+#### Sample split by `above_cutoff`
+
+Based on main placebo "specification" ("second attempt", regular distances within inter-quartile range), I split the sample into two by values of the "instrument" `above_cutoff`:
+
+```{r, rdrobust_placebo_split, eval=FALSE}
+# to do: remove eval=FALSE
+# Above
+df <- d_rdd_bivariate %>% filter(above_cutoff == 1)
+rdd_placebo_split <-
+  tibble(sample = "", placebo_c = "", point_estimate = "", se = "", se_robust = "",
+         ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
+  mutate(across(2:last_col(), as.numeric))
+vector <- seq(from = 0.015, to = (0.18), by = 0.015) # Choose vector of arbitrary placebo cutoffs
+rdd_placebo_above <- rdd_placebo_split
+for (i in vector) {
+  print(paste("Cutoff at:", i))
+  rdd <- rdrobust::rdrobust(
+    y = df$ln_gross_expenditure_pc,
+    x = df$inhabs_rel_to_cutoff,
+    c = i,
+    fuzzy = df$total_seats,
+    cluster = df$inhabitants_treshold_factor,
+    covs = model.matrix( ~ df$inhabitants_treshold_factor + df$year + df$state)
+  )
+  #summary(rdd)
+  rdd_placebo_above <- rdd_placebo_above %>%
+    dplyr::add_row(
+      sample = "above",
+      placebo_c = i,
+      point_estimate = rdd$coef[1],
+      se = rdd$se[1],
+      se_robust = rdd$se[3],
+      ci_lower = rdd$ci[3,1],
+      ci_upper = rdd$ci[3,2],
+      p = rdd$pv[3],
+      bw = rdd$bws[1,1],
+      obs_below = rdd$N_h[1],
+      obs_above = rdd$N_h[2]
+  )
+}
+
+# Below
+df <- d_rdd_bivariate %>% filter(above_cutoff == 0)
+vector <- seq(from = -0.18, to = -0.015, by = 0.015) # Choose vector of arbitrary placebo cutoffs
+rdd_placebo_below <- rdd_placebo_split
+for (i in vector) {
+  print(paste("Cutoff at:", i))
+  rdd <- rdrobust::rdrobust(
+    y = df$ln_gross_expenditure_pc,
+    x = df$inhabs_rel_to_cutoff,
+    c = i,
+    fuzzy = df$total_seats,
+    cluster = df$inhabitants_treshold_factor,
+    covs = model.matrix( ~ df$inhabitants_treshold_factor + df$year + df$state)
+  )
+  #summary(rdd)
+  rdd_placebo_below <- rdd_placebo_below %>%
+    dplyr::add_row(
+      sample = "below",
+      placebo_c = i,
+      point_estimate = rdd$coef[1],
+      se = rdd$se[1],
+      se_robust = rdd$se[3],
+      ci_lower = rdd$ci[3,1],
+      ci_upper = rdd$ci[3,2],
+      p = rdd$pv[3],
+      bw = rdd$bws[1,1],
+      obs_below = rdd$N_h[1],
+      obs_above = rdd$N_h[2]
+  )
+}
+# Bind
+rdd_placebo_split <-
+  rbind(rdd_placebo_above, rdd_placebo_below) %>%
+  drop_na() %>%
+  arrange(placebo_c)
+
+# Save & clean up
+rm(df, rdd_placebo_above, rdd_placebo_below, vector)
+save(rdd_placebo_split, file = "tables_robustness_checks/rdd_placebo_split.Rdata")
+```
+```{r}
+load(file = "tables_robustness_checks/rdd_placebo_split.Rdata")
+rdd_placebo_split
+```
+Visualization of placebo cutoffs:
+```{r, rdrobust_placebo_split_viz}
+df <- rdd_placebo_split %>%
+  filter(abs(ci_upper) < 15 | abs(ci_lower) < 15) %>%
+  rowwise() %>%
+  mutate(note = paste0("n=",
+                       trimws(format(sum(obs_below, obs_above), big.mark = ",") ), # add big mark
+                       "\np=",
+                       round(p, 2) ) ) %>%
+  ungroup()
+even_number <- round((df$placebo_c*1000), 0) %% 2
+ggplot2::ggplot(df) +
+  geom_point(aes(x = placebo_c, y = point_estimate), size = 1.5, colour = ifelse(df$p <= 0.05, 2, 1)) +
+  geom_errorbar(aes(x = placebo_c, ymin = ci_lower, ymax = ci_upper),
+                colour = ifelse(df$p <= 0.05, 2, 1),
+                linetype = ifelse(df$p <= 0.05, 2, 1)) +
+  geom_text(aes(x = placebo_c,
+                y = ifelse(even_number == 0, -1.4, -1.8),
+                label = note),
+            colour = ifelse(df$p <= 0.05, 2, 1),
+            size = 2.7,
+            vjust = 0) +
+  geom_hline(aes(yintercept = 0), linetype = "dotted") +
+  geom_vline(aes(xintercept = 0), linetype = "dotted") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Cutoff of the running variable", y = "Increase in spending at the threshold")
+rm(df, even_number)
 ```
 
 
 ### Donut-hole RDD
 
+```{r}
+summary(d_rdd_bivariate$inhabs_rel_to_cutoff)
+quantile(d_rdd_bivariate$inhabs_rel_to_cutoff, c(0.45, 0.55))
+```
+
+
+```{r}
+donut <- seq(0.005, 0.03, 0.005)
+```
+```{r, donut_rdd, eval=FALSE}
+# to do: remove eval=FALSE
+rdd_donut <-
+  tibble(donut_radius = "", dropped_obs = "", point_estimate = "", se = "", se_robust = "",
+         ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
+  mutate(across(everything(), as.numeric))
+for (i in 1:length(donut)) {
+  print(donut[i])
+  print(paste("Number of dropped observations at the center:",
+              d_rdd_bivariate %>% filter(abs(inhabs_rel_to_cutoff) <= donut[i]) %>% nrow(.)))
+  df <- d_rdd_bivariate %>% filter(abs(inhabs_rel_to_cutoff) > donut[i])
+  rdd <-
+    rdrobust::rdrobust(
+      y = df$ln_gross_expenditure_pc,
+      x = df$inhabs_rel_to_cutoff,
+      fuzzy = df$total_seats,
+      cluster = df$inhabitants_treshold_factor,
+      covs = model.matrix( ~ df$inhabitants_treshold_factor + df$year + df$state)
+      )
+  summary(rdd)
+  rdd_donut <- rdd_donut %>%
+    dplyr::add_row(
+      donut_radius = donut[i],
+      dropped_obs = d_rdd_bivariate %>% filter(abs(inhabs_rel_to_cutoff) <= donut[i]) %>% nrow(.),
+      point_estimate = rdd$coef[1],
+      se = rdd$se[1],
+      se_robust = rdd$se[3],
+      ci_lower = rdd$ci[3,1],
+      ci_upper = rdd$ci[3,2],
+      p = rdd$pv[3],
+      bw = rdd$bws[1,1],
+      obs_below = rdd$N_h[1],
+      obs_above = rdd$N_h[2]
+  )
+  save(rdd, file = paste0("tables_robustness_checks/rdd_donut_rdrobust", i, ".RData"))
+  df <- df %>% filter(closest <= 0.1)
+  rdd <- fixest::feols(ln_gross_expenditure_pc ~
+                         1  | # controls
+                         inhabitants_treshold_factor + year + ags | # fixed-effect controls
+                         # First stage regression:
+                         inhabs_rel_to_cutoff*total_seats ~ # Instrument our standard RDD...
+                         inhabs_rel_to_cutoff*above_cutoff, # ... with being above the cutoff
+                       vcov = "threeway",
+                       data = df)
+  summary(rdd)
+  save(rdd, file = paste0("tables_robustness_checks/rdd_donut_iv", i, ".RData"))
+}
+rdd_donut <- rdd_donut %>% drop_na()
+save(rdd_donut, file = "tables_robustness_checks/rdd_donut.Rdata")
+rm(df)
+```
+
+```{r}
+for (i in 1:length(donut)) {
+  print(donut[i])
+  print(paste("Number of dropped observations at the center:",
+              d_rdd_bivariate %>% filter(abs(inhabs_rel_to_cutoff) <= donut[i]) %>% nrow(.)))
+  df <- d_rdd_bivariate %>% filter(abs(inhabs_rel_to_cutoff) > donut[i])
+  load(file = paste0("tables_robustness_checks/rdd_donut_rdrobust", i, ".RData"))
+  #summary(rdd)
+  load(file = paste0("tables_robustness_checks/rdd_donut_iv", i, ".RData"))
+  #summary(rdd)
+}
+load(file = "tables_robustness_checks/rdd_donut.Rdata")
+rdd_donut
+```
+```{r}
+rm(donut)
+```
+
+```{r}
+df <- rdd_donut %>%
+  mutate(donut_radius = paste0("[-", donut_radius, ",", donut_radius, "]")) %>%
+  rowwise() %>%
+  mutate(note = paste0("n=",
+                       trimws(format(sum(obs_below, obs_above), big.mark = ",") ), # add big mark
+                       "\np=",
+                       round(p, 2) ) ) %>%
+  ungroup()
+ggplot2::ggplot(data = df, aes(x = donut_radius, y = point_estimate)) +
+  geom_point(size = 1.5, color = ifelse(df$p <= 0.05, 2, 1)) +
+  geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
+                color = ifelse(df$p <= 0.05, 2, 1),
+                linetype = ifelse(df$p <= 0.05, 2, 1),
+                width = 0.25) +
+  geom_text(aes(x = donut_radius, y = -0.06, label = note),
+            colour = ifelse(df$p <= 0.05, 2, 1), vjust = 0) +
+  geom_hline(aes(yintercept = 0), linetype = "dotted") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Interval of excluded data of the running variable (population relative to thresholds)",
+       y = "Increase in spending at the threshold")
+ggsave(filename = "plots/rdd_donut.pdf", width = 6, height = 6*9/16)
+rm(df)
+```
+
+Four out of six regressions are positively significant...
+
 
 ### Mass points
 
-Investigating mass points: to do
+Investigating and counting mass points:
 
 ```{r}
 sum(!is.na(data$inhabs_rel_to_cutoff)) # Number of valid observations of running variable
@@ -1400,11 +1719,75 @@ length(unique(data$inhabs_rel_to_cutoff)) # Number of unique values of running v
 sum(!is.na(data$inhabs_rel_to_cutoff)) / length(unique(data$inhabs_rel_to_cutoff)) # 18 observations per value
 ```
 
-Lee and Card 2008 procedure: Clustering at the respective dicrete values of the running variable
+#### Clustering at discrete values
 
---> RDhonest???
+Lee and Card (2008) procedure: Clustering at the respective dicrete values of the running variable. As for as I know, this is only possible in the IV approach. However, it has been shown not to be a statistically valid approach (see next subsection).
+
+```{r}
+rdd <-
+  rdrobust::rdrobust(
+    y = d_rdd_bivariate$ln_gross_expenditure_pc,
+    x = d_rdd_bivariate$inhabs_rel_to_cutoff,
+    fuzzy = d_rdd_bivariate$total_seats,
+    cluster = d_rdd_bivariate$inhabs_rel_to_cutoff,
+    covs = model.matrix( ~ d_rdd_bivariate$inhabitants_treshold_factor + d_rdd_bivariate$year + d_rdd_bivariate$state)
+  )
+summary(rdd)
+```
+```{r}
+df <- d_rdd_bivariate %>%
+  filter(closest <= 0.1) # Choose bandwidth window -- similar to Höhmann (2017)
+# only one FE
+rdd <- fixest::feols(
+  ln_gross_expenditure_pc ~
+    1  | # controls
+    inhabitants_treshold_factor | # fixed-effect controls
+    # First stage regression:
+    inhabs_rel_to_cutoff * total_seats ~ # Instrument our standard RDD...
+    inhabs_rel_to_cutoff * above_cutoff, # ... with being above the cutoff
+  cluster = c("inhabitants_treshold_factor", "inhabs_rel_to_cutoff"),
+  data = df
+)
+summary(rdd)
+# three FE
+rdd <- fixest::feols(
+  ln_gross_expenditure_pc ~
+    1  | # controls
+    inhabitants_treshold_factor + year + ags | # fixed-effect controls
+    # First stage regression:
+    inhabs_rel_to_cutoff * total_seats ~ # Instrument our standard RDD...
+    inhabs_rel_to_cutoff * above_cutoff, # ... with being above the cutoff
+  cluster = c("inhabitants_treshold_factor", "year", "ags", "inhabs_rel_to_cutoff"),
+  data = df
+)
+summary(rdd)
+rm(df, rdd)
+```
+
+IV approach does not alter the conclusions significantly but the `rdrobust` one does... Note that this approach is not statistically sound (see next subsection and its paper).
 
 
+#### `RDHonest` package
+
+Based on Kolesár & Rothe (2018):
+
+```{r}
+# Sharp (intention to treat)
+RDHonest::RDHonest(
+  formula = ln_gross_expenditure_pc ~ inhabs_rel_to_cutoff,
+  data = d_rdd_bivariate#,
+  #clusterid = model.matrix( ~  inhabitants_treshold_factor) # No idea how to correctly specify the clusterid variable
+)
+# Fuzzy
+# RDHonest::RDHonest(
+#   formula = ln_gross_expenditure_pc ~ inhabs_rel_to_cutoff + total_seats,
+#   data = d_rdd_bivariate
+# )
+```
+
+The results from the sharp `RDHonest` are interesting in that the parameter is significant. However, the estimation is not clustered at the respective thresholds, presumable invalidating the result.
+
+For the fuzzy case, I do not know how to run it. According to the [`RDhonest` vignette](https://github.com/kolesarm/RDHonest/blob/master/vignettes/RDHonest.Rmd), one needs a function called `FRDData`, which is, however, apparently not part of the package.
 
 
 # Concluding Remarks
