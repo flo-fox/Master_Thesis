@@ -102,7 +102,7 @@ Export plot:
 ```{r}
 pdf(file = "plots/mccrary.pdf", width = 7, height = 7*9/16)
 rdd::DCdensity(runvar = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff, cutpoint = 0, plot = TRUE, verbose = TRUE)
-title(xlab = "Running variable (Population relative to thresholds)")
+title(xlab = "Running variable (population relative to thresholds)")
 abline(v=0)
 dev.off()
 ```
@@ -115,7 +115,7 @@ The test for the overall data is significant (i. e. there is a jump at the thres
 ```{r}
 rddensity_disc_test <- rddensity::rddensity(X = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff, c = 0)
 summary(rddensity_disc_test)
-p <- rddensity::rdplotdensity(rddensity_disc_test, X = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff, xlabel = "Running variable (Population relative to threshold)")
+p <- rdplotdensity_with_theme(rddensity_disc_test, X = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff, xlabel = "Running variable (population relative to threshold)")
 ```
 
 Export plot

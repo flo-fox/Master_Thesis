@@ -620,16 +620,22 @@ df <- rdd_vary_states %>%
   ),
   state_name = fct_reorder(state_name, state)) %>%
   rowwise() %>%
-  mutate(effective_n = paste0("n=", trimws(format(sum(obs_below, obs_above), big.mark = ",")))) %>%
+  mutate(note = paste0(
+    "n=",
+    trimws(format(sum(obs_below, obs_above), big.mark = ",")),
+    "\n",
+    p_value(p),
+    assign_stars(p)
+    )) %>%
   ungroup()
 plot_states_fuzzy1 <- ggplot2::ggplot(data = df, aes(x = state_name, y = point_estimate)) +
-  geom_point(size = 1.5, color = ifelse(df$p <= p_value_cutoff, 2, 1)) +
+  geom_point(color = ifelse(df$p <= p_value_cutoff, 2, 1)) +
   geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
                 color = ifelse(df$p <= p_value_cutoff, 2, 1),
                 linetype = ifelse(df$p <= p_value_cutoff, 2, 1),
                 width = 0.5) +
-  geom_text(aes(y = -1.05, label = effective_n),
-            colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 1) +
+  geom_text(aes(y = -1.75, label = note),
+            colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 0, size = 2.8) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   labs(title = "First stage", x = "State", y = "Increase in council size at the threshold")
 plot_states_fuzzy1
@@ -650,7 +656,13 @@ df <- rdd_vary_states %>%
   ),
   state_name = fct_reorder(state_name, state)) %>%
   rowwise() %>%
-  mutate(effective_n = paste0("n=", trimws(format(sum(obs_below, obs_above), big.mark = ",")))) %>%
+  mutate(note = paste0(
+    "n=",
+    trimws(format(sum(obs_below, obs_above), big.mark = ",")),
+    "\n",
+    p_value(p),
+    assign_stars(p)
+    )) %>%
   ungroup()
 plot_states_fuzzy2 <- ggplot2::ggplot(data = df, aes(x = state_name, y = point_estimate)) +
   geom_point(size = 1.5, color = ifelse(df$p <= p_value_cutoff, 2, 1)) +
@@ -658,8 +670,8 @@ plot_states_fuzzy2 <- ggplot2::ggplot(data = df, aes(x = state_name, y = point_e
                 color = ifelse(df$p <= p_value_cutoff, 2, 1),
                 linetype = ifelse(df$p <= p_value_cutoff, 2, 1),
                 width = 0.5) +
-  geom_text(aes(y = -0.165, label = effective_n),
-            colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 1) +
+  geom_text(aes(y = -0.22, label = note),
+            colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 0, size = 2.8) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
   labs(title = "Second stage", x = "State", y = "Increase in spending at the threshold")
@@ -735,7 +747,13 @@ df <- rdd_vary_states %>%
   ),
   state_name = fct_reorder(state_name, state)) %>%
   rowwise() %>%
-  mutate(effective_n = paste0("n=", trimws(format(sum(obs_below, obs_above), big.mark = ",")))) %>%
+  mutate(note = paste0(
+    "n=",
+    trimws(format(sum(obs_below, obs_above), big.mark = ",")),
+    "\n",
+    p_value(p),
+    assign_stars(p)
+    )) %>%
   ungroup()
 plot_states_sharp <- ggplot2::ggplot(data = df, aes(x = state_name, y = point_estimate)) +
   geom_point(size = 1.5, color = ifelse(df$p <= p_value_cutoff, 2, 1)) +
@@ -743,8 +761,8 @@ plot_states_sharp <- ggplot2::ggplot(data = df, aes(x = state_name, y = point_es
                 color = ifelse(df$p <= p_value_cutoff, 2, 1),
                 linetype = ifelse(df$p <= p_value_cutoff, 2, 1),
                 width = 0.5) +
-  geom_text(aes(y = -0.09, label = effective_n),
-            colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 1) +
+  geom_text(aes(y = -0.165, label = note),
+            colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 0) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "State", y = "Increase in spending at the threshold")
@@ -1117,9 +1135,15 @@ rdd_vary_may_affil
 for (i in c("fuzzy", "sharp")) {
   df <- rdd_vary_may_affil %>%
     filter(method == i) %>%
-    rowwise() %>%
-    mutate(effective_n = paste0("n=", trimws(format(sum(obs_below, obs_above), big.mark = ",")))) %>%
-    ungroup()
+  rowwise() %>%
+  mutate(note = paste0(
+    "n=",
+    trimws(format(sum(obs_below, obs_above), big.mark = ",")),
+    "\n",
+    p_value(p),
+    assign_stars(p)
+    )) %>%
+  ungroup()
   p <- ggplot2::ggplot(data = df, aes(x = reorder(mayor_party_affiliation, c(1,3,2)),
                                       y = point_estimate)) +
     geom_point(size = 1.5, color = ifelse(df$p <= p_value_cutoff, 2, 1)) +
@@ -1127,8 +1151,8 @@ for (i in c("fuzzy", "sharp")) {
                   color = ifelse(df$p <= p_value_cutoff, 2, 1),
                   linetype = ifelse(df$p <= p_value_cutoff, 2, 1),
                   width = 0.5) +
-    geom_text(aes(y = -0.135, label = effective_n),
-            colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 1) +
+    geom_text(aes(y = -0.155, label = note),
+            colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 0) +
     geom_hline(aes(yintercept = 0), linetype = "dotted") +
     scale_y_continuous(labels = scales::percent) +
     labs(y = "Increase in spending at the threshold", title = i)
@@ -1407,7 +1431,7 @@ data_subset <- data %>% # prepare data set used for analysis
   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year, absolute_majority) %>%
   drop_na()
 table(data_subset$state)
-lims <- c(-0.0425, 0.04) # ggplot y axis limits
+lims <- c(-0.05, 0.04) # ggplot y axis limits
 ```
 ```{r, eval=FALSE}
 # to do: remove eval=FALSE
@@ -1460,8 +1484,9 @@ df <- rdd_vary_abs_majority %>%
   mutate(note = paste0(
     "n=",
     trimws(format(sum(obs_below, obs_above), big.mark = ",")),
-    "\np=",
-    round(p, 2)
+    "\n",
+    p_value(p),
+    assign_stars(p)
     )) %>% 
   ungroup()
 p_maj1 <-
@@ -1472,7 +1497,7 @@ p_maj1 <-
                 linetype = ifelse(df$p <= p_value_cutoff, 2, 1),
                 width = 0.5) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
-  geom_text(aes(y = -0.04, label = note),
+  geom_text(aes(y = -0.0475, label = note),
             colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 0) +
   scale_y_continuous(limits = lims, labels = scales::percent) +
   aes(stringr::str_wrap(absolute_majority, 15)) +
@@ -1578,8 +1603,9 @@ df <- rdd_vary_abs_majority2 %>%
   mutate(note = paste0(
     "n=",
     trimws(format(sum(obs_below, obs_above), big.mark = ",")),
-    "\np=",
-    round(p, 2)
+    "\n",
+    p_value(p),
+    assign_stars(p)
     )) %>% 
   ungroup()
 p_maj2 <-
@@ -1589,7 +1615,7 @@ p_maj2 <-
                 color = ifelse(df$p <= p_value_cutoff, 2, 1),
                 linetype = ifelse(df$p <= p_value_cutoff, 2, 1),
                 width = 0.5) +
-  geom_text(aes(y = -0.04, label = note),
+  geom_text(aes(y = -0.0475, label = note),
             colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 0) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(limits = lims, labels = scales::percent) +
@@ -1770,7 +1796,8 @@ for (i in exp_category) {
       x = df$inhabs_rel_to_cutoff,
       fuzzy = df$total_seats,
       cluster = df$inhabitants_treshold_factor,
-      covs = model.matrix(~ df$inhabitants_treshold_factor + df$year + df$state)
+      covs = model.matrix(~ df$inhabitants_treshold_factor + df$year + df$state),
+      level = (1-p_value_cutoff)*100
     )
   #summary(rdd)
   rdd_vary_exp_category <- rdd_vary_exp_category %>%
@@ -1805,8 +1832,9 @@ df <- rdd_vary_exp_category %>%
   mutate(note = paste0(
     "n=",
     trimws(format(sum(obs_below, obs_above), big.mark = ",")),
-    "\np=",
-    round(p, 2)
+    "\n",
+    p_value(p),
+    assign_stars(p)
     )) %>% 
   ungroup()
 ggplot2::ggplot(data = df, aes(x = exp_category2, y = point_estimate)) +
@@ -1819,7 +1847,7 @@ ggplot2::ggplot(data = df, aes(x = exp_category2, y = point_estimate)) +
   scale_y_continuous(labels = scales::percent) +
   aes(stringr::str_wrap(exp_category2, 15)) +
   labs(x = NULL, y = "Increase in spending at the threshold") +
-  geom_text(aes(y = -0.1, label = note),
+  geom_text(aes(y = -0.13, label = note),
             colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 0) #+
   #coord_flip()
 ggsave(filename = "plots/rdd_exp_categories.pdf", width = 6, height = 6*9/16)
@@ -1951,8 +1979,9 @@ rdd_vary_fem_rep <- rdd_vary_fem_rep %>%
   mutate(note = paste0(
     "n=",
     trimws(format(sum(obs_below, obs_above), big.mark = ",")),
-    "\np=",
-    round(p, 2)
+    "\n",
+    p_value(p),
+    assign_stars(p)
     )) %>% 
   ungroup()
 df1 <- rdd_vary_fem_rep %>% filter(var == "female_share_council")
@@ -1966,7 +1995,7 @@ p1 <- ggplot2::ggplot(data = df1, aes(x = value, y = point_estimate)) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(limits = lims, labels = scales::percent) +
   geom_text(aes(y = -0.14, label = note),
-            colour = ifelse(df1$p <= p_value_cutoff, 2, 1), vjust = 0) +
+            colour = ifelse(df1$p <= p_value_cutoff, 2, 1), vjust = 0, size = 2.75) +
   labs(subtitle = "Share of women in council",
        x = "Quantile", y = "Increase in spending at the threshold")
 p1
@@ -1980,7 +2009,7 @@ p2 <- ggplot2::ggplot(data = df2, aes(x = value, y = point_estimate)) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(limits = lims, labels = scales::percent) +
   geom_text(aes(y = -0.14, label = note),
-            colour = ifelse(df2$p <= p_value_cutoff, 2, 1), vjust = 0) +
+            colour = ifelse(df2$p <= p_value_cutoff, 2, 1), vjust = 0, size = 2.75) +
   labs(subtitle = "Share of women in the largest party",
        x = "Quantile of the heterogeneity-inducing variable", y = "Increase in spending at the threshold")
 p2
@@ -2362,8 +2391,9 @@ rdd_vary_city
   mutate(note = paste0(
     "n=",
     trimws(format(sum(obs_below, obs_above), big.mark = ",")),
-    "\np=",
-    round(p, 2)
+    "\n",
+    p_value(p),
+    assign_stars(p)
     )) %>%
   ungroup()
 ggplot2::ggplot(data = df, aes(x = reorder(status, c(1, 3, 2)), y = point_estimate)) +

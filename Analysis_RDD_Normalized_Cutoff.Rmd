@@ -23,6 +23,7 @@ library(RDHonest)
 library(xtable)
 library(scales)
 library(janitor)
+library(latex2exp) # For mathematical notation in ggplot
 source("functions/functions.R")
 ```
 
@@ -1406,8 +1407,9 @@ df <- rdd_placebo %>%
   rowwise() %>%
   mutate(note = paste0("n=",
                        trimws(format(sum(obs_below, obs_above), big.mark = ",") ),
-                       "\np=",
-                       round(p, 2) ) ) %>% # add big mark
+                       "\n",
+                       p_value(p),
+                       assign_stars(p) ) ) %>% # add big mark
   ungroup()
 even_number <- round(abs(df$placebo_c*100) %% 2, 0) %% 2
 ggplot2::ggplot(df) +
@@ -1577,8 +1579,9 @@ df <- rdd_placebo_split %>%
   rowwise() %>%
   mutate(note = paste0("n=",
                        trimws(format(sum(obs_below, obs_above), big.mark = ",") ), # add big mark
-                       "\np=",
-                       round(p, 2) ) ) %>%
+                       "\n",
+                       p_value(p),
+                       assign_stars(p) ) ) %>%
   ungroup()
 even_number <- round((df$placebo_c*1000), 0) %% 2
 ggplot2::ggplot(df) +
@@ -1602,6 +1605,8 @@ rm(df, even_number)
 
 ### Donut-hole RDD
 
+#### Values of the running variable
+
 ```{r}
 summary(d_rdd_bivariate$inhabs_rel_to_cutoff)
 quantile(d_rdd_bivariate$inhabs_rel_to_cutoff, c(0.45, 0.55))
@@ -1609,13 +1614,17 @@ quantile(d_rdd_bivariate$inhabs_rel_to_cutoff, c(0.45, 0.55))
 
 
 ```{r}
-donut <- seq(0.005, 0.03, 0.005)
+#donut <- seq(0.005, 0.03, 0.005)
+#donut <- seq(0.0025, 0.02, 0.0025)
+donut <- seq(0.0025, 0.0325, 0.0025)
 ```
 ```{r, donut_rdd, eval=FALSE}
 # to do: remove eval=FALSE
 rdd_donut <-
   tibble(donut_radius = "", dropped_obs = "", point_estimate = "", se = "", se_robust = "",
-         ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
+         ci_lower = "", ci_upper = "", p = "",
+         point_estimate_first_stage = "", ci_lower_first_stage = "", ci_upper_first_stage = "",
+         bw = "", obs_below = "", obs_above = "") %>%
   mutate(across(everything(), as.numeric))
 for (i in 1:length(donut)) {
   print(donut[i])
@@ -1641,6 +1650,9 @@ for (i in 1:length(donut)) {
       ci_lower = rdd$ci[3,1],
       ci_upper = rdd$ci[3,2],
       p = rdd$pv[3],
+      point_estimate_first_stage = rdd$tau_T[1],
+      ci_lower_first_stage = rdd$ci_T[3,1],
+      ci_upper_first_stage = rdd$ci_T[3,2],
       bw = rdd$bws[1,1],
       obs_below = rdd$N_h[1],
       obs_above = rdd$N_h[2]
@@ -1658,7 +1670,9 @@ for (i in 1:length(donut)) {
   summary(rdd)
   save(rdd, file = paste0("tables_robustness_checks/rdd_donut_iv", i, ".RData"))
 }
-rdd_donut <- rdd_donut %>% drop_na()
+rdd_donut <- rdd_donut %>%
+  drop_na() %>%
+  mutate(share_dropped = dropped_obs / nrow(d_rdd_bivariate), .after = dropped_obs)
 save(rdd_donut, file = "tables_robustness_checks/rdd_donut.Rdata")
 rm(df)
 ```
@@ -1682,13 +1696,15 @@ rm(donut)
 ```
 
 ```{r}
+text_size <- 2.75
 df <- rdd_donut %>%
+  filter(donut_radius <= 0.025) %>%
   mutate(donut_radius = paste0("[-", donut_radius, ",", donut_radius, "]")) %>%
   rowwise() %>%
   mutate(note = paste0("n=",
-                       trimws(format(sum(obs_below, obs_above), big.mark = ",") ), # add big mark
-                       "\np=",
-                       round(p, 2) ) ) %>%
+                       trimws(format(sum(obs_below, obs_above), big.mark = ",") ) # add big mark
+                       ),
+         note2 = paste0(p_value(p), assign_stars(p))) %>%
   ungroup()
 ggplot2::ggplot(data = df, aes(x = donut_radius, y = point_estimate)) +
   geom_point(size = 1.5, color = ifelse(df$p <= 0.05, 2, 1)) +
@@ -1696,17 +1712,155 @@ ggplot2::ggplot(data = df, aes(x = donut_radius, y = point_estimate)) +
                 color = ifelse(df$p <= 0.05, 2, 1),
                 linetype = ifelse(df$p <= 0.05, 2, 1),
                 width = 0.25) +
-  geom_text(aes(x = donut_radius, y = -0.06, label = note),
-            colour = ifelse(df$p <= 0.05, 2, 1), vjust = 0) +
+  geom_text(aes(x = donut_radius, y = -0.025, label = note),
+            colour = ifelse(df$p <= 0.05, 2, 1), size = text_size,
+            vjust = 0) +
+  annotate(geom = "text", x = df$donut_radius, y = -0.03166667,
+           label = latex2exp::TeX("$n_{dropped}$="),
+            colour = ifelse(df$p <= 0.05, 2, 1), size = text_size,
+           vjust = 0) +# Doesn't work with geom_text, apparently
+  geom_text(aes(x = donut_radius, y = -0.03833333,
+                label = format(dropped_obs, big.mark = ",")),
+            colour = ifelse(df$p <= 0.05, 2, 1), size = text_size,
+            vjust = 0) +
+  geom_text(aes(x = donut_radius, y = -0.045, label = note2),
+            colour = ifelse(df$p <= 0.05, 2, 1), size = text_size,
+            vjust = 0) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "Interval of excluded data of the running variable (population relative to thresholds)",
-       y = "Increase in spending at the threshold")
-ggsave(filename = "plots/rdd_donut.pdf", width = 6, height = 6*9/16)
-rm(df)
+       y = "Increase in spending at the threshold") +
+  theme(axis.text.x = element_text(size = 6))
+ggsave(filename = "plots/rdd_donut.pdf", width = 7, height = 7*9/16)
+rm(df, text_size)
 ```
 
-Four out of six regressions are positively significant...
+Plotting only "donuts" close to the threshold (i. e. running variable $|X| \leq 0.025$) as this would be where sorting would most likely occur.
+
+Seven out of ten regressions are positively significant...
+
+#### (Percentage) windows of the running variable
+
+```{r}
+donut_window <- seq(0.01, 0.09, 0.01)
+```
+```{r, donut_window_rdd, eval=FALSE}
+# to do: remove eval=FALSE
+rdd_donut_window <-
+  tibble(donut_window = "", dropped_obs = "", point_estimate = "", se = "", se_robust = "",
+         ci_lower = "", ci_upper = "", p = "",
+         point_estimate_first_stage = "", ci_lower_first_stage = "", ci_upper_first_stage = "",
+         bw = "", obs_below = "", obs_above = "") %>%
+  mutate(across(everything(), as.numeric))
+for (i in 1:length(donut_window)) {
+  print(donut_window[i])
+  print(paste("Number of dropped observations at the center:",
+              d_rdd_bivariate %>% filter(closest <= donut_window[i]) %>% nrow(.)))
+  df <- d_rdd_bivariate %>% filter(closest > donut_window[i])
+  rdd <-
+    rdrobust::rdrobust(
+      y = df$ln_gross_expenditure_pc,
+      x = df$inhabs_rel_to_cutoff,
+      fuzzy = df$total_seats,
+      cluster = df$inhabitants_treshold_factor,
+      covs = model.matrix( ~ df$inhabitants_treshold_factor + df$year + df$state)
+      )
+  summary(rdd)
+  do <- d_rdd_bivariate %>% filter(closest <= donut_window[i]) %>% nrow(.)
+  rdd_donut_window <- rdd_donut_window %>%
+    dplyr::add_row(
+      donut_window = donut_window[i],
+      dropped_obs = do,
+      point_estimate = rdd$coef[1],
+      se = rdd$se[1],
+      se_robust = rdd$se[3],
+      ci_lower = rdd$ci[3,1],
+      ci_upper = rdd$ci[3,2],
+      p = rdd$pv[3],
+      point_estimate_first_stage = rdd$tau_T[1],
+      ci_lower_first_stage = rdd$ci_T[3,1],
+      ci_upper_first_stage = rdd$ci_T[3,2],
+      bw = rdd$bws[1,1],
+      obs_below = rdd$N_h[1],
+      obs_above = rdd$N_h[2]
+  )
+  save(rdd, file = paste0("tables_robustness_checks/rdd_donut_window_rdrobust", i, ".RData"))
+  df <- df %>% filter(closest <= 0.1)
+  rdd <- fixest::feols(ln_gross_expenditure_pc ~
+                         1  | # controls
+                         inhabitants_treshold_factor + year + ags | # fixed-effect controls
+                         # First stage regression:
+                         inhabs_rel_to_cutoff*total_seats ~ # Instrument our standard RDD...
+                         inhabs_rel_to_cutoff*above_cutoff, # ... with being above the cutoff
+                       vcov = "threeway",
+                       data = df)
+  summary(rdd)
+  save(rdd, file = paste0("tables_robustness_checks/rdd_donut_window_iv", i, ".RData"))
+}
+rdd_donut_window <- rdd_donut_window %>%
+  drop_na() %>%
+  mutate(share_dropped = dropped_obs / nrow(d_rdd_bivariate), .after = dropped_obs)
+save(rdd_donut_window, file = "tables_robustness_checks/rdd_donut_window.Rdata")
+rm(df, do)
+```
+
+```{r}
+for (i in 1:length(donut_window)) {
+  print(donut_window[i])
+  print(paste("Number of dropped observations at the center:",
+              d_rdd_bivariate %>% filter(closest <= donut_window[i]) %>% nrow(.)))
+  df <- d_rdd_bivariate %>% filter(closest > donut_window[i])
+  load(file = paste0("tables_robustness_checks/rdd_donut_window_rdrobust", i, ".RData"))
+  #summary(rdd)
+  load(file = paste0("tables_robustness_checks/rdd_donut_window_iv", i, ".RData"))
+  #summary(rdd)
+}
+load(file = "tables_robustness_checks/rdd_donut_window.Rdata")
+rdd_donut_window
+```
+```{r}
+rm(donut_window)
+```
+
+```{r}
+text_size <- 2.75
+df <- rdd_donut_window %>%
+  #filter(donut_window <= 0.025) %>%
+  #mutate(donut_radius = paste0("[-", donut_radius, ",", donut_radius, "]")) %>%
+  rowwise() %>%
+  mutate(note = paste0("n=",
+                       trimws(format(sum(obs_below, obs_above), big.mark = ",") ) # add big mark
+                       ),
+         note2 = paste0(p_value(p), assign_stars(p))) %>%
+  ungroup()
+ggplot2::ggplot(data = df, aes(x = donut_window, y = point_estimate)) +
+  geom_point(size = 1.5, color = ifelse(df$p <= 0.05, 2, 1)) +
+  geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
+                color = ifelse(df$p <= 0.05, 2, 1),
+                linetype = ifelse(df$p <= 0.05, 2, 1),
+                width = 0.002) +
+  geom_text(aes(x = donut_window, y = -0.03, label = note),
+            colour = ifelse(df$p <= 0.05, 2, 1), size = text_size,
+            vjust = 0) +
+  annotate(geom = "text", x = df$donut_window, y = -0.03666667,
+           label = latex2exp::TeX("$n_{dropped}$="),
+            colour = ifelse(df$p <= 0.05, 2, 1), size = text_size,
+           vjust = 0) +# Doesn't work with geom_text, apparently
+  geom_text(aes(x = donut_window, y = -0.04333333,
+                label = format(dropped_obs, big.mark = ",")),
+            colour = ifelse(df$p <= 0.05, 2, 1), size = text_size,
+            vjust = 0) +
+  geom_text(aes(x = donut_window, y = -0.05, label = note2),
+            colour = ifelse(df$p <= 0.05, 2, 1), size = text_size,
+            vjust = 0) +
+  geom_hline(aes(yintercept = 0), linetype = "dotted") +
+  scale_x_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Window around the threshold",
+       y = "Increase in spending at the threshold")
+ggsave(filename = "plots/rdd_donut_window.pdf", width = 7, height = 7*9/16)
+rm(df, text_size)
+```
 
 
 ### Mass points

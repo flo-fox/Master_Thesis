@@ -84,6 +84,21 @@
       "Hash": "45f0398006e83a5b10b72a90663d8d8c",
       "Requirements": []
     },
+    "RDHonest": {
+      "Package": "RDHonest",
+      "Version": "0.4.1",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "RDHonest",
+      "RemoteUsername": "kolesarm",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "7b5b7475eb04d042f551fdc0318abbb90d6f074b",
+      "Hash": "09f173922df431aad5a703fdb9a1745b",
+      "Requirements": [
+        "Formula"
+      ]
+    },
     "Rcpp": {
       "Package": "Rcpp",
       "Version": "1.0.8.3",
@@ -918,6 +933,17 @@
       "Requirements": [
         "Rcpp",
         "rlang"
+      ]
+    },
+    "latex2exp": {
+      "Package": "latex2exp",
+      "Version": "0.9.5",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "c9f83888947a8e9c5f73b5b8997e73a9",
+      "Requirements": [
+        "magrittr",
+        "stringr"
       ]
     },
     "lattice": {
