@@ -11,7 +11,7 @@
 
 <meta name="author" content="Florian Fox" />
 
-<meta name="date" content="2022-09-27" />
+<meta name="date" content="2022-10-17" />
 
 <title>Master Thesis: A Causal Test of the Law of 1/n and its Mechanisms – Analysis: Conventional Regressions</title>
 
@@ -2784,7 +2784,7 @@ div.tocify {
 <h1 class="title toc-ignore">Master Thesis: A Causal Test of the Law of
 1/n and its Mechanisms – Analysis: Conventional Regressions</h1>
 <h4 class="author">Florian Fox</h4>
-<h4 class="date">2022-09-27</h4>
+<h4 class="date">2022-10-17</h4>
 
 </div>
 
@@ -2809,15 +2809,13 @@ library(tidyverse)</code></pre>
 library(xtable)
 #library(scales)
 #library(janitor)
-source(&quot;functions.R&quot;)</code></pre>
+source(&quot;functions/functions.R&quot;)</code></pre>
 <pre class="r"><code>data &lt;-
   readRDS(&quot;data/gemeinderatswahlen_alldata.rds&quot;) %&gt;%
   mutate(
     year = as.factor(year),
     ags = as.factor(ags)
   )</code></pre>
-<pre class="r"><code>options(scipen = 20)
-theme_set(theme_minimal())</code></pre>
 <p>Generating different data sets:</p>
 <pre class="r"><code>d_bivariate &lt;- data %&gt;%
   select(ln_gross_expenditure_pc, total_seats, ags, year, state) %&gt;% drop_na()
@@ -3067,48 +3065,48 @@ fixest::feols(
 ## kreisfreie_stadt1 ***
 ## ---
 ## Expl. vars.: total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha + share_working_age + kreisfreie_stadt + stadt
-##                       Estimate   Std. Error    t value            Pr(&gt;|t|)    
-## (Intercept)        7.061435016 0.0400079835 176.500648           &lt; 2.2e-16 ***
-## total_seats        0.007851058 0.0001893624  41.460482           &lt; 2.2e-16 ***
-## inh_tot           -0.000000214 0.0000000393  -5.433884 0.00000005526230741 ***
-## pop_over65         0.322394419 0.0449783027   7.167776 0.00000000000076724 ***
-## unempl_rate       -3.152870373 0.0408716452 -77.140775           &lt; 2.2e-16 ***
-## total_area_ha      0.000018058 0.0000005048  35.773997           &lt; 2.2e-16 ***
-## share_working_age  0.044469005 0.0567730595   0.783277 0.43346650521594987    
-## kreisfreie_stadt1  0.403928009 0.0104185168  38.770203           &lt; 2.2e-16 ***
-## stadt1             0.125261292 0.0032352680  38.717439           &lt; 2.2e-16 ***
+##                       Estimate   Std. Error    t value          Pr(&gt;|t|)    
+## (Intercept)        7.061545736 0.0400055795 176.514022         &lt; 2.2e-16 ***
+## total_seats        0.007778283 0.0001903678  40.859229         &lt; 2.2e-16 ***
+## inh_tot           -0.000000224 0.0000000395  -5.678912 0.000000013591059 ***
+## pop_over65         0.320765892 0.0449812196   7.131107 0.000000000001002 ***
+## unempl_rate       -3.158500357 0.0409052823 -77.214975         &lt; 2.2e-16 ***
+## total_area_ha      0.000018140 0.0000005049  35.927020         &lt; 2.2e-16 ***
+## share_working_age  0.046267236 0.0567730769   0.814950 0.415102605285770    
+## kreisfreie_stadt1  0.423804112 0.0104842191  40.423050         &lt; 2.2e-16 ***
+## stadt1             0.127398164 0.0032775494  38.869945         &lt; 2.2e-16 ***
 ## ---
 ## Expl. vars.: total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha + share_working_age + kreisfreie_stadt + stadt + years_since_last_elec
 ##                            Estimate   Std. Error    t value
-## (Intercept)             7.131724155 0.0403015540 176.959036
-## total_seats             0.008165926 0.0001888351  43.243684
-## inh_tot                -0.000000181 0.0000000399  -4.531834
-## pop_over65              0.268248338 0.0449413136   5.968858
-## unempl_rate            -2.926014355 0.0410437452 -71.290140
-## total_area_ha           0.000016732 0.0000004977  33.621566
-## share_working_age      -0.048785155 0.0568787173  -0.857705
-## kreisfreie_stadt1       0.394270070 0.0104352611  37.782482
-## stadt1                  0.125035949 0.0032229366  38.795659
-## years_since_last_elec1 -0.035278814 0.0037823988  -9.327101
-## years_since_last_elec2 -0.023410733 0.0037683687  -6.212432
-## years_since_last_elec3 -0.038980368 0.0034651923 -11.249121
-## years_since_last_elec4 -0.027429375 0.0035423783  -7.743209
-## years_since_last_elec5  0.201427230 0.0057391831  35.096847
-##                                     Pr(&gt;|t|)    
-## (Intercept)                        &lt; 2.2e-16 ***
-## total_seats                        &lt; 2.2e-16 ***
-## inh_tot                0.0000058538184997040 ***
-## pop_over65             0.0000000023968125064 ***
-## unempl_rate                        &lt; 2.2e-16 ***
-## total_area_ha                      &lt; 2.2e-16 ***
-## share_working_age      0.3910573826068410863    
-## kreisfreie_stadt1                  &lt; 2.2e-16 ***
-## stadt1                             &lt; 2.2e-16 ***
-## years_since_last_elec1             &lt; 2.2e-16 ***
-## years_since_last_elec2 0.0000000005236538518 ***
-## years_since_last_elec3             &lt; 2.2e-16 ***
-## years_since_last_elec4 0.0000000000000097798 ***
-## years_since_last_elec5             &lt; 2.2e-16 ***</code></pre>
+## (Intercept)             7.131532325 0.0402986929 176.966840
+## total_seats             0.008098496 0.0001898797  42.650655
+## inh_tot                -0.000000192 0.0000000402  -4.779973
+## pop_over65              0.267054907 0.0449427377   5.942115
+## unempl_rate            -2.931558971 0.0410825567 -71.357754
+## total_area_ha           0.000016821 0.0000004979  33.786935
+## share_working_age      -0.046782499 0.0568794991  -0.822484
+## kreisfreie_stadt1       0.413850412 0.0105396117  39.266192
+## stadt1                  0.126901527 0.0032667663  38.846222
+## years_since_last_elec1 -0.035187786 0.0037821500  -9.303646
+## years_since_last_elec2 -0.023325890 0.0037681440  -6.190286
+## years_since_last_elec3 -0.038936139 0.0034649841 -11.237033
+## years_since_last_elec4 -0.027387905 0.0035422868  -7.731702
+## years_since_last_elec5  0.201146038 0.0057412881  35.035002
+##                                    Pr(&gt;|t|)    
+## (Intercept)                       &lt; 2.2e-16 ***
+## total_seats                       &lt; 2.2e-16 ***
+## inh_tot                0.000001755548785227 ***
+## pop_over65             0.000000002822499615 ***
+## unempl_rate                       &lt; 2.2e-16 ***
+## total_area_ha                     &lt; 2.2e-16 ***
+## share_working_age      0.410803147835743121    
+## kreisfreie_stadt1                 &lt; 2.2e-16 ***
+## stadt1                            &lt; 2.2e-16 ***
+## years_since_last_elec1            &lt; 2.2e-16 ***
+## years_since_last_elec2 0.000000000602758365 ***
+## years_since_last_elec3            &lt; 2.2e-16 ***
+## years_since_last_elec4 0.000000000000010705 ***
+## years_since_last_elec5            &lt; 2.2e-16 ***</code></pre>
 <pre class="r"><code>ols &lt;- fixest::feols(
   ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
     share_working_age + kreisfreie_stadt + stadt + years_since_last_elec,
@@ -3121,39 +3119,39 @@ fixest::feols(
 ## Observations: 105,186 
 ## Standard-errors: Heteroskedasticity-robust 
 ##                            Estimate   Std. Error    t value
-## (Intercept)             7.131724155 0.0403015540 176.959036
-## total_seats             0.008165926 0.0001888351  43.243684
-## inh_tot                -0.000000181 0.0000000399  -4.531834
-## pop_over65              0.268248338 0.0449413136   5.968858
-## unempl_rate            -2.926014355 0.0410437452 -71.290140
-## total_area_ha           0.000016732 0.0000004977  33.621566
-## share_working_age      -0.048785155 0.0568787173  -0.857705
-## kreisfreie_stadt1       0.394270070 0.0104352611  37.782482
-## stadt1                  0.125035949 0.0032229366  38.795659
-## years_since_last_elec1 -0.035278814 0.0037823988  -9.327101
-## years_since_last_elec2 -0.023410733 0.0037683687  -6.212432
-## years_since_last_elec3 -0.038980368 0.0034651923 -11.249121
-## years_since_last_elec4 -0.027429375 0.0035423783  -7.743209
-## years_since_last_elec5  0.201427230 0.0057391831  35.096847
-##                                     Pr(&gt;|t|)    
-## (Intercept)                        &lt; 2.2e-16 ***
-## total_seats                        &lt; 2.2e-16 ***
-## inh_tot                0.0000058538184997040 ***
-## pop_over65             0.0000000023968125064 ***
-## unempl_rate                        &lt; 2.2e-16 ***
-## total_area_ha                      &lt; 2.2e-16 ***
-## share_working_age      0.3910573826068410863    
-## kreisfreie_stadt1                  &lt; 2.2e-16 ***
-## stadt1                             &lt; 2.2e-16 ***
-## years_since_last_elec1             &lt; 2.2e-16 ***
-## years_since_last_elec2 0.0000000005236538518 ***
-## years_since_last_elec3             &lt; 2.2e-16 ***
-## years_since_last_elec4 0.0000000000000097798 ***
-## years_since_last_elec5             &lt; 2.2e-16 ***
+## (Intercept)             7.131532325 0.0402986929 176.966840
+## total_seats             0.008098496 0.0001898797  42.650655
+## inh_tot                -0.000000192 0.0000000402  -4.779973
+## pop_over65              0.267054907 0.0449427377   5.942115
+## unempl_rate            -2.931558971 0.0410825567 -71.357754
+## total_area_ha           0.000016821 0.0000004979  33.786935
+## share_working_age      -0.046782499 0.0568794991  -0.822484
+## kreisfreie_stadt1       0.413850412 0.0105396117  39.266192
+## stadt1                  0.126901527 0.0032667663  38.846222
+## years_since_last_elec1 -0.035187786 0.0037821500  -9.303646
+## years_since_last_elec2 -0.023325890 0.0037681440  -6.190286
+## years_since_last_elec3 -0.038936139 0.0034649841 -11.237033
+## years_since_last_elec4 -0.027387905 0.0035422868  -7.731702
+## years_since_last_elec5  0.201146038 0.0057412881  35.035002
+##                                    Pr(&gt;|t|)    
+## (Intercept)                       &lt; 2.2e-16 ***
+## total_seats                       &lt; 2.2e-16 ***
+## inh_tot                0.000001755548785227 ***
+## pop_over65             0.000000002822499615 ***
+## unempl_rate                       &lt; 2.2e-16 ***
+## total_area_ha                     &lt; 2.2e-16 ***
+## share_working_age      0.410803147835743121    
+## kreisfreie_stadt1                 &lt; 2.2e-16 ***
+## stadt1                            &lt; 2.2e-16 ***
+## years_since_last_elec1            &lt; 2.2e-16 ***
+## years_since_last_elec2 0.000000000602758365 ***
+## years_since_last_elec3            &lt; 2.2e-16 ***
+## years_since_last_elec4 0.000000000000010705 ***
+## years_since_last_elec5            &lt; 2.2e-16 ***
 ## ... 8 variables were removed because of collinearity (years_since_last_elec6, years_since_last_elec7 and 6 others [full set in $collin.var])
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## RMSE: 0.367485   Adj. R2: 0.199902</code></pre>
+## RMSE: 0.367461   Adj. R2: 0.200008</code></pre>
 <pre class="r"><code># Main model with Bavarian data only:
 fixest::feols(
   ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
@@ -3192,45 +3190,27 @@ ols_pol &lt;- fixest::feols(
 <pre><code>## OLS estimation, Dep. Var.: ln_gross_expenditure_pc
 ## Observations: 46,641 
 ## Standard-errors: Heteroskedasticity-robust 
-##                           Estimate   Std. Error    t value          Pr(&gt;|t|)
-## (Intercept)             7.47713387 0.0822047228  90.957473         &lt; 2.2e-16
-## total_seats            -0.00216214 0.0003530095  -6.124868 0.000000000914822
-## inh_tot                 0.00000103 0.0000000812  12.663079         &lt; 2.2e-16
-## pop_over65              1.90876093 0.0701726054  27.200941         &lt; 2.2e-16
-## unempl_rate            -4.24107787 0.1043007492 -40.662008         &lt; 2.2e-16
-## total_area_ha          -0.00000636 0.0000005133 -12.381118         &lt; 2.2e-16
-## share_working_age       0.10570857 0.1057106610   0.999980 0.317325262860819
-## kreisfreie_stadt1       0.50377480 0.0144301751  34.911205         &lt; 2.2e-16
-## stadt1                  0.10318312 0.0036938522  27.933743         &lt; 2.2e-16
-## turnout                -0.18931751 0.0168693711 -11.222559         &lt; 2.2e-16
-## ward_elections          0.07250728 0.0060992430  11.887915         &lt; 2.2e-16
-## const_typ_sueddt       -0.14695091 0.0328645471  -4.471411 0.000007788812793
-## years_since_last_elec1 -0.02739132 0.0043826118  -6.250000 0.000000000413994
-## years_since_last_elec2 -0.02583442 0.0045603350  -5.665026 0.000000014786619
-## years_since_last_elec3 -0.04093155 0.0041066880  -9.967045         &lt; 2.2e-16
-## years_since_last_elec4 -0.02756566 0.0041232972  -6.685343 0.000000000023297
-## years_since_last_elec5  0.00728862 0.0058145364   1.253517 0.210024070081531
-##                           
-## (Intercept)            ***
-## total_seats            ***
-## inh_tot                ***
-## pop_over65             ***
-## unempl_rate            ***
-## total_area_ha          ***
-## share_working_age         
-## kreisfreie_stadt1      ***
-## stadt1                 ***
-## turnout                ***
-## ward_elections         ***
-## const_typ_sueddt       ***
-## years_since_last_elec1 ***
-## years_since_last_elec2 ***
-## years_since_last_elec3 ***
-## years_since_last_elec4 ***
-## years_since_last_elec5    
+##                           Estimate   Std. Error   t value          Pr(&gt;|t|)    
+## (Intercept)             7.44872773 0.0820088205  90.82837         &lt; 2.2e-16 ***
+## total_seats            -0.00224337 0.0003546652  -6.32531 0.000000000255012 ***
+## inh_tot                 0.00000101 0.0000000815  12.38139         &lt; 2.2e-16 ***
+## pop_over65              1.91171025 0.0701134812  27.26594         &lt; 2.2e-16 ***
+## unempl_rate            -4.23541264 0.1043315839 -40.59569         &lt; 2.2e-16 ***
+## total_area_ha          -0.00000617 0.0000005134 -12.01689         &lt; 2.2e-16 ***
+## share_working_age       0.11695681 0.1056700826   1.10681 0.268381348918325    
+## kreisfreie_stadt1       0.52983562 0.0148265210  35.73567         &lt; 2.2e-16 ***
+## stadt1                  0.10390049 0.0037599490  27.63348         &lt; 2.2e-16 ***
+## turnout                -0.19219796 0.0168576931 -11.40120         &lt; 2.2e-16 ***
+## ward_elections          0.07178390 0.0060959120  11.77574         &lt; 2.2e-16 ***
+## const_typ_sueddt       -0.12362468 0.0327036403  -3.78015 0.000156928824838 ***
+## years_since_last_elec1 -0.02732288 0.0043832154  -6.23353 0.000000000459949 ***
+## years_since_last_elec2 -0.02570255 0.0045606841  -5.63568 0.000000017537558 ***
+## years_since_last_elec3 -0.04078956 0.0041068294  -9.93213         &lt; 2.2e-16 ***
+## years_since_last_elec4 -0.02742005 0.0041241272  -6.64869 0.000000000029896 ***
+## years_since_last_elec5  0.00714282 0.0058149321   1.22836 0.219318563730727    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## RMSE: 0.286173   Adj. R2: 0.147734</code></pre>
+## RMSE: 0.286193   Adj. R2: 0.147615</code></pre>
 <pre class="r"><code># Only Bavarian data:
 ols_pol &lt;- fixest::feols(
   ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
@@ -3591,29 +3571,29 @@ fixest::feols(
 ## share_working_age  0.25205861 0.13504421  1.866490 0.0865902 .  
 ## ---
 ## Expl. vars.: total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha + share_working_age + kreisfreie_stadt + stadt
-##                      Estimate Std. Error   t value  Pr(&gt;|t|)    
-## total_seats        0.00244822 0.00109864  2.228403 0.0457420 *  
-## inh_tot           -0.00000256 0.00000115 -2.215736 0.0467957 *  
-## pop_over65         0.79676728 0.17249378  4.619107 0.0005911 ***
-## unempl_rate        0.20613009 0.11671158  1.766149 0.1027744    
-## total_area_ha      0.00000607 0.00000646  0.940095 0.3657078    
-## share_working_age  0.25218792 0.13509307  1.866772 0.0865482 .  
-## stadt1            -0.12646546 0.04989069 -2.534851 0.0261849 *  
+##                      Estimate Std. Error   t value   Pr(&gt;|t|)    
+## total_seats        0.00244448 0.00109759  2.227137 0.04584632 *  
+## inh_tot           -0.00000256 0.00000116 -2.214674 0.04688515 *  
+## pop_over65         0.79685408 0.17246343  4.620423 0.00058976 ***
+## unempl_rate        0.20624580 0.11671990  1.767015 0.10262384    
+## total_area_ha      0.00000610 0.00000646  0.943967 0.36380493    
+## share_working_age  0.25204489 0.13511984  1.865343 0.08676129 .  
+## stadt1            -0.14142413 0.04871501 -2.903092 0.01325001 *  
 ## ---
 ## Expl. vars.: total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha + share_working_age + kreisfreie_stadt + stadt + years_since_last_elec
 ##                           Estimate Std. Error   t value   Pr(&gt;|t|)    
-## total_seats             0.00246785 0.00110622  2.230878 0.04553880 *  
-## inh_tot                -0.00000255 0.00000115 -2.218961 0.04652529 *  
-## pop_over65              0.80149822 0.17027819  4.706993 0.00050818 ***
-## unempl_rate             0.20728077 0.12228466  1.695068 0.11583137    
-## total_area_ha           0.00000597 0.00000645  0.925167 0.37311040    
-## share_working_age       0.25168385 0.13579695  1.853384 0.08856409 .  
-## stadt1                 -0.12688665 0.05014289 -2.530501 0.02639508 *  
-## years_since_last_elec1  0.00576218 0.00907979  0.634616 0.53759058    
-## years_since_last_elec2  0.00533054 0.01253313  0.425316 0.67813407    
-## years_since_last_elec3  0.00413861 0.01174010  0.352519 0.73056313    
-## years_since_last_elec4 -0.00151903 0.01216818 -0.124837 0.90271987    
-## years_since_last_elec5 -0.00302130 0.03239506 -0.093264 0.92723271</code></pre>
+## total_seats             0.00246452 0.00110544  2.229438 0.04565693 *  
+## inh_tot                -0.00000255 0.00000115 -2.217828 0.04662011 *  
+## pop_over65              0.80157016 0.17025214  4.708136 0.00050718 ***
+## unempl_rate             0.20738216 0.12229222  1.695792 0.11569122    
+## total_area_ha           0.00000600 0.00000645  0.929063 0.37116839    
+## share_working_age       0.25152825 0.13581860  1.851943 0.08878359 .  
+## stadt1                 -0.14158539 0.04893214 -2.893505 0.01348804 *  
+## years_since_last_elec1  0.00575170 0.00908264  0.633263 0.53844418    
+## years_since_last_elec2  0.00531101 0.01253899  0.423559 0.67937994    
+## years_since_last_elec3  0.00412095 0.01173278  0.351234 0.73150249    
+## years_since_last_elec4 -0.00153499 0.01216985 -0.126131 0.90171719    
+## years_since_last_elec5 -0.00303797 0.03239777 -0.093771 0.92683864</code></pre>
 <pre class="r"><code>panel_multivariate &lt;- fixest::feols(
   ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
     share_working_age + kreisfreie_stadt + stadt + years_since_last_elec |
@@ -3628,23 +3608,23 @@ fixest::feols(
 ## Fixed-effects: year: 13,  ags: 9,767
 ## Standard-errors: Clustered (year &amp; ags) 
 ##                           Estimate Std. Error   t value   Pr(&gt;|t|)    
-## total_seats             0.00246785 0.00110622  2.230878 0.04553880 *  
-## inh_tot                -0.00000255 0.00000115 -2.218961 0.04652529 *  
-## pop_over65              0.80149822 0.17027819  4.706993 0.00050818 ***
-## unempl_rate             0.20728077 0.12228466  1.695068 0.11583137    
-## total_area_ha           0.00000597 0.00000645  0.925167 0.37311040    
-## share_working_age       0.25168385 0.13579695  1.853384 0.08856409 .  
-## stadt1                 -0.12688665 0.05014289 -2.530501 0.02639508 *  
-## years_since_last_elec1  0.00576218 0.00907979  0.634616 0.53759058    
-## years_since_last_elec2  0.00533054 0.01253313  0.425316 0.67813407    
-## years_since_last_elec3  0.00413861 0.01174010  0.352519 0.73056313    
-## years_since_last_elec4 -0.00151903 0.01216818 -0.124837 0.90271987    
-## years_since_last_elec5 -0.00302130 0.03239506 -0.093264 0.92723271    
+## total_seats             0.00246452 0.00110544  2.229438 0.04565693 *  
+## inh_tot                -0.00000255 0.00000115 -2.217828 0.04662011 *  
+## pop_over65              0.80157016 0.17025214  4.708136 0.00050718 ***
+## unempl_rate             0.20738216 0.12229222  1.695792 0.11569122    
+## total_area_ha           0.00000600 0.00000645  0.929063 0.37116839    
+## share_working_age       0.25152825 0.13581860  1.851943 0.08878359 .  
+## stadt1                 -0.14158539 0.04893214 -2.893505 0.01348804 *  
+## years_since_last_elec1  0.00575170 0.00908264  0.633263 0.53844418    
+## years_since_last_elec2  0.00531101 0.01253899  0.423559 0.67937994    
+## years_since_last_elec3  0.00412095 0.01173278  0.351234 0.73150249    
+## years_since_last_elec4 -0.00153499 0.01216985 -0.126131 0.90171719    
+## years_since_last_elec5 -0.00303797 0.03239777 -0.093771 0.92683864    
 ## ... 9 variables were removed because of collinearity (kreisfreie_stadt1, years_since_last_elec6 and 7 others [full set in $collin.var])
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## RMSE: 0.20061     Adj. R2: 0.737128
-##                 Within R2: 0.001534</code></pre>
+## RMSE: 0.200609     Adj. R2: 0.73713 
+##                  Within R2: 0.001545</code></pre>
 <pre class="r"><code># Main model with Bavarian data only
 fixest::feols(
   ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
@@ -3691,24 +3671,24 @@ panel_pol &lt;- fixest::feols(
 ## Fixed-effects: year: 13,  ags: 3,850
 ## Standard-errors: Clustered (year &amp; ags) 
 ##                           Estimate  Std. Error   t value Pr(&gt;|t|)    
-## total_seats             0.00210006 0.001306249  1.607705 0.133877    
-## inh_tot                -0.00000178 0.000000588 -3.020824 0.010647 *  
-## pop_over65              0.51941430 0.353201603  1.470589 0.167132    
-## unempl_rate            -0.25099032 0.309374452 -0.811283 0.433000    
-## total_area_ha          -0.00000720 0.000014367 -0.500956 0.625464    
-## share_working_age      -0.04090571 0.270099170 -0.151447 0.882139    
-## stadt1                 -0.14701247 0.090036324 -1.632813 0.128454    
-## turnout                -0.04125796 0.039866380 -1.034906 0.321119    
-## years_since_last_elec1  0.00444913 0.009694173  0.458949 0.654473    
-## years_since_last_elec2  0.00295395 0.010011365  0.295060 0.772991    
-## years_since_last_elec3 -0.00649766 0.017529953 -0.370660 0.717351    
-## years_since_last_elec4 -0.00848502 0.013267294 -0.639544 0.534488    
-## years_since_last_elec5 -0.00501361 0.014656277 -0.342079 0.738208    
+## total_seats             0.00207743 0.001297879  1.600635 0.135439    
+## inh_tot                -0.00000178 0.000000589 -3.021650 0.010630 *  
+## pop_over65              0.51913958 0.353249472  1.469612 0.167392    
+## unempl_rate            -0.25181016 0.308935535 -0.815090 0.430901    
+## total_area_ha          -0.00000722 0.000014365 -0.502545 0.624379    
+## share_working_age      -0.04249189 0.270046770 -0.157350 0.877585    
+## stadt1                 -0.19366218 0.081515812 -2.375762 0.035032 *  
+## turnout                -0.04145225 0.039866117 -1.039787 0.318937    
+## years_since_last_elec1  0.00439860 0.009650400  0.455795 0.656676    
+## years_since_last_elec2  0.00288950 0.009983015  0.289442 0.777183    
+## years_since_last_elec3 -0.00656431 0.017476175 -0.375615 0.713759    
+## years_since_last_elec4 -0.00854016 0.013236537 -0.645196 0.530943    
+## years_since_last_elec5 -0.00507483 0.014642920 -0.346572 0.734914    
 ## ... 3 variables were removed because of collinearity (kreisfreie_stadt1, ward_elections and const_typ_sueddt)
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## RMSE: 0.167522     Adj. R2: 0.681601
-##                  Within R2: 0.001509</code></pre>
+## RMSE: 0.167518     Adj. R2: 0.681618
+##                  Within R2: 0.001563</code></pre>
 <pre class="r"><code># Only Bavarian data:
 panel_pol &lt;- fixest::feols(
   ln_gross_expenditure_pc ~ total_seats + inh_tot + pop_over65 + unempl_rate + total_area_ha +
@@ -3798,7 +3778,7 @@ regressor:</p>
 ## Multiple R-squared:  0.9259, Adjusted R-squared:  0.9259 
 ## F-statistic: 3.328e+05 on 1 and 26637 DF,  p-value: &lt; 0.00000000000000022</code></pre>
 <pre class="r"><code>ggplot2::ggplot(data = d_bivariate_iv) + geom_point(aes(total_seats, total_seats_24_y_ago))</code></pre>
-<p><img src="data:image/png;base64,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" width="672" /></p>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABUAAAAPACAMAAADDuCPrAAABRFBMVEUAAAAAADoAAGYAOjoAOmYAOpAAZrYzMzM6AAA6OgA6Ojo6OmY6OpA6ZmY6ZpA6ZrY6kLY6kNtNTU1NTW5NTY5Nbm5Nbo5NbqtNjshmAABmADpmOgBmOjpmOpBmZjpmZmZmZpBmkGZmkJBmkLZmkNtmtttmtv9uTU1ubk1ubo5ujqtujshuq+SOTU2Obk2Obm6Oq6uOyOSOyP+QOgCQOjqQZjqQZmaQZpCQkGaQkLaQtraQttuQ2/+rbk2rjm6ryOSr5P+2ZgC2Zjq2Zma2kDq2kGa2tra2ttu227a229u22/+2///Ijk3Ijm7Iq27I5P/I///bkDrbkGbbtmbbtpDbtrbbttvb27bb29vb2//b///kq27kyI7kyKvk5Mjk////tmb/yI7/25D/27b/29v/5Kv/5Mj//7b//8j//9v//+T///9uLqivAAAACXBIWXMAAB2HAAAdhwGP5fFlAAAgAElEQVR4nO3df3sb5YHv4XFJgkkLnChdSJqWsMsSbynZbsmBPXsgLGELPRCzaRoohexu7IT8sP3+/z8aaeTYskbWfCVnpPF9X1eJZWceuxPlkxnNM4+KPQAiRds/AMCqElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgAKETC2ghzUDHCShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAChKHNPft/r9d67M3yw++nG8wcHBhZQoOOSzD3uF7Pv4mflg2fXBw9++efxgQUU6Lggc7s3e2/e2XvS/++D/qPNgw8ODiygwHIqigUFKhjl8cbgcPPZ9fIQ9NCDQwMLKLCUimJRBQ0G2e5dKn/pH4h+sLd3f/ig/+v7YwMLKLCMimJhBZ33CHSzrOjeflUPDCygwBIqisUVdJ7XQC+VH1en7o83Ri+CvlwRUGAJtRzQvd1vBhfef/dAQIFV03ZAH//zIKBv3DkU0LGJTE7hgWXUckAfb5QHn/3D0H47JxyB7v+Q8/9wAAvX7kWkzeqC+2bvkoACK6fNaUyHm+kqPLBqWpxIfzigo/mf5oECp86cp/DuRAJOr+hOpOcXkcpJoW+4Fx44lZLM3e8NDQ5En1iNCTilosz9T7ke6G+rJUCffFouDvpg/PcIKNB1VqQHCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQ4AUVxGhogoMDiFcWpKKiAAgtXFKejoAIKLFpRnJKCCiiwaAI698Bd33NAHQGde+Cu7zmgjoDOPXDX9xxQ65T0U0CBE3A6+imgwEk4Ff0UUICUgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChCKMrf7zUav93d/qB582n/w3p0jAwso0HFJ5p5c7w38rnzwbPjgl38eH1hAgY4LMrd7s/fGnb3d/+xd/Kz/aLP35p29Jzd7bz4YG1hA4WQVhb9mLQv2/3Z1uHm/d2lv7/HG4MGz64OaHhzY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" width="672" /></p>
 <pre class="r"><code>iv_bivariate &lt;-
   fixest::feols(ln_gross_expenditure_pc ~
                   1 | # 1 is the intercept
@@ -4293,7 +4273,7 @@ size appears way to large…</p>
 <pre class="r"><code>etable(ols, panel_bivariate, panel_multivariate, iv_multivariate)</code></pre>
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
-{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["ols"],"name":[1],"type":["chr"],"align":["left"]},{"label":["panel_bivariate"],"name":[2],"type":["chr"],"align":["left"]},{"label":["panel_multivariate"],"name":[3],"type":["chr"],"align":["left"]},{"label":["iv_multivariate"],"name":[4],"type":["chr"],"align":["left"]}],"data":[{"1":"ln_gross_expenditure_pc","2":"ln_gross_expenditure_pc","3":"ln_gross_expenditure_pc","4":"ln_gross_expenditure_pc","_rn_":"Dependent Var.:"},{"1":"","2":"","3":"","4":"","_rn_":""},{"1":"7.132*** (0.0403)","2":"","3":"","4":"","_rn_":"(Intercept)"},{"1":"0.0082*** (0.0002)","2":"0.0023. (0.0011)","3":"0.0025* (0.0011)","4":"-0.0006 (0.0007)","_rn_":"total_seats"},{"1":"-1.81e-7*** (3.99e-8)","2":"","3":"-2.55e-6* (1.15e-6)","4":"4.05e-7*** (3.78e-8)","_rn_":"inh_tot"},{"1":"0.2682*** (0.0449)","2":"","3":"0.8015*** (0.1703)","4":"1.354*** (0.1589)","_rn_":"pop_over65"},{"1":"-2.926*** (0.0410)","2":"","3":"0.2073 (0.1223)","4":"-1.757*** (0.1098)","_rn_":"unempl_rate"},{"1":"1.67e-5*** (4.98e-7)","2":"","3":"5.97e-6 (6.45e-6)","4":"-2.2e-6*** (4.12e-7)","_rn_":"total_area_ha"},{"1":"-0.0488 (0.0569)","2":"","3":"0.2517. (0.1358)","4":"0.3833* (0.1613)","_rn_":"share_working_age"},{"1":"0.3943*** (0.0104)","2":"","3":"","4":"0.4516*** (0.0160)","_rn_":"kreisfreie_stadt1"},{"1":"0.1250*** (0.0032)","2":"","3":"-0.1269* (0.0501)","4":"0.0469*** (0.0035)","_rn_":"stadt1"},{"1":"-0.0353*** (0.0038)","2":"","3":"0.0058 (0.0091)","4":"","_rn_":"years_since_last_elec1"},{"1":"-0.0234*** (0.0038)","2":"","3":"0.0053 (0.0125)","4":"","_rn_":"years_since_last_elec2"},{"1":"-0.0390*** (0.0035)","2":"","3":"0.0041 (0.0117)","4":"","_rn_":"years_since_last_elec3"},{"1":"-0.0274*** (0.0035)","2":"","3":"-0.0015 (0.0122)","4":"","_rn_":"years_since_last_elec4"},{"1":"0.2014*** (0.0057)","2":"","3":"-0.0030 (0.0324)","4":"","_rn_":"years_since_last_elec5"},{"1":"-----------------------","2":"-----------------------","3":"-----------------------","4":"-----------------------","_rn_":"Fixed-Effects:"},{"1":"No","2":"Yes","3":"Yes","4":"Yes","_rn_":"year"},{"1":"No","2":"Yes","3":"Yes","4":"No","_rn_":"ags"},{"1":"_______________________","2":"_______________________","3":"_______________________","4":"_______________________","_rn_":"______________________"},{"1":"Heteroskedasticity-rob.","2":"by: year & ags","3":"by: year & ags","4":"by: year","_rn_":"S.E. type"},{"1":"105,186","2":"107,515","3":"105,186","4":"26,639","_rn_":"Observations"},{"1":"0.20000","2":"0.75607","3":"0.76159","4":"0.20692","_rn_":"R2"},{"1":"--","2":"6.56e-5","3":"0.00153","4":"0.04474","_rn_":"Within R2"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["ols"],"name":[1],"type":["chr"],"align":["left"]},{"label":["panel_bivariate"],"name":[2],"type":["chr"],"align":["left"]},{"label":["panel_multivariate"],"name":[3],"type":["chr"],"align":["left"]},{"label":["iv_multivariate"],"name":[4],"type":["chr"],"align":["left"]}],"data":[{"1":"ln_gross_expenditure_pc","2":"ln_gross_expenditure_pc","3":"ln_gross_expenditure_pc","4":"ln_gross_expenditure_pc","_rn_":"Dependent Var.:"},{"1":"","2":"","3":"","4":"","_rn_":""},{"1":"7.132*** (0.0403)","2":"","3":"","4":"","_rn_":"(Intercept)"},{"1":"0.0081*** (0.0002)","2":"0.0023. (0.0011)","3":"0.0025* (0.0011)","4":"-0.0006 (0.0007)","_rn_":"total_seats"},{"1":"-1.92e-7*** (4.02e-8)","2":"","3":"-2.55e-6* (1.15e-6)","4":"4.05e-7*** (3.78e-8)","_rn_":"inh_tot"},{"1":"0.2671*** (0.0449)","2":"","3":"0.8016*** (0.1703)","4":"1.354*** (0.1589)","_rn_":"pop_over65"},{"1":"-2.932*** (0.0411)","2":"","3":"0.2074 (0.1223)","4":"-1.757*** (0.1098)","_rn_":"unempl_rate"},{"1":"1.68e-5*** (4.98e-7)","2":"","3":"6e-6 (6.45e-6)","4":"-2.2e-6*** (4.12e-7)","_rn_":"total_area_ha"},{"1":"-0.0468 (0.0569)","2":"","3":"0.2515. (0.1358)","4":"0.3833* (0.1613)","_rn_":"share_working_age"},{"1":"0.4139*** (0.0105)","2":"","3":"","4":"0.4516*** (0.0160)","_rn_":"kreisfreie_stadt1"},{"1":"0.1269*** (0.0033)","2":"","3":"-0.1416* (0.0489)","4":"0.0469*** (0.0035)","_rn_":"stadt1"},{"1":"-0.0352*** (0.0038)","2":"","3":"0.0058 (0.0091)","4":"","_rn_":"years_since_last_elec1"},{"1":"-0.0233*** (0.0038)","2":"","3":"0.0053 (0.0125)","4":"","_rn_":"years_since_last_elec2"},{"1":"-0.0389*** (0.0035)","2":"","3":"0.0041 (0.0117)","4":"","_rn_":"years_since_last_elec3"},{"1":"-0.0274*** (0.0035)","2":"","3":"-0.0015 (0.0122)","4":"","_rn_":"years_since_last_elec4"},{"1":"0.2011*** (0.0057)","2":"","3":"-0.0030 (0.0324)","4":"","_rn_":"years_since_last_elec5"},{"1":"-----------------------","2":"-----------------------","3":"-----------------------","4":"-----------------------","_rn_":"Fixed-Effects:"},{"1":"No","2":"Yes","3":"Yes","4":"Yes","_rn_":"year"},{"1":"No","2":"Yes","3":"Yes","4":"No","_rn_":"ags"},{"1":"_______________________","2":"_______________________","3":"_______________________","4":"_______________________","_rn_":"______________________"},{"1":"Heteroskedasticity-rob.","2":"by: year & ags","3":"by: year & ags","4":"by: year","_rn_":"S.E. type"},{"1":"105,186","2":"107,515","3":"105,186","4":"26,639","_rn_":"Observations"},{"1":"0.20011","2":"0.75607","3":"0.76160","4":"0.20692","_rn_":"R2"},{"1":"--","2":"6.56e-5","3":"0.00154","4":"0.04474","_rn_":"Within R2"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 <p>Test LaTeX export – note that differences between HTML and TeX output
@@ -4348,7 +4328,7 @@ rm(list=ls(pattern=&quot;^iv_&quot;))</code></pre>
 <h1>Concluding Remarks</h1>
 <p>For references, see the paper.</p>
 <pre class="r"><code>Sys.time() - time</code></pre>
-<pre><code>## Time difference of 16.31499 secs</code></pre>
+<pre><code>## Time difference of 15.40507 secs</code></pre>
 </div>
 
 

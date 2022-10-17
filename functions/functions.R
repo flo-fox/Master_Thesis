@@ -7,6 +7,7 @@ options(scipen = 20)
 theme_set(theme_classic())
 p_value_cutoff <- 0.01
 round_decimals <- 4 # Rounding of decimals
+y_lab_RDD <- "Increase in spending at the thresholds" # y axis label for RD plots
 
 #### Functions ####
 

@@ -11,7 +11,7 @@
 
 <meta name="author" content="Florian Fox" />
 
-<meta name="date" content="2022-10-16" />
+<meta name="date" content="2022-10-17" />
 
 <title>Master Thesis: A Causal Test of the Law of 1/n and its Mechanisms – Analysis: RDD, Normalized Cutoff, Checking the Validity</title>
 
@@ -2785,7 +2785,7 @@ div.tocify {
 1/n and its Mechanisms – Analysis: RDD, Normalized Cutoff, Checking the
 Validity</h1>
 <h4 class="author">Florian Fox</h4>
-<h4 class="date">2022-10-16</h4>
+<h4 class="date">2022-10-17</h4>
 
 </div>
 
@@ -3447,7 +3447,7 @@ ggplot2::ggplot(df) +
   labs(x = &quot;Covariates&quot;, y = &quot;Jump at the threshold&quot;)
 #ggsave(filename = &quot;plots/rdrobust_balance_test.pdf&quot;, width = 6, height = 6*9/16)
 rm(df)</code></pre>
-<p>Table of balance test regressions:</p>
+<p>Table of balance test regressions with fuzzy and cerred method:</p>
 <pre class="r"><code># Correlations to test similarity of methods
 cor(rdd_balance_tests %&gt;% filter(method == &quot;sharp&quot;) %&gt;% pull(p),
     rdd_balance_tests %&gt;% filter(method == &quot;fuzzy&quot;) %&gt;% pull(p))</code></pre>
@@ -3465,16 +3465,16 @@ cor(rdd_balance_tests %&gt;% filter(method == &quot;sharp&quot;) %&gt;% pull(p),
 df &lt;- rdd_balance_tests %&gt;%
   mutate(across(where(is.numeric), ~ round(., digits = round_decimals))) %&gt;%
   rowwise() %&gt;%
-  mutate(point_estimate = paste0(point_estimate, assign_stars(p)), .after = method) %&gt;%
+  mutate(p = paste0(p_value(p), assign_stars(p))) %&gt;%
   mutate(ci = paste0(&quot;[&quot;, ci_lower, &quot;, &quot;, ci_upper, &quot;]&quot;), .before = p) %&gt;%
   ungroup() %&gt;%
   filter(method == &quot;fuzzy&quot;, bw_procedure == &quot;cerrd&quot;) %&gt;%
   arrange(p) %&gt;%
-  select(-c(method, bw_procedure, se_robust, ci_lower, ci_upper, p)) %&gt;%
+  select(-c(method, bw_procedure, se_robust, ci_lower, ci_upper)) %&gt;%
   t() %&gt;%
   tibble::as_tibble() %&gt;%
   janitor::row_to_names(row_number = 1) %&gt;%
-  mutate(`Dependent variable` = c(&quot;Point estimate&quot;, &quot;SE&quot;, &quot;CI&quot;, &quot;Bandwidth&quot;, &quot;Obs. below&quot;, &quot;Obs. above&quot;),
+  mutate(`Dependent variable` = c(&quot;Point estimate&quot;, &quot;SE&quot;, &quot;CI&quot;, &quot;p value&quot;, &quot;Bandwidth&quot;, &quot;Obs. below&quot;, &quot;Obs. above&quot;),
          .before = 1) %&gt;%
   dplyr::rename(`Population (as of 12-31)` = inh_tot, `Share of poplation aged &gt; 65 years` = pop_over65, `Unemployment rate` = unempl_rate, `Total area in ha` = total_area_ha, `Share of working-age population` = share_working_age, `District-free city (dummy)` = kreisfreie_stadt, `City (dummy)` = stadt, `Lagged council size` = lag_total_seats)</code></pre>
 <pre><code>## Warning: The `x` argument of `as_tibble.matrix()` must have unique column names if `.name_repair` is omitted as of tibble 2.0.0.
@@ -3484,7 +3484,7 @@ df &lt;- rdd_balance_tests %&gt;%
 <pre class="r"><code>df</code></pre>
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
-{"columns":[{"label":["Dependent variable"],"name":[1],"type":["chr"],"align":["left"]},{"label":["District-free city (dummy)"],"name":[2],"type":["chr"],"align":["left"]},{"label":["Share of working-age population"],"name":[3],"type":["chr"],"align":["left"]},{"label":["Share of poplation aged > 65 years"],"name":[4],"type":["chr"],"align":["left"]},{"label":["Unemployment rate"],"name":[5],"type":["chr"],"align":["left"]},{"label":["Total area in ha"],"name":[6],"type":["chr"],"align":["left"]},{"label":["City (dummy)"],"name":[7],"type":["chr"],"align":["left"]},{"label":["Lagged council size"],"name":[8],"type":["chr"],"align":["left"]},{"label":["Population (as of 12-31)"],"name":[9],"type":["chr"],"align":["left"]}],"data":[{"1":"Point estimate","2":"0.0077***","3":"-0.0016*","4":"0.0024*","5":"-0.0015","6":"-51.4934","7":"0.0044","8":"-0.0846","9":"15.7506"},{"1":"SE","2":"0.0015","3":"0.0007","4":"0.0012","5":"0.0011","6":"53.9151","7":"0.0063","8":"0.1809","9":"22.6144"},{"1":"CI","2":"[0.0049, 0.0112]","3":"[-0.0032, -0.0002]","4":"[0.0001, 0.0051]","5":"[-0.0039, 0.0008]","6":"[-173.913, 54.355]","7":"[-0.0073, 0.0195]","8":"[-0.4796, 0.2455]","9":"[-63.7457, 47.2135]"},{"1":"Bandwidth","2":"0.0509","3":"0.0433","4":"0.0377","5":"0.0428","6":"0.0760","7":"0.0752","8":"0.0420","9":"0.0355"},{"1":"Obs. below","2":"7430","3":"6253","4":"5587","5":"6176","6":"11350","7":"11243","8":"5225","9":"5219"},{"1":"Obs. above","2":"8100","3":"6934","4":"5982","5":"6797","6":"12028","7":"11970","8":"5798","9":"5725"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["Dependent variable"],"name":[1],"type":["chr"],"align":["left"]},{"label":["District-free city (dummy)"],"name":[2],"type":["chr"],"align":["left"]},{"label":["Share of working-age population"],"name":[3],"type":["chr"],"align":["left"]},{"label":["Share of poplation aged > 65 years"],"name":[4],"type":["chr"],"align":["left"]},{"label":["Unemployment rate"],"name":[5],"type":["chr"],"align":["left"]},{"label":["Total area in ha"],"name":[6],"type":["chr"],"align":["left"]},{"label":["City (dummy)"],"name":[7],"type":["chr"],"align":["left"]},{"label":["Lagged council size"],"name":[8],"type":["chr"],"align":["left"]},{"label":["Population (as of 12-31)"],"name":[9],"type":["chr"],"align":["left"]}],"data":[{"1":"Point estimate","2":"0.0077","3":"-0.0016","4":"0.0024","5":"-0.0015","6":"-51.4934","7":"0.0044","8":"-0.0846","9":"15.7506"},{"1":"SE","2":"0.0015","3":"0.0007","4":"0.0012","5":"0.0011","6":"53.9151","7":"0.0063","8":"0.1809","9":"22.6144"},{"1":"CI","2":"[0.0049, 0.0112]","3":"[-0.0032, -0.0002]","4":"[0.0001, 0.0051]","5":"[-0.0039, 0.0008]","6":"[-173.913, 54.355]","7":"[-0.0073, 0.0195]","8":"[-0.4796, 0.2455]","9":"[-63.7457, 47.2135]"},{"1":"p value","2":"p<0.001***","3":"p=0.024*","4":"p=0.039*","5":"p=0.19","6":"p=0.30","7":"p=0.37","8":"p=0.53","9":"p=0.77"},{"1":"Bandwidth","2":"0.0509","3":"0.0433","4":"0.0377","5":"0.0428","6":"0.0760","7":"0.0752","8":"0.0420","9":"0.0355"},{"1":"Obs. below","2":"7430","3":"6253","4":"5587","5":"6176","6":"11350","7":"11243","8":"5225","9":"5219"},{"1":"Obs. above","2":"8100","3":"6934","4":"5982","5":"6797","6":"12028","7":"11970","8":"5798","9":"5725"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 <pre class="r"><code>print(
@@ -3495,7 +3495,7 @@ df &lt;- rdd_balance_tests %&gt;%
   file = &quot;tables/rdd_balance_tests.tex&quot;,
   booktabs = TRUE,
   floating = FALSE,
-  hline.after = c(-1, -1, 0, 3, nrow(df), nrow(df)),
+  hline.after = c(-1, -1, 0, 4, nrow(df), nrow(df)),
   include.rownames = FALSE
 )
 # Appendix:
@@ -3507,7 +3507,7 @@ print(
   file = &quot;tables/rdd_balance_tests_appendix.tex&quot;,
   booktabs = TRUE,
   floating = FALSE,
-  hline.after = c(-1, -1, 0, 3, nrow(df), nrow(df)),
+  hline.after = c(-1, -1, 0, 4, nrow(df), nrow(df)),
   include.rownames = FALSE
 )
 rm(df)</code></pre>
@@ -3518,7 +3518,7 @@ values close to it.</p>
 <h1>Concluding Remarks</h1>
 <p>For references, see the paper.</p>
 <pre class="r"><code>Sys.time() - time</code></pre>
-<pre><code>## Time difference of 22.44391 secs</code></pre>
+<pre><code>## Time difference of 30.12284 secs</code></pre>
 </div>
 
 

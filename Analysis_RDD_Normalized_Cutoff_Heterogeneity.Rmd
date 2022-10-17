@@ -190,9 +190,9 @@ Note that the variable `net_expenditure` is apparently not equal to $gross\_reve
 
 ```{r}
 rdd_tex_export <- tibble(
-  `Dependent variable:` = c("Model", "", "Council size", "", "", "Data sample", "Observations", "Bandwidth", "Observations below", "Observations above"),
-  `Ln of gross revenue p. c.` = c("FE RDD w/o covariates", "(1)", paste0(round(rdd_h2_taxes$Estimate[1], round_decimals), assign_stars(rdd_h2_taxes$pv[3])), paste0("(", round(rdd_h2_taxes$se[1], round_decimals), ")"), paste0("[", round(rdd_h2_taxes$ci[3,1], 3), ", ", round(rdd_h2_taxes$ci[3,2], 3), "]"), "All data", sum(rdd_h2_taxes$N), round(rdd_h2_taxes$bws[1,1], round_decimals), rdd_h2_taxes$N_h[1], rdd_h2_taxes$N_h[2]),
-  `Ln of net expenditure p. c.` = c("FE RDD w/o covariates", "(2)", paste0(round(rdd_h3_debt$Estimate[1], round_decimals), assign_stars(rdd_h3_debt$pv[3])), paste0("(", round(rdd_h3_debt$se[1], round_decimals), ")"), paste0("[", round(rdd_h3_debt$ci[3,1], 3), ", ", round(rdd_h3_debt$ci[3,2], 3), "]"), "All data", sum(rdd_h3_debt$N), round(rdd_h3_debt$bws[1,1], round_decimals), rdd_h3_debt$N_h[1], rdd_h3_debt$N_h[2])
+  `Dependent variable:` = c("Model", "", "Council size", "", "", "", "Data sample", "Observations", "Bandwidth", "Observations below", "Observations above"),
+  `Ln of gross revenue p. c.` = c("FE RDD w/o covariates", "(1)", round(rdd_h2_taxes$Estimate[1], round_decimals), paste0("(", round(rdd_h2_taxes$se[1], round_decimals), ")"), paste0("[", round(rdd_h2_taxes$ci[3,1], 3), ", ", round(rdd_h2_taxes$ci[3,2], 3), "]"), paste0(p_value(rdd_h2_taxes$pv[3]), assign_stars(rdd_h2_taxes$pv[3])), "All data", sum(rdd_h2_taxes$N), round(rdd_h2_taxes$bws[1,1], round_decimals), rdd_h2_taxes$N_h[1], rdd_h2_taxes$N_h[2]),
+  `Ln of net expenditure p. c.` = c("FE RDD w/o covariates", "(2)", round(rdd_h3_debt$Estimate[1], round_decimals), paste0("(", round(rdd_h3_debt$se[1], round_decimals), ")"), paste0("[", round(rdd_h3_debt$ci[3,1], 3), ", ", round(rdd_h3_debt$ci[3,2], 3), "]"), paste0(p_value(rdd_h3_debt$pv[3]), assign_stars(rdd_h3_debt$pv[3])), "All data", sum(rdd_h3_debt$N), round(rdd_h3_debt$bws[1,1], round_decimals), rdd_h3_debt$N_h[1], rdd_h3_debt$N_h[2])
   )
 rdd_tex_export
 ```
@@ -206,7 +206,7 @@ print(
   file = "tables/rdd_rdrobust_financing.tex",
   booktabs = TRUE,
   floating = FALSE,
-  hline.after = c(-1, -1, 2, 5, nrow(rdd_tex_export), nrow(rdd_tex_export)),
+  hline.after = c(-1, -1, 2, 6, nrow(rdd_tex_export), nrow(rdd_tex_export)),
   include.rownames = FALSE
 )
 ```
@@ -287,7 +287,7 @@ ggplot2::ggplot(data = rdd_vary_rev_category, aes(x = rev_category2, y = point_e
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
   aes(stringr::str_wrap(rev_category2, 15)) +
-  labs(x = NULL, y = "Increase in spending at the threshold") +
+  labs(x = NULL, y = y_lab_RDD) +
   coord_flip()
 ggsave(filename = "plots/rdd_rev_categories.pdf", width = 6, height = 6*9/16)
 ```
@@ -479,7 +479,7 @@ ggplot2::ggplot(data = rdd_vary_year, aes(x = year, y = point_estimate)) +
                 width = 0.5) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
-  labs(x = "Year", y = "Increase in spending at the threshold")
+  labs(x = "Year", y = y_lab_RDD)
 ```
 
 For each year: Not much variation in the results here (as expected).
@@ -637,7 +637,7 @@ plot_states_fuzzy1 <- ggplot2::ggplot(data = df, aes(x = state_name, y = point_e
   geom_text(aes(y = -1.75, label = note),
             colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 0, size = 2.8) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
-  labs(x = "State", y = "Increase in council size at the threshold")
+  labs(x = "State", y = "Increase in council size at the thresholds")
 plot_states_fuzzy1
 ggsave(filename = "plots/rdd_states_fuzzy1.pdf", width = 6, height = 6*9/16)
 # Second stage
@@ -674,7 +674,7 @@ plot_states_fuzzy2 <- ggplot2::ggplot(data = df, aes(x = state_name, y = point_e
             colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 0, size = 2.8) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
-  labs(x = "State", y = "Increase in spending at the threshold")
+  labs(x = "State", y = y_lab_RDD)
 plot_states_fuzzy2
 ggsave(filename = "plots/rdd_states_fuzzy2.pdf", width = 6, height = 6*9/16)
 rm(df)
@@ -765,7 +765,7 @@ plot_states_sharp <- ggplot2::ggplot(data = df, aes(x = state_name, y = point_es
             colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 0) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
-  labs(x = "State", y = "Increase in spending at the threshold")
+  labs(x = "State", y = y_lab_RDD)
 plot_states_sharp
 ggsave(filename = "plots/rdd_states_sharp.pdf", width = 6, height = 6*9/16)
 rm(df)
@@ -861,7 +861,7 @@ fixest::wald(rdd, "fit_total_seats:state")
 rm(df)
 ```
 
-States 13 (MV) and 15 (SA) apparently not testable...
+States 13 (MV) and 15 (ST) apparently not testable...
 
 To conclude: very contradicting results. Subsample yields several differences between states, interaction shows no significant results
 
@@ -932,7 +932,7 @@ ggplot2::ggplot(data = rdd_vary_ward, aes(x = value, y = point_estimate)) +
                 width = 0.5) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
-  labs(y = "Increase in spending at the threshold")
+  labs(y = y_lab_RDD)
 ```
 
 Preliminary evidence looks promising: SH and NW spend more at the threshold (about 1.9 %), likely primarily driven by NW (see states section).
@@ -1017,7 +1017,7 @@ ggplot2::ggplot(data = rdd_vary_const_type, aes(x = const_typ_sueddt, y = point_
                 width = 0.5) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
-  labs(y = "Increase in spending at the threshold")
+  labs(y = y_lab_RDD)
 ```
 
 No differences visible.
@@ -1155,7 +1155,7 @@ for (i in c("fuzzy", "sharp")) {
             colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 0) +
     geom_hline(aes(yintercept = 0), linetype = "dotted") +
     scale_y_continuous(labels = scales::percent) +
-    labs(y = "Increase in spending at the threshold", title = i)
+    labs(y = y_lab_RDD, title = i)
   print(p)
 }
 # Make plot "publication-ready":
@@ -1287,7 +1287,7 @@ ggplot2::ggplot(data = df, aes(x = no_parties_in_parliament, y = point_estimate)
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "Number of parties in parliament (unweighted)",
-       y = "Increase in spending at the threshold")
+       y = y_lab_RDD)
 rm(df)
 ```
 
@@ -1393,7 +1393,7 @@ ggplot2::ggplot(data = df, aes(x = parties_in_parliament_hhi_quant, y = point_es
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "Number of parties in parliament by HHI",
-       y = "Increase in spending at the threshold")
+       y = y_lab_RDD)
 rm(df)
 ```
 
@@ -1501,7 +1501,7 @@ p_maj1 <-
             colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 0) +
   scale_y_continuous(limits = lims, labels = scales::percent) +
   aes(stringr::str_wrap(absolute_majority, 15)) +
-  labs(x = NULL, y = "Increase in spending at the threshold")
+  labs(x = NULL, y = y_lab_RDD)
 p_maj1
 # Adjustments for "publication"
 p_maj1 <- p_maj1 + labs(title = "Absolute majority", y = NULL)
@@ -1620,7 +1620,7 @@ p_maj2 <-
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(limits = lims, labels = scales::percent) +
   #aes(stringr::str_wrap(abs_majority_party, 15)) +
-  labs(x = NULL, y = "Increase in spending at the threshold")
+  labs(x = NULL, y = y_lab_RDD)
 p_maj2
 p_maj2 <- p_maj2 + labs(title = "Absolute majority by party", y = NULL)
 #rm(df)
@@ -1720,7 +1720,7 @@ ggplot2::ggplot(data = rdd_vary_abs_majority, aes(x = abs_majority_party, y = po
                 width = 0.5) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
-  labs(y = "Increase in spending at the threshold")
+  labs(y = y_lab_RDD)
 ```
 
 Interesting results for Bavaria: `cdu_csu` absolute majority drives up the treatment effect, whereas `waehlergruppen` as well as other majorities (including `spd` absolute majority and no single majority party) produce a contrary "Law of 1/n".
@@ -1760,7 +1760,7 @@ plot_council_majorities <- ggpubr::ggarrange(
 ) %>%
   annotate_figure(
     # See https://github.com/kassambara/ggpubr/issues/78
-    left = text_grob("Increase in spending at the threshold", rot = 90)
+    left = text_grob(y_lab_RDD, rot = 90)
     )
 plot_council_majorities
 ggsave(filename = "plots/rdd_absolute_majority_council.pdf", width = 6, height = 6*9/16)
@@ -1846,7 +1846,7 @@ ggplot2::ggplot(data = df, aes(x = exp_category2, y = point_estimate)) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
   aes(stringr::str_wrap(exp_category2, 15)) +
-  labs(x = NULL, y = "Increase in spending at the threshold") +
+  labs(x = NULL, y = y_lab_RDD) +
   geom_text(aes(y = -0.13, label = note),
             colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 0) #+
   #coord_flip()
@@ -1997,7 +1997,7 @@ p1 <- ggplot2::ggplot(data = df1, aes(x = value, y = point_estimate)) +
   geom_text(aes(y = -0.14, label = note),
             colour = ifelse(df1$p <= p_value_cutoff, 2, 1), vjust = 0, size = 2.75) +
   labs(subtitle = "Share of women in council",
-       x = "Quantile", y = "Increase in spending at the threshold")
+       x = "Quantile", y = y_lab_RDD)
 p1
 p1 <- p1 + labs(x = NULL, y = NULL)
 p2 <- ggplot2::ggplot(data = df2, aes(x = value, y = point_estimate)) +
@@ -2011,7 +2011,7 @@ p2 <- ggplot2::ggplot(data = df2, aes(x = value, y = point_estimate)) +
   geom_text(aes(y = -0.14, label = note),
             colour = ifelse(df2$p <= p_value_cutoff, 2, 1), vjust = 0, size = 2.75) +
   labs(subtitle = "Share of women in the largest party",
-       x = "Quantile of the heterogeneity-inducing variable", y = "Increase in spending at the threshold")
+       x = "Quantile of the heterogeneity-inducing variable", y = y_lab_RDD)
 p2
 p2 <- p2 + labs(x = NULL, y = NULL)
 ggpubr::ggarrange(
@@ -2022,7 +2022,7 @@ ggpubr::ggarrange(
   nrow = 1
   ) %>%
   annotate_figure(
-    left = text_grob("Increase in spending at the threshold", rot = 90),
+    left = text_grob(y_lab_RDD, rot = 90),
     bottom = text_grob("Quantile")
     )
 ggsave(filename = "plots/rdd_council_women.pdf", width = 6, height = 6*9/16)
@@ -2143,7 +2143,7 @@ ggplot2::ggplot(data = df, aes(x = x, y = point_estimate)) +
                 width = 0.5) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
-  labs(x = "Year", y = "Increase in spending at the threshold")
+  labs(x = "Year", y = y_lab_RDD)
 rm(df)
 ```
 
@@ -2406,7 +2406,7 @@ ggplot2::ggplot(data = df, aes(x = reorder(status, c(1, 3, 2)), y = point_estima
   scale_y_continuous(labels = scales::percent) +
   geom_text(aes(y = -0.315, label = note),
             colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 0) +
-  labs(x= NULL, y = "Increase in spending at the threshold")
+  labs(x= NULL, y = y_lab_RDD)
 ggsave(filename = "plots/rdd_cities.pdf", width = 6, height = 6*9/16)
 ```
 
@@ -2497,7 +2497,7 @@ ggplot2::ggplot(data = rdd_vary_city, aes(x = value, y = point_estimate)) +
                 width = 0.5) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
-  labs(y = "Increase in spending at the threshold")
+  labs(y = y_lab_RDD)
 ```
 
 *Preliminary conclusion here*

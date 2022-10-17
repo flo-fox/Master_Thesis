@@ -494,16 +494,16 @@ cor(rdd_balance_tests %>% filter(method == "fuzzy", bw_procedure == "mserd") %>%
 df <- rdd_balance_tests %>%
   mutate(across(where(is.numeric), ~ round(., digits = round_decimals))) %>%
   rowwise() %>%
-  mutate(point_estimate = paste0(point_estimate, assign_stars(p)), .after = method) %>%
+  mutate(p = paste0(p_value(p), assign_stars(p))) %>%
   mutate(ci = paste0("[", ci_lower, ", ", ci_upper, "]"), .before = p) %>%
   ungroup() %>%
   filter(method == "fuzzy", bw_procedure == "cerrd") %>%
   arrange(p) %>%
-  select(-c(method, bw_procedure, se_robust, ci_lower, ci_upper, p)) %>%
+  select(-c(method, bw_procedure, se_robust, ci_lower, ci_upper)) %>%
   t() %>%
   tibble::as_tibble() %>%
   janitor::row_to_names(row_number = 1) %>%
-  mutate(`Dependent variable` = c("Point estimate", "SE", "CI", "Bandwidth", "Obs. below", "Obs. above"),
+  mutate(`Dependent variable` = c("Point estimate", "SE", "CI", "p value", "Bandwidth", "Obs. below", "Obs. above"),
          .before = 1) %>%
   dplyr::rename(`Population (as of 12-31)` = inh_tot, `Share of poplation aged > 65 years` = pop_over65, `Unemployment rate` = unempl_rate, `Total area in ha` = total_area_ha, `Share of working-age population` = share_working_age, `District-free city (dummy)` = kreisfreie_stadt, `City (dummy)` = stadt, `Lagged council size` = lag_total_seats)
 df
@@ -515,7 +515,7 @@ print(
   file = "tables/rdd_balance_tests.tex",
   booktabs = TRUE,
   floating = FALSE,
-  hline.after = c(-1, -1, 0, 3, nrow(df), nrow(df)),
+  hline.after = c(-1, -1, 0, 4, nrow(df), nrow(df)),
   include.rownames = FALSE
 )
 # Appendix:
@@ -527,7 +527,7 @@ print(
   file = "tables/rdd_balance_tests_appendix.tex",
   booktabs = TRUE,
   floating = FALSE,
-  hline.after = c(-1, -1, 0, 3, nrow(df), nrow(df)),
+  hline.after = c(-1, -1, 0, 4, nrow(df), nrow(df)),
   include.rownames = FALSE
 )
 rm(df)
