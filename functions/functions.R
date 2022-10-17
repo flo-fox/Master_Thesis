@@ -4,7 +4,7 @@
 
 #### Options ####
 options(scipen = 20)
-theme_set(theme_minimal())
+theme_set(theme_classic())
 p_value_cutoff <- 0.01
 round_decimals <- 4 # Rounding of decimals
 

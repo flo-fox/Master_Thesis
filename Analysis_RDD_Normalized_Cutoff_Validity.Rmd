@@ -115,7 +115,7 @@ The test for the overall data is significant (i. e. there is a jump at the thres
 ```{r}
 rddensity_disc_test <- rddensity::rddensity(X = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff, c = 0)
 summary(rddensity_disc_test)
-p <- rdplotdensity_with_theme(rddensity_disc_test, X = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff, xlabel = "Running variable (population relative to threshold)")
+p <- rdplotdensity_with_theme(rddensity_disc_test, X = dens_test_d_rdd_bivariate$inhabs_rel_to_cutoff, xlabel = "Running variable (population relative to thresholds)")
 ```
 
 Export plot
@@ -479,7 +479,7 @@ ggplot2::ggplot(df) +
 #ggsave(filename = "plots/rdrobust_balance_test.pdf", width = 6, height = 6*9/16)
 rm(df)
 ```
-Table of balance test regressions:
+Table of balance test regressions with fuzzy and cerred method:
 ```{r, rdrobust_balance_test_table}
 # Correlations to test similarity of methods
 cor(rdd_balance_tests %>% filter(method == "sharp") %>% pull(p),
@@ -505,7 +505,7 @@ df <- rdd_balance_tests %>%
   janitor::row_to_names(row_number = 1) %>%
   mutate(`Dependent variable` = c("Point estimate", "SE", "CI", "Bandwidth", "Obs. below", "Obs. above"),
          .before = 1) %>%
-  dplyr::rename(`Population (as of 12-31)` = inh_tot, `Share of poplation aged > 65 years` = pop_over65, `Unemployment rate` = unempl_rate, `Total area in ha` = total_area_ha, `Share of working-age population` = share_working_age, `Dummy: district-free city` = kreisfreie_stadt, `Dummy: city` = stadt, `Lagged council size` = lag_total_seats)
+  dplyr::rename(`Population (as of 12-31)` = inh_tot, `Share of poplation aged > 65 years` = pop_over65, `Unemployment rate` = unempl_rate, `Total area in ha` = total_area_ha, `Share of working-age population` = share_working_age, `District-free city (dummy)` = kreisfreie_stadt, `City (dummy)` = stadt, `Lagged council size` = lag_total_seats)
 df
 print(
   xtable::xtable(

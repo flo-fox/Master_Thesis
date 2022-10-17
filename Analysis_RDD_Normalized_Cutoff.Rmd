@@ -1289,7 +1289,7 @@ etable(rdd_conf_1, rdd_conf_2,
 
           ),
        # LaTeX settings
-       title = "Results of the interacted \\ac{RDD}s to investigate (non)confounded thresholds",
+       title = "Results of the interacted \\ac{IV} \\ac{RDD}s to investigate (non)confounded thresholds",
        label = "tab:rdd_conf_thresholds",
        notes = paste("\\footnotesize{*Notes:* Results of the \\ac{IV} \\ac{RDD}, in a ten-percent window around the cutoffs. No control variables but threshold, state, and year \\ac{FE}. Standard errors clustered at the threshold, year and municipality level in parentheses.",
                      tex_signif_text)#,
@@ -1343,8 +1343,7 @@ load(file = "tables_robustness_checks/rdd_placebo_1.Rdata")
 rdd_placebo
 ```
 Visualization of placebo cutoffs:
-```{r, rdrobust_placebo_viz1, eval=FALSE}
-# to do: remove eval=FALSE
+```{r, rdrobust_placebo_viz1}
 df <- rdd_placebo %>%
   #tidyr::drop_na() %>%
   filter(abs(ci_upper) < 100 | abs(ci_lower) < 100) %>%
@@ -1416,7 +1415,8 @@ ggplot2::ggplot(df) +
   geom_point(aes(x = placebo_c, y = point_estimate), size = 1.5, colour = ifelse(df$p <= 0.05, 2, 1)) +
   geom_errorbar(aes(x = placebo_c, ymin = ci_lower, ymax = ci_upper),
                 colour = ifelse(df$p <= 0.05, 2, 1),
-                linetype = ifelse(df$p <= 0.05, 2, 1)) +
+                linetype = ifelse(df$p <= 0.05, 2, 1),
+                width = 0.015) +
   geom_text(aes(x = placebo_c,
                 y = ifelse(even_number == 0, -0.8, -1),
                 label = note),

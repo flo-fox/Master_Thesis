@@ -1,13 +1,52 @@
 % latex table generated in R 4.2.1 by xtable 1.8-4 package
-% Tue Sep 27 16:35:00 2022
-\begin{tabular}{lrrrrrrrr}
+% Mon Oct 17 11:10:44 2022
+\begin{tabular}{llrrrrrrrl}
   \toprule
-Statistic & Min. & 1st Quar. & Median & 3rd Quar. & Max. & Mean & S. D. & n \\ 
+Data Set & Statistic & Min & 1st Quar & Median & 3rd Quar & Max & Mean & SD & n \\ 
   \midrule
-Ln of gross expenditure p. c. & 0.14 & 6.91 & 7.19 & 7.45 & 13.94 & 7.19 & 0.42 & 110504 \\ 
-  Council size & 0.00 & 9.00 & 12.00 & 18.00 & 102.00 & 15.40 & 9.45 & 215992 \\ 
-  Running variable & -3.76 & -0.16 & 0.01 & 0.18 & 1.10 & -0.03 & 0.37 & 191249 \\ 
-  Population (as of 12-31) & 0.00 & 603.00 & 1600.00 & 4931.00 & 1488202.00 & 6536.49 & 28429.63 & 221116 \\ 
-  Population (for coun. size) & 3.00 & 578.00 & 1642.00 & 4960.00 & 1471104.00 & 6693.63 & 29688.62 & 191289 \\ 
+RDD without controls &  &  &  &  &  &  &  &  &  \\ 
+   & Ln of gross expenditure p. c. & 0.14 & 6.90 & 7.19 & 7.45 & 13.94 & 7.19 & 0.42 & 103,618 \\ 
+   & Council size & 0.00 & 9.00 & 14.00 & 19.00 & 94.00 & 15.58 & 9.02 & 103,618 \\ 
+   & Above cutoff (dummy, instrument) & 0.00 & 0.00 & 1.00 & 1.00 & 1.00 & 0.53 & 0.50 & 103,618 \\ 
+   & Running variable (inhabitants relative to thresholds) & -3.76 & -0.15 & 0.02 & 0.19 & 0.86 & -0.02 & 0.36 & 103,618 \\ 
+   & Year & 2002.00 & 2005.00 & 2007.00 & 2011.00 & 2014.00 & 2007.66 & 3.63 & 103,618 \\ 
+   & Council size population thresholds & 70.00 & 500.00 & 2000.00 & 5000.00 & 700000.00 & 6019.66 & 21825.06 & 103,618 \\ 
+  RDD with controls &  &  &  &  &  &  &  &  &  \\ 
+   & Ln of gross expenditure p. c. & 0.14 & 6.91 & 7.20 & 7.45 & 13.80 & 7.19 & 0.41 & 101,409 \\ 
+   & Council size & 0.00 & 10.00 & 14.00 & 19.00 & 94.00 & 15.78 & 8.99 & 101,409 \\ 
+   & Above cutoff (dummy, instrument) & 0.00 & 0.00 & 1.00 & 1.00 & 1.00 & 0.54 & 0.50 & 101,409 \\ 
+   & Running variable (inhabitants relative to thresholds) & -3.31 & -0.14 & 0.03 & 0.19 & 0.86 & -0.01 & 0.32 & 101,409 \\ 
+   & Year & 2002.00 & 2005.00 & 2008.00 & 2011.00 & 2014.00 & 2007.69 & 3.63 & 101,409 \\ 
+   & Council size population thresholds & 70.00 & 750.00 & 2000.00 & 5000.00 & 700000.00 & 6130.97 & 22022.54 & 101,409 \\ 
+   & Share of working-age population & 0.34 & 0.60 & 0.61 & 0.63 & 0.82 & 0.61 & 0.03 & 101,409 \\ 
+   & Share of poplation aged $>$ 65 years & 0.02 & 0.17 & 0.19 & 0.21 & 0.47 & 0.19 & 0.04 & 101,409 \\ 
+   & Unemployment rate & 0.00 & 0.03 & 0.04 & 0.06 & 0.30 & 0.05 & 0.03 & 101,409 \\ 
+   & Total area in ha & 39.00 & 712.00 & 1580.00 & 3372.00 & 40516.00 & 2566.77 & 2851.21 & 101,409 \\ 
+   & District-free city (dummy) & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 & 0.01 & 0.10 & 101,409 \\ 
+   & City (dummy) & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 & 0.16 & 0.37 & 101,409 \\ 
+   & Years since last election & 0.00 & 1.00 & 2.00 & 3.00 & 5.00 & 2.13 & 1.56 & 101,409 \\ 
+  Potentially heterogeneity-inducing variables/Potential mechanisms &  &  &  &  &  &  &  &  &  \\ 
+   & Ln of gross revenue p. c. & -1.29 & 6.89 & 7.19 & 7.45 & 13.91 & 7.18 & 0.42 & 103,610 \\ 
+   & Ln of net expenditure p. c. & -0.24 & 6.49 & 6.85 & 7.16 & 13.94 & 6.81 & 0.55 & 103,555 \\ 
+   & Ward elections (dummy) & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 & 0.14 & 0.34 & 103,618 \\ 
+   & Southern-German type local constitution (dummy) & 0.00 & 1.00 & 1.00 & 1.00 & 1.00 & 0.87 & 0.34 & 103,618 \\ 
+   & CDU/CSU mayor (dummy, BY only) & 0.00 & 0.00 & 0.00 & 1.00 & 1.00 & 0.44 & 0.50 & 26,702 \\ 
+   & SPD mayor (dummy, BY only) & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 & 0.14 & 0.34 & 26,702 \\ 
+   & Number of parties in council (NW, BW, BY, SL, MV, SN) & 1.00 & 2.00 & 3.00 & 4.00 & 9.00 & 2.84 & 1.27 & 48,489 \\ 
+   & Number of parties in council by HHI (NW, BW, BY, SL, MV, SN) & 0.18 & 0.35 & 0.43 & 0.57 & 1.00 & 0.52 & 0.24 & 48,489 \\ 
+   & Absolute majority (dummy, NW, BW, BY, SL, MV, SN) & 0.00 & 0.00 & 1.00 & 1.00 & 1.00 & 0.51 & 0.50 & 48,489 \\ 
+   & Absolute CDU/CSU majority (dummy, NW, BW, BY, SL, MV, SN) & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 & 0.12 & 0.33 & 48,489 \\ 
+   & Absolute SPD majority (dummy, NW, BW, BY, SL, MV, SN) & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 & 0.00 & 0.06 & 48,489 \\ 
+   & Absolute majority by independent election group (dummy, BY only) & 0.00 & 0.00 & 0.00 & 1.00 & 1.00 & 0.33 & 0.47 & 26,702 \\ 
+   & Ln of administrative expenditure p. c. & -0.23 & 6.61 & 6.85 & 7.08 & 13.80 & 6.86 & 0.36 & 103,616 \\ 
+   & Ln of personnel expenditure p. c. & -3.34 & 4.32 & 5.45 & 5.83 & 9.67 & 5.11 & 0.95 & 103,589 \\ 
+   & Ln of operating expenditure p. c. & -2.22 & 4.85 & 5.26 & 5.60 & 9.81 & 5.22 & 0.57 & 103,602 \\ 
+   & Ln of capital expenditure p. c. & -5.21 & 5.10 & 5.77 & 6.32 & 13.26 & 5.62 & 1.09 & 102,754 \\ 
+   & Ln of loan expenditure p. c. & -5.30 & 2.92 & 3.65 & 4.34 & 9.70 & 3.58 & 1.22 & 86,517 \\ 
+   & Ln of property investment expenditure p. c. & -5.14 & 4.48 & 5.30 & 5.90 & 10.85 & 5.04 & 1.31 & 100,061 \\ 
+   & Female share in council (SH, BW, BY, SA, TH) & 0.00 & 0.11 & 0.17 & 0.25 & 0.67 & 0.18 & 0.10 & 56,964 \\ 
+   & Female share in largest council party (BW, BY only) & 0.00 & 0.10 & 0.17 & 0.25 & 0.71 & 0.17 & 0.12 & 41,007 \\ 
+   & District-free city (dummy) & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 & 0.01 & 0.10 & 103,618 \\ 
+   & City (dummy) & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 & 0.16 & 0.36 & 103,618 \\ 
    \bottomrule
 \end{tabular}

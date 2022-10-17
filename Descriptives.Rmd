@@ -9,6 +9,11 @@ output:
     toc_float: true
 ---
 
+# Introduction
+
+Note: Since this script serves as exploratory data analysis with respect to the research question, I use the `data` data set, i. e. the data set running until 2021. In the paper, I only use data until 2014. For the LaTeX export, I obviously limit the data set to the data used in the analysis scripts.
+
+
 # Load data and packages
 
 ```{r Packages}
@@ -16,7 +21,7 @@ library(tidyverse)
 library(reshape2)
 library(ggcorrplot)
 library(xtable)
-source("functions.R")
+source("functions/functions.R")
 ```
 
 ```{r Data}
@@ -27,8 +32,27 @@ data <-
 ```{r}
 # similar data set definition as in "Analysis.Rmd"
 d_rdd_bivariate <- data %>%
-  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, inhabitants_treshold, year, ags, election_year, state, closest, exact_pop, kreisfreie_stadt, by_law_seats) %>%
+  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, inhabitants_treshold_factor, inhabitants_treshold, year, ags, election_year, state, closest, clean_disc_acc_Höhmann, clean_disc_acc_to_my_research) %>%
+  drop_na(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff) %>%
+  # Repeat (bandwidth) window calculation for data subsets
+  mutate(
+    closest = base::rank(abs(inhabs_rel_to_cutoff), ties.method = "last"),
+    closest = closest/max(closest),
+  )
+d_rdd_bivariate2 <- data %>%
+  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, inhabitants_treshold_factor, inhabitants_treshold, year, ags, election_year, state, closest, clean_disc_acc_Höhmann, clean_disc_acc_to_my_research, by_law_seats) %>% # add by_law_seats here
   drop_na(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff)
+d_rdd <- data %>%
+  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, above_cutoff, closest,
+         inhabitants_treshold_factor, inhabitants_treshold, year, ags, state,
+         inh_tot, pop_over65, unempl_rate, total_area_ha,
+         share_working_age, kreisfreie_stadt, stadt, years_since_last_elec) %>%
+  drop_na() %>%
+  # Repeat (bandwidth) window calculation for data subsets
+  mutate(
+    closest = base::rank(abs(inhabs_rel_to_cutoff), ties.method = "last"),
+    closest = closest/max(closest),
+  )
 ```
 
 ```{r Options}
@@ -92,27 +116,111 @@ data %>%
 Exporting ta table of descriptive univariate statistics to LaTeX to use it in the paper.
 
 ```{r}
-univar_descriptives <- data %>%
-  select(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff, inh_tot, exact_pop) %>%
-  summarize(across(
-    everything(), summarize2
-  )) %>%
-  mutate(
-    Stat = c("Min.", "1st Quar.", "Median", "3rd Quar.", "Max.", "Mean", "S. D.", "Number of unique values", "n", "Missings"),
-    .before = 1
-    ) %>%
-  filter(!(Stat %in% c("Number of unique values", "Missings"))) %>%
-  rename(
-    `Ln of gross expenditure p. c.` = ln_gross_expenditure_pc,
-    `Council size` = total_seats,
-    `Running variable` = inhabs_rel_to_cutoff,
-    `Population (as of 12-31)` = inh_tot,
-    `Population (for coun. size)` = exact_pop
-  ) %>%
+# Bivariate RDD data
+d_rdd_bivariate_summary <- d_rdd_bivariate %>%
+  select(ln_gross_expenditure_pc, total_seats, above_cutoff, inhabs_rel_to_cutoff,
+         year, inhabitants_treshold) %>%
+  # mutate(across(where(is.factor),
+  #               as.numeric)) %>% 
+  summarize(across(everything(), summarize2)) %>%
+  mutate(Stat = sum_stats,
+         .before = 1) %>%
   pivot_longer(-Stat, names_to = "Statistic") %>%
-  pivot_wider(names_from = Stat, values_from = value)
+  pivot_wider(names_from = Stat, values_from = value) #%>%
+  # mutate(Data_Set2 = "RDD without controls",
+  #        .before = 1)
+# Multivariate RDD data
+d_rdd_multivariate_summary <- d_rdd %>%
+  select(ln_gross_expenditure_pc, total_seats, above_cutoff, inhabs_rel_to_cutoff,
+         year, inhabitants_treshold, share_working_age, pop_over65, unempl_rate, total_area_ha,
+         kreisfreie_stadt, stadt, years_since_last_elec
+         ) %>%
+  mutate(across(where(is.factor),
+                ~as.numeric(.)-1)) %>% 
+  summarize(across(everything(), summarize2)) %>%
+  mutate(Stat = sum_stats,
+         .before = 1) %>% 
+  pivot_longer(-Stat, names_to = "Statistic") %>%
+  pivot_wider(names_from = Stat, values_from = value) #%>% 
+  # mutate(Data_Set2 = "RDD with controls",
+  #        .before = 1)
+# Potentially heterogeneity-inducing variables
+d_rdd_het_summary <- data %>%
+  drop_na(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff) %>%
+  select(ln_gross_revenue_pc, ln_net_expenditure_pc,
+         #contains("revenue"),
+         ward_elections, const_typ_sueddt, ends_with("mayor"),
+         no_parties_in_parliament, parties_in_parliament_hhi,
+         absolute_majority, cdu_csu_majority, spd_majority, waehlergruppen_majority,
+         starts_with("ln_expenditure"),
+         female_share_council, female_share_largest_party,
+         kreisfreie_stadt, stadt) %>%
+  mutate(across(where(is.factor),
+                ~as.numeric(.)-1)) %>% 
+  summarize(across(everything(), summarize2)) %>%
+  mutate(Stat = sum_stats,
+         .before = 1) %>% 
+  pivot_longer(-Stat, names_to = "Statistic") %>%
+  pivot_wider(names_from = Stat, values_from = value) #%>%
+  # mutate(Data_Set2 = "Potential heterogeneity-inducing variables",
+  #        .before = 1)
+# Tie it up
+univar_descriptives <-
+  bind_rows(d_rdd_bivariate_summary, d_rdd_multivariate_summary, d_rdd_het_summary) %>%
+  select(!c(`No of unique values`, `No of NA`)) %>%
+  mutate(
+    Statistic = case_when(
+      Statistic == "ln_gross_expenditure_pc" ~ "Ln of gross expenditure p. c.",
+      Statistic == "total_seats" ~ "Council size",
+      Statistic == "above_cutoff" ~ "Above cutoff (dummy, instrument)",
+      Statistic == "inhabs_rel_to_cutoff" ~ "Running variable (inhabitants relative to thresholds)",
+      #`Population (as of 12-31)` = inh_tot,
+      #`Population (for coun. size)` = exact_pop,
+      Statistic == "inhabitants_treshold" ~ "Council size population thresholds",
+      Statistic == "share_working_age" ~ "Share of working-age population",
+      Statistic == "pop_over65" ~ "Share of poplation aged > 65 years",
+      Statistic == "unempl_rate" ~ "Unemployment rate",
+      Statistic == "total_area_ha" ~ "Total area in ha",
+      Statistic == "kreisfreie_stadt" ~ "District-free city (dummy)",
+      Statistic == "stadt" ~ "City (dummy)",
+      Statistic == "years_since_last_elec" ~ "Years since last election",
+      Statistic == "ln_gross_revenue_pc" ~ "Ln of gross revenue p. c.",
+      Statistic == "ln_net_expenditure_pc" ~ "Ln of net expenditure p. c.",
+      #Statistic == "ln_revenue_administrative_pc" ~ "Ln of ",
+      #"ln_revenue_admin_taxes_pc"            "ln_revenue_admin_transfers_pc"
+      #"ln_revenue_admin_chargesfees_pc"      "ln_revenue_capital_pc"
+      #"ln_revenue_capital_charges_pc"        "ln_revenue_capital_allocations_pc"
+      #"ln_revenue_capital_loans_pc"          "ln_tax_prop_a_revenue_pc"
+      Statistic == "ward_elections" ~ "Ward elections (dummy)",
+      Statistic == "const_typ_sueddt" ~ "Southern-German type local constitution (dummy)",
+      Statistic == "cdu_csu_mayor" ~ "CDU/CSU mayor (dummy, BY only)",
+      Statistic == "spd_mayor" ~ "SPD mayor (dummy, BY only)",
+      Statistic == "no_parties_in_parliament" ~ "Number of parties in council (NW, BW, BY, SL, MV, SN)",
+      Statistic == "parties_in_parliament_hhi" ~ "Number of parties in council by HHI (NW, BW, BY, SL, MV, SN)",
+      Statistic == "absolute_majority" ~ "Absolute majority (dummy, NW, BW, BY, SL, MV, SN)",
+      Statistic == "cdu_csu_majority" ~ "Absolute CDU/CSU majority (dummy, NW, BW, BY, SL, MV, SN)",
+      Statistic == "spd_majority" ~ "Absolute SPD majority (dummy, NW, BW, BY, SL, MV, SN)",
+      Statistic == "waehlergruppen_majority" ~ "Absolute majority by independent election group (dummy, BY only)",
+      Statistic == "ln_expenditure_administrative_pc" ~ "Ln of administrative expenditure p. c.",
+      Statistic == "ln_expenditure_admin_personel_pc" ~ "Ln of personnel expenditure p. c.", #admin
+      Statistic == "ln_expenditure_adminoperating_pc" ~ "Ln of operating expenditure p. c.", #admin
+      Statistic == "ln_expenditure_capital_pc" ~ "Ln of capital expenditure p. c.",
+      Statistic == "ln_expenditure_capital_loans_pc" ~ "Ln of loan expenditure p. c.", #capital
+      Statistic == "ln_expenditure_capital_prop_inv_pc" ~ "Ln of property investment expenditure p. c.", #capital
+      Statistic == "female_share_council" ~ "Female share in council (SH, BW, BY, SA, TH)",
+      Statistic == "female_share_largest_party" ~ "Female share in largest council party (BW, BY only)",
+      TRUE ~ paste(toupper(substr(Statistic, 1, 1)), substr(Statistic, 2, nchar(Statistic)), sep="")
+    )
+  ) %>%
+  mutate(`Data Set` = "", .before = 1,
+         n = trimws(format(n, big.mark = ",") ) ) %>%
+  add_row(`Data Set` = "RDD without controls", .before = 1) %>%
+  add_row(`Data Set` = "RDD with controls", .before = 8) %>%
+  add_row(`Data Set` = "Potentially heterogeneity-inducing variables/Potential mechanisms", .before = 22)
+# Maybe add states whose valid values there are for each variable
 univar_descriptives
-print(xtable::xtable(univar_descriptives, digits = c(rep(2, times = 9), 0)),
+# Export
+print(xtable::xtable(univar_descriptives, digits = c(rep(2, times = 10), 0)),
       file = "tables/descriptives.tex",
       booktabs = TRUE, floating = FALSE,
       include.rownames = FALSE)
@@ -156,19 +264,19 @@ data %>%
   summarize(n = n(), seat_cor = cor(total_seats, by_law_seats, use = "pairwise.complete.obs")) %>%
   arrange(seat_cor)
 # Main data set used in analysis
-d_rdd_bivariate %>%
+d_rdd_bivariate2 %>%
   group_by(state) %>%
   summarize(n = n(), seat_cor = cor(total_seats, by_law_seats, use = "pairwise.complete.obs")) %>%
   arrange(seat_cor)
-cor(d_rdd_bivariate$total_seats, d_rdd_bivariate$by_law_seats, use = "pairwise.complete.obs")
+cor(d_rdd_bivariate2$total_seats, d_rdd_bivariate2$by_law_seats, use = "pairwise.complete.obs")
 # Main data set used in analysis & close to cutoffs
-d_rdd_bivariate %>%
+d_rdd_bivariate2 %>%
   filter(closest <= 0.1) %>%
   group_by(state) %>%
   summarize(n = n(), seat_cor = cor(total_seats, by_law_seats, use = "pairwise.complete.obs")) %>%
   arrange(seat_cor)
-cor(d_rdd_bivariate %>% filter(closest <= 0.1) %>% pull(total_seats),
-    d_rdd_bivariate %>% filter(closest <= 0.1) %>% pull(by_law_seats),
+cor(d_rdd_bivariate2 %>% filter(closest <= 0.1) %>% pull(total_seats),
+    d_rdd_bivariate2 %>% filter(closest <= 0.1) %>% pull(by_law_seats),
     use = "pairwise.complete.obs")
 ```
 

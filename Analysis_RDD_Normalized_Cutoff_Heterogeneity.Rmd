@@ -629,7 +629,7 @@ df <- rdd_vary_states %>%
     )) %>%
   ungroup()
 plot_states_fuzzy1 <- ggplot2::ggplot(data = df, aes(x = state_name, y = point_estimate)) +
-  geom_point(color = ifelse(df$p <= p_value_cutoff, 2, 1)) +
+  geom_point(size = 1.5, color = ifelse(df$p <= p_value_cutoff, 2, 1)) +
   geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
                 color = ifelse(df$p <= p_value_cutoff, 2, 1),
                 linetype = ifelse(df$p <= p_value_cutoff, 2, 1),
@@ -637,7 +637,7 @@ plot_states_fuzzy1 <- ggplot2::ggplot(data = df, aes(x = state_name, y = point_e
   geom_text(aes(y = -1.75, label = note),
             colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 0, size = 2.8) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
-  labs(title = "First stage", x = "State", y = "Increase in council size at the threshold")
+  labs(x = "State", y = "Increase in council size at the threshold")
 plot_states_fuzzy1
 ggsave(filename = "plots/rdd_states_fuzzy1.pdf", width = 6, height = 6*9/16)
 # Second stage
@@ -674,7 +674,7 @@ plot_states_fuzzy2 <- ggplot2::ggplot(data = df, aes(x = state_name, y = point_e
             colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 0, size = 2.8) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
-  labs(title = "Second stage", x = "State", y = "Increase in spending at the threshold")
+  labs(x = "State", y = "Increase in spending at the threshold")
 plot_states_fuzzy2
 ggsave(filename = "plots/rdd_states_fuzzy2.pdf", width = 6, height = 6*9/16)
 rm(df)
