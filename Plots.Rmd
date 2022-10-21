@@ -241,6 +241,7 @@ th_1_change <- c(2000, 2500)
 th_1 <- c(70, 200, 750, 1250, 2000, 5000, 10000, 15000, 25000, 35000, 45000)
 th_15 <- c(1000, 2000, 3000, 5000, 10000, 20000, 30000, 50000, 150000, 300000)
 th_15_change <- c(100, 500)
+th_15 <- c(th_15, th_15_change)
 plot_list <- list()
 plot_df <- d_rdd_bivariate %>%
   mutate(
@@ -292,14 +293,14 @@ Arrange plots:
 ```{r}
 first_stage <- ggpubr::ggarrange(
   plot_list[[1]], plot_list[[5]], plot_list[[6]], plot_list[[7]], plot_list[[8]],
-  plot_list[[9]], plot_list[[10]], plot_list[[13]], plot_list[[14]], plot_list[[16]],
+  plot_list[[9]], plot_list[[10]], plot_list[[13]], plot_list[[14]], plot_list[[15]], plot_list[[16]],
   # labels = c("SH", "NW", "Hesse", "Rhineland-Palatinate", "Baden-Württemberg",
   #            "Bavaria", "Saarland", "Mecklenburg-Vorpommern", "Saxony", "Thuringia"),
-  labels = paste(" ", c("SH", "NW", "HE", "RP", "BW", "BY", "SL", "MV", "SN", "TH")),
+  labels = paste(" ", c("SH", "NW", "HE", "RP", "BW", "BY", "SL", "MV", "SN", "ST", "TH")),
   #label.x = "Population",
   #label.y = "Council size",
   #common.legend = TRUE,
-  ncol = 2, nrow = 5) %>%
+  ncol = 2, nrow = 6) %>%
   annotate_figure(
     # See https://github.com/kassambara/ggpubr/issues/78
     left = text_grob("Council size", rot = 90),

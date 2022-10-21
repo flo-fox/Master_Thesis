@@ -505,7 +505,7 @@ df <- rdd_balance_tests %>%
   janitor::row_to_names(row_number = 1) %>%
   mutate(`Dependent variable` = c("Point estimate", "SE", "CI", "p value", "Bandwidth", "Obs. below", "Obs. above"),
          .before = 1) %>%
-  dplyr::rename(`Population (as of 12-31)` = inh_tot, `Share of poplation aged > 65 years` = pop_over65, `Unemployment rate` = unempl_rate, `Total area in ha` = total_area_ha, `Share of working-age population` = share_working_age, `District-free city (dummy)` = kreisfreie_stadt, `City (dummy)` = stadt, `Lagged council size` = lag_total_seats)
+  dplyr::rename(`Population (as of 12-31)` = inh_tot, `Share of poplation aged > 65 years` = pop_over65, `Unemployment rate` = unempl_rate, `Total area in ha` = total_area_ha, `Share of working-age population` = share_working_age, `Independent large city (dummy)` = kreisfreie_stadt, `City (dummy)` = stadt, `Lagged council size` = lag_total_seats)
 df
 print(
   xtable::xtable(

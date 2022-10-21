@@ -4,6 +4,7 @@
 
 #### Options ####
 options(scipen = 20)
+Sys.setenv(LANG = "en")
 theme_set(theme_classic())
 p_value_cutoff <- 0.01
 round_decimals <- 4 # Rounding of decimals
@@ -30,7 +31,7 @@ sum_stats <- c("Min", "1st Quar", "Median", "3rd Quar", "Max", "Mean", "SD", "No
 
 
 #### LaTeX export text
-tex_control_text <- "Controls, \\ac{FE} and \\ac{SE} as indicated in the respective column. Controls, if included and as long as not perfectly collinear: population, share of population over 65 years, unemployment rate, total area, share of working-age population, and dummies for ``district-free'' cities, cities, as well as year in the electoral cycle."
+tex_control_text <- "Controls, \\ac{FE} and \\ac{SE} as indicated in the respective columns. Controls, if included: population, share of population over 65 years, unemployment rate, total area, share of working-age population, and dummies for independent large cities, cities, as well as year in the electoral cycle."
 tex_signif_text <- "Significance codes: *** p < 0.001, ** p < 0.01, * p < 0.05, ' p < 0.10.}"
 
 #### Function to generate significance stars out of p values ####

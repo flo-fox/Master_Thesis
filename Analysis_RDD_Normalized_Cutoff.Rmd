@@ -390,7 +390,7 @@ etable(#rdd_bivariate, rdd_w_covs,
          "_^Window around the threshold" = rep("10%", 4)
          ),
        # LaTeX settings
-       title = "Results of the \\ac{IV} \\ac{RDD}",
+       title = "Results of the \\acs{IV} \\acs{RDD}",
        label = "tab:rdd_iv",
        notes = paste("\\footnotesize{*Notes:* Results of the \\ac{IV} \\ac{RDD}, in a ten-percent window around the cutoffs.",
                      tex_control_text,
@@ -1289,7 +1289,7 @@ etable(rdd_conf_1, rdd_conf_2,
 
           ),
        # LaTeX settings
-       title = "Results of the interacted \\ac{IV} \\ac{RDD}s to investigate (non)confounded thresholds",
+       title = "Results of the interacted \\acs{IV} \\acs{RDD}s to investigate (non)confounded thresholds",
        label = "tab:rdd_conf_thresholds",
        notes = paste("\\footnotesize{*Notes:* Results of the \\ac{IV} \\ac{RDD}, in a ten-percent window around the cutoffs. No control variables but threshold, state, and year \\ac{FE}. Standard errors clustered at the threshold, year and municipality level in parentheses.",
                      tex_signif_text)#,

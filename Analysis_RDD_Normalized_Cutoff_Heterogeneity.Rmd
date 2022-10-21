@@ -142,7 +142,7 @@ rdd_bi_fe_model <- function(...) {
 }
 ```
 
-## H2: How is the additional spending financed?
+## How is the additional spending financed?
 
 The `gross revenue` variable is coded similarly to the `gross expenditure` variable: In natural logs and per capita.
 
@@ -164,7 +164,7 @@ summary(rdd_h2_taxes)
 rm(df)
 ```
 
-## H3: If taxes are used to fund the Law, which taxes?
+## If taxes are used to fund the Law, which taxes?
 
 Debt at the cutoff:
 
@@ -687,12 +687,13 @@ Second stage: State 14's (SN) CIs are too large, state `15` produces an error. H
 
 Subsample method, sharp approach (only possible for a subset of states):
 
-```{r, state_variation_shp, eval=FALSE}
-# to do: remove eval=FALSE
-# data_state <- data %>% # prepare data set used for analysis
-#   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year) %>%
-#   drop_na()
+```{r}
+data_state <- data %>% # prepare data set used for analysis
+  select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year) %>%
+  drop_na()
 all_states <- data_state %>% distinct(state) %>% filter(state %in% c(7, 9, 10, 16)) %>% pull() # vector of states
+```
+```{r, state_variation_shp, eval=FALSE}
 # rdd_vary_states <- # prepare data set to store the results
 #   tibble(state = "", point_estimate = "", se = "", se_robust = "",
 #          ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "",
@@ -728,7 +729,7 @@ for (i in all_states) {
 }
 rdd_vary_states <- rdd_vary_states %>% drop_na(state)
 save(rdd_vary_states, file = "tables_robustness_checks/rdd_vary_states.Rdata")
-rm(all_states, data_state, df, i, rdd)
+rm(data_state, df, i, rdd)
 ```
 ```{r}
 load(file = "tables_robustness_checks/rdd_vary_states.Rdata")
@@ -760,7 +761,7 @@ plot_states_sharp <- ggplot2::ggplot(data = df, aes(x = state_name, y = point_es
   geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
                 color = ifelse(df$p <= p_value_cutoff, 2, 1),
                 linetype = ifelse(df$p <= p_value_cutoff, 2, 1),
-                width = 0.5) +
+                width = 0.3) +
   geom_text(aes(y = -0.165, label = note),
             colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 0) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
@@ -801,6 +802,37 @@ nrow(data %>% filter(state == 14, exact_pop <= 10000)) / nrow(data %>% filter(st
 # Saarland (SL):
 nrow(data %>% filter(state == 10))
 ```
+
+
+Interaction-term method in the *subsample* approach:
+
+```{r}
+all_states <- data %>%
+  distinct(state) %>%
+  filter(state != "3", state != "12", state != "13", state != "15") %>%
+  pull() # vector of states
+df <- data %>%
+  filter(closest <= 0.1) %>%
+  mutate(state = as.factor(state))
+for (i in all_states) {
+  df_state <- df %>% filter(state == i)
+  rdd <- fixest::feols(ln_gross_expenditure_pc ~
+                       1  | # controls
+                       inhabitants_treshold_factor + year | # fixed-effect controls
+                       # First stage regression:
+                       inhabs_rel_to_cutoff*total_seats ~ # Instrument our standard RDD...
+                       inhabs_rel_to_cutoff*above_cutoff, # ... with being above the cutoff
+                     vcov = "twoway",
+                     data = df_state)
+  print(paste("State:", i))
+  print(summary(rdd))
+}
+```
+```{r}
+rm(all_states, df, df_state, rdd)
+```
+
+
 
 
 
@@ -872,9 +904,7 @@ Run RDD for Bavaria as some data are only available for Bavaria
 
 # Different political systems
 
-## H4: Bureaucracy-council agency conflict
-
-## H5: At-large vs. ward electoral systems
+## At-large vs. ward electoral systems
 
 Dummy `ward_elections` is 1 for states 01 and 05, 0 otherwise. 01 & 05 have 
 
@@ -959,13 +989,20 @@ summary(rdd)
 However in the parametric approach, nothing proves significant, in line with what one might expect based on the overlapping CIs in the plot above.
 
 
-## H6: Role of the mayor
+## Role of the mayor
 
-How to define role of mayor? How to define `const_typ_sueddt`?
+Hard to pin down local constitutional types. The way I did it:
+
+- `const_typ_sueddt` = 1 if states: 01, 03, 05, 07, 08, 09, 10, 14, 0 otherwise. I. e. = 1 if "pure" "süddeutsche Ratsverfassung".
+- `const_typ_magistrat` = 1 if state: 06, 0 otherwise. Only Hesse has pure "Magistratsverfassung".
+
+### `const_typ_sueddt` -- Süddeutsche Ratsverfassung
+
+(Main specification)
 
 Subsample method:
 
-```{r, eval=FALSE}
+```{r, rdd_const_typ_sueddt, eval=FALSE}
 # to do: remove eval=FALSE
 data_subset <- data %>% # prepare data set used for analysis
   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year, const_typ_sueddt) %>%
@@ -1003,12 +1040,12 @@ rdd_vary_const_type <- rdd_vary_const_type %>% drop_na()
 save(rdd_vary_const_type, file = "tables_robustness_checks/rdd_vary_const_type.Rdata")
 rm(all_values, data_subset, df, i, rdd)
 ```
-```{r, eval=FALSE}
+```{r}
 load(file = "tables_robustness_checks/rdd_vary_const_type.Rdata")
 rdd_vary_const_type
 ```
 
-```{r, eval=FALSE}
+```{r}
 ggplot2::ggplot(data = rdd_vary_const_type, aes(x = const_typ_sueddt, y = point_estimate)) +
   geom_point(size = 1.5, color = ifelse(rdd_vary_const_type$p <= p_value_cutoff, 2, 1)) +
   geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
@@ -1025,7 +1062,7 @@ No differences visible.
 
 Interaction-term method using an IV approach:
 
-```{r, eval=FALSE}
+```{r}
 df <- data %>%
   filter(closest <= 0.1)
 rdd <- fixest::feols(ln_gross_expenditure_pc ~
@@ -1043,7 +1080,91 @@ rm(df)
 Local constititutional type does not matter.
 
 
-## H7: Mayoral party affiliation
+### `const_typ_magistrat` -- Magistratsverfassung
+
+We should expect `const_typ_magistrat == 1` to be significant as it only consists of Hesse, which had a large positive effect in the state-heterogeneity section (subsection method).
+
+Subsample method:
+
+```{r, rdd_const_typ_magistrat, eval=FALSE}
+# to do: remove eval=FALSE
+data_subset <- data %>% # prepare data set used for analysis
+  select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year, const_typ_magistrat) %>%
+  drop_na()
+all_values <- data_subset %>% distinct(const_typ_magistrat) %>% pull() # vector of values
+rdd_vary_const_type2 <- # prepare data set to store the results
+  tibble(const_typ_magistrat = "", point_estimate = "", se = "", se_robust = "",
+         ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
+  mutate(across(everything(), as.numeric))
+for (i in all_values) {
+  print(paste("constitutional type:", i))
+  df <- data_subset %>%
+    filter(const_typ_magistrat == i)
+  rdd <-
+    rdrobust_wrapper(
+      ccluster = df$inhabitants_treshold_factor,
+      ccovs = model.matrix( ~ df$inhabitants_treshold_factor + df$state + df$year) # FE
+  )
+  #summary(rdd)
+  rdd_vary_const_type2 <- rdd_vary_const_type2 %>%
+    dplyr::add_row(
+      const_typ_magistrat = i,
+      point_estimate = rdd$coef[1],
+      se = rdd$se[1],
+      se_robust = rdd$se[3],
+      ci_lower = rdd$ci[3,1],
+      ci_upper = rdd$ci[3,2],
+      p = rdd$pv[3],
+      bw = rdd$bws[1,1],
+      obs_below = rdd$N_h[1],
+      obs_above = rdd$N_h[2]
+  )
+}
+rdd_vary_const_type2 <- rdd_vary_const_type2 %>% drop_na()
+save(rdd_vary_const_type2, file = "tables_robustness_checks/rdd_vary_const_type2.Rdata")
+rm(all_values, data_subset, df, i, rdd)
+```
+```{r}
+load(file = "tables_robustness_checks/rdd_vary_const_type2.Rdata")
+rdd_vary_const_type2
+```
+
+```{r}
+ggplot2::ggplot(data = rdd_vary_const_type2, aes(x = const_typ_magistrat, y = point_estimate)) +
+  geom_point(size = 1.5, color = ifelse(rdd_vary_const_type2$p <= p_value_cutoff, 2, 1)) +
+  geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
+                color = ifelse(rdd_vary_const_type2$p <= p_value_cutoff, 2, 1),
+                linetype = ifelse(rdd_vary_const_type2$p <= p_value_cutoff, 2, 1),
+                width = 0.5) +
+  geom_hline(aes(yintercept = 0), linetype = "dotted") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(y = y_lab_RDD)
+```
+
+`const_typ_magistrat == 1` is significant, as expected (reasons see above).
+
+
+Interaction-term method using an IV approach:
+
+```{r}
+df <- data %>%
+  filter(closest <= 0.1)
+rdd <- fixest::feols(ln_gross_expenditure_pc ~
+                       1  | # controls
+                       inhabitants_treshold_factor + state + year | # fixed-effect controls
+                       # First stage regression:
+                       inhabs_rel_to_cutoff*total_seats*const_typ_sueddt ~
+                       inhabs_rel_to_cutoff*above_cutoff*const_typ_sueddt,
+                     vcov = "threeway",
+                     data = df)
+summary(rdd)
+rm(df)
+```
+
+But not significant here.
+
+
+## Mayoral party affiliation
 
 Bavarian data only!
 
@@ -1150,7 +1271,7 @@ for (i in c("fuzzy", "sharp")) {
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
                   color = ifelse(df$p <= p_value_cutoff, 2, 1),
                   linetype = ifelse(df$p <= p_value_cutoff, 2, 1),
-                  width = 0.5) +
+                  width = 0.3) +
     geom_text(aes(y = -0.155, label = note),
             colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 0) +
     geom_hline(aes(yintercept = 0), linetype = "dotted") +
@@ -1208,7 +1329,7 @@ The baseline effect for CSU mayors is -2.1 % (nonsignificant). The "individual" 
 
 
 
-## H8: Parties in parliament
+## Parties in parliament
 
 Number of parties in parliament is presumably biased downwards -- Number of parties in parliament (biased downwards b/c of aggregates (others, waehlergruppen)!)
 
@@ -1419,7 +1540,7 @@ rm(df)
 This completes the picture: No treatment effect variation here.
 
 
-## H9: Absolute majority in parliament
+## Absolute majority in parliament
 
 Data available for the following states:
 `r data %>% filter(!is.na(absolute_majority)) %>% group_by(state) %>% summarize() %>% pull(state) %>% paste(., collapse = ",")`
@@ -1531,7 +1652,7 @@ summary(rdd)
 This squares nicely with the `rdrobust` results: No differences.
 
 
-## H10: Party affiliation of (absolute) majority party
+## Party affiliation of (absolute) majority party
 
 Why only looking at *absolute* majorities? Easier to identify effect, e. g. `cdu_csu` might sit at 40 % of council seats but `spd` and greens might jointly be at 60 %. Hence, the left-wing party would have a majority over the conservatives but the data set might lead us to think that `cdu_csu` "dictates" policies.
 
@@ -1816,8 +1937,8 @@ for (i in exp_category) {
 }
 rdd_vary_exp_category <- rdd_vary_exp_category %>%
   drop_na() %>%
-  mutate(exp_category2 = c("administrative", "administrative: personnel", "administrative: operating",
-                           "capital", "capital: loans", "capital: property investment"))
+  mutate(exp_category2 = c("Administrative", "Administrative: personnel", "Administrative: operating",
+                           "Capital", "Capital: loans", "Capital: property investment"))
 save(rdd_vary_exp_category, file = "tables_robustness_checks/rdd_vary_exp_category.Rdata")
 rm(df)
 ```
@@ -1842,7 +1963,7 @@ ggplot2::ggplot(data = df, aes(x = exp_category2, y = point_estimate)) +
   geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
                 color = ifelse(df$p <= p_value_cutoff, 2, 1),
                 linetype = ifelse(df$p <= p_value_cutoff, 2, 1),
-                width = 0.5) +
+                width = 0.4) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
   aes(stringr::str_wrap(exp_category2, 15)) +
@@ -1880,13 +2001,13 @@ rm(df, exp_category)
 Similar conclusions: No effect is significant at commonly used significance levels, lowest p value: 0.2.
 
 
-## H11: More visible projects favored?
+## More visible projects favored?
 
-## H12: Social expenditures favored?
+## Social expenditures favored?
 
 # Council characteristics
 
-## H13: Female representation
+## Female representation
 
 ### Overall data
 
@@ -2060,6 +2181,35 @@ rm(df, rdd)
 
 No effect visible using interaction-term method.
 
+Given the results from the subsample approach, I will also run models nonlinear in the female-representation variables:
+
+```{r, eval=FALSE}
+df <- data %>%
+  filter(closest <= 0.1) %>%
+  mutate(state = as.factor(state))
+rdd <- fixest::feols(ln_gross_expenditure_pc ~
+                       1  | # controls
+                       inhabitants_treshold_factor + year + state | # fixed-effect controls
+                       # First stage regression:
+                       inhabs_rel_to_cutoff*total_seats*poly(female_share_council, 2) ~
+                       inhabs_rel_to_cutoff*above_cutoff*poly(female_share_council, 2),
+                     vcov = "threeway",
+                     data = df)
+summary(rdd)
+rdd <- fixest::feols(ln_gross_expenditure_pc ~
+                       1  | # controls
+                       inhabitants_treshold_factor + year + state | # fixed-effect controls
+                       # First stage regression:
+                       inhabs_rel_to_cutoff*total_seats*poly(female_share_largest_party, 2) ~
+                       inhabs_rel_to_cutoff*above_cutoff*poly(female_share_largest_party, 2),
+                     vcov = "threeway",
+                     data = df)
+summary(rdd)
+rm(df, rdd)
+```
+
+Unfortunately, this does not work because "missing values are not allowed in poly".
+
 
 ### Bavarian data
 
@@ -2204,7 +2354,7 @@ Only significant at $\alpha$ = 0.1
 
 # Municipality characteristics
 
-## H14: Size of the municipalities
+## Size of the municipalities
 
 ```{r, size_variation, eval=FALSE}
 # to do: remove eval=FALSE
@@ -2223,7 +2373,22 @@ for (i in all_th) {
   print(paste("thresholds:", i))
   df <- data_th %>%
     filter(inhabitants_treshold_factor == i)
-  states_in_df <- df %>% distinct(state) %>% pull()
+  states_in_df <- df %>%
+    distinct(state) %>%
+    mutate(state = case_when(
+      state == 1 ~ "SH",
+      state == 5 ~ "NW",
+      state == 6 ~ "HE",
+      state == 7 ~ "RP",
+      state == 8 ~ "BW",
+      state == 9 ~ "BY",
+      state == 10 ~ "SL",
+      state == 13 ~ "MV",
+      state == 14 ~ "SN",
+      state == 15 ~ "ST",
+      state == 16 ~ "TH"
+    )) %>%
+    pull()
   rdd <-
     rdrobust_wrapper(
       ccluster = NULL,
@@ -2233,7 +2398,7 @@ for (i in all_th) {
   rdd_vary_th <- rdd_vary_th %>%
     dplyr::add_row(
       threshold = as.numeric(i),
-      states = paste(states_in_df, collapse = ","),
+      states = paste(states_in_df, collapse = ", "),
       point_estimate = rdd$coef[1],
       se = rdd$se[1],
       se_robust = rdd$se[3],
@@ -2258,7 +2423,19 @@ Several thresholds, many of them rather large ones, have been dropped as they yi
 
 ```{r}
 df <- rdd_vary_th %>%
-  filter(threshold != 100000)
+  filter(threshold != 100000) %>%
+  mutate(states = gsub(", ", ",\n", states))
+ggplot2::ggplot(data = df, aes(x = threshold, y = point_estimate)) +
+  geom_point(size = 1.5, color = ifelse(df$p <= p_value_cutoff, 2, 1)) +
+  geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
+                color = ifelse(df$p <= p_value_cutoff, 2, 1),
+                linetype = ifelse(df$p <= p_value_cutoff, 2, 1),
+                width = 0.1) +
+  geom_text(aes(y = -0.6, label = states), size = 2.5, vjust = 1) +
+  geom_hline(aes(yintercept = 0), linetype = "dotted") +
+  scale_x_log10() +
+  scale_y_continuous(limits = c(-1.2, 1.1), labels = scales::percent) +
+  labs(x = "Population threshold", y = "Increase in spending at the threshold")
 ggplot2::ggplot(data = df, aes(x = threshold, y = point_estimate)) +
   geom_point(size = 1.5, color = ifelse(df$p <= p_value_cutoff, 2, 1)) +
   geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
@@ -2273,6 +2450,60 @@ ggsave(filename = "plots/rdd_pop_size.pdf", width = 6, height = 6*9/16)
 ```
 
 There are not many CI deviating from zero in a statistically significant way. This might also result from pooling several states in many of the cutoffs displayed above.
+
+Run these regressions for each state separately:
+
+```{r, size_variation_by_state, eval=FALSE}
+# code still needs some work, not ready yet
+# to do: remove eval=FALSE
+for (j in c(1, 5)) {
+  data_th <- data %>% # prepare data set used for analysis
+    filter(state == j) %>%
+    select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year) %>%
+  drop_na()
+all_th <- data_th %>%
+  distinct(inhabitants_treshold_factor) %>%
+  filter(!(inhabitants_treshold_factor %in% c("45000", "35000", "60000", "75000", "80000", "150000", "2e+05", "250000", "3e+05", "4e+05", "5e+05", "550000", "7e+05"))) %>%
+  pull() # vector of thresholds
+rdd_vary_th_by_state <- # prepare data set to store the results
+  tibble(state = j, threshold = "", point_estimate = "", se = "", se_robust = "",
+         ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
+  mutate(across(c(2:last_col()), as.numeric))
+for (i in all_th) {
+  print(paste("state", j, "thresholds:", i))
+  df <- data_th %>%
+    filter(inhabitants_treshold_factor == i)
+  states_in_df <- df %>% distinct(state) %>% pull()
+  rdd <-
+    rdrobust_wrapper(
+      ccluster = NULL,
+      ccovs = model.matrix( ~ df$year + df$state) # Dropping threshold FE
+  )
+  #summary(rdd)
+  rdd_vary_th_by_state <- rdd_vary_th_by_state %>%
+    dplyr::add_row(
+      state = j,
+      threshold = as.numeric(i),
+      point_estimate = rdd$coef[1],
+      se = rdd$se[1],
+      se_robust = rdd$se[3],
+      ci_lower = rdd$ci[3,1],
+      ci_upper = rdd$ci[3,2],
+      p = rdd$pv[3],
+      bw = rdd$bws[1,1],
+      obs_below = rdd$N_h[1],
+      obs_above = rdd$N_h[2]
+  )
+}
+rdd_vary_th_by_state <- rdd_vary_th_by_state %>% drop_na() %>% arrange(threshold)
+save(rdd_vary_th_by_state, file = "tables_robustness_checks/rdd_vary_th_by_state.Rdata")
+rm(all_th, data_th, df, i, rdd, states_in_df)
+}
+```
+```{r, eval=FALSE}
+load(file = "tables_robustness_checks/rdd_vary_th_by_state.Rdata")
+rdd_vary_th_by_state
+```
 
 Interaction-term method using an IV approach with `inhabitants_threshold` included as a factor, not as a numerical variable:
 
@@ -2324,13 +2555,13 @@ rm(df)
 
 
 
-## H15: Kreisfreie Städte vs. not
+## "Kreisfreie Städte" vs. not
 
-General remark: The two variables `kreisfreie_stadt` and `stadt` are mutually exclusive. If a city is categorized as a "district-free city" (`kreisfreie_stadt == 1`), `stadt == 1`. So each town belongs to one of three categories:
+General remark: The two variables `kreisfreie_stadt` and `stadt` are mutually exclusive. If a city is categorized as an independent large city (`kreisfreie_stadt == 1`), `stadt == 1`. So each town belongs to one of three categories:
 
 - `kreisfreie_stadt = 0` & `stadt = 0` -> "Gemeinde"/municiapality
 - `kreisfreie_stadt = 0` & `stadt = 1` -> "kreisangehörige Stadt"/town within a county
-- `kreisfreie_stadt = 1` & `stadt = 1` -> "kreisfreie Stadt"/"district-free city"
+- `kreisfreie_stadt = 1` & `stadt = 1` -> "kreisfreie Stadt"/independent large city
 
 
 ```{r}
@@ -2339,9 +2570,9 @@ data_subset <- data %>% # prepare data set used for analysis
   drop_na() %>%
   mutate(
     status = case_when(
-      as.numeric(kreisfreie_stadt) == 1 & as.numeric(stadt) == 1 ~ "municipality",
-      as.numeric(kreisfreie_stadt) == 1 & as.numeric(stadt) == 2 ~ "town",
-      as.numeric(kreisfreie_stadt) == 2 & as.numeric(stadt) == 1 ~ "district-free city"
+      as.numeric(kreisfreie_stadt) == 1 & as.numeric(stadt) == 1 ~ "Municipality",
+      as.numeric(kreisfreie_stadt) == 1 & as.numeric(stadt) == 2 ~ "Town",
+      as.numeric(kreisfreie_stadt) == 2 & as.numeric(stadt) == 1 ~ "Independent large city"
     )
   )
 table(data_subset$state)
@@ -2434,98 +2665,7 @@ fixest::wald(rdd, "fit_total_seats:status")
 rm(data_subset, df, rdd)
 ```
 
-Extremely high p value for the joint test: No significant differences from baseline ("district-free cities").
-
-
-
-
-
-
-# Model procedure
-
-Subsample method:
-
-```{r, eval=FALSE}
-# to do: remove eval=FALSE
-data_subset <- data %>% # prepare data set used for analysis
-  select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year, kreisfreie_stadt, stadt) %>%
-  drop_na()
-all_values <- data_subset %>% distinct(kreisfreie_stadt) %>% pull() # vector of values
-rdd_vary_city <- # prepare data set to store the results
-  tibble(value = "", point_estimate = "", se = "", se_robust = "",
-         ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
-  mutate(across(everything(), as.numeric))
-for (i in all_values) {
-  print(paste("year:", i))
-  df <- data_subset %>%
-    filter(year == i)
-  rdd <-
-    rdrobust_wrapper(
-      ccluster = df$inhabitants_treshold_factor,
-      ccovs = model.matrix( ~ df$inhabitants_treshold_factor + df$state + df$year) # FE
-  )
-  #summary(rdd)
-  rdd_vary_city <- rdd_vary_city %>%
-    dplyr::add_row(
-      value = i,
-      point_estimate = rdd$coef[1],
-      se = rdd$se[1],
-      se_robust = rdd$se[3],
-      ci_lower = rdd$ci[3,1],
-      ci_upper = rdd$ci[3,2],
-      p = rdd$pv[3],
-      bw = rdd$bws[1,1],
-      obs_below = rdd$N_h[1],
-      obs_above = rdd$N_h[2]
-  )
-}
-rdd_vary_city <- rdd_vary_city %>% drop_na()
-save(rdd_vary_city, file = "tables_robustness_checks/rdd_vary_city.Rdata")
-rm(all_values, data_subset, df, i, rdd)
-```
-```{r, eval=FALSE}
-load(file = "tables_robustness_checks/rdd_vary_city.Rdata")
-rdd_vary_city
-```
-
-```{r, eval=FALSE}
-ggplot2::ggplot(data = rdd_vary_city, aes(x = value, y = point_estimate)) +
-  geom_point(size = 1.5, color = ifelse(rdd_vary_city$p <= p_value_cutoff, 2, 1)) +
-  geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
-                color = ifelse(rdd_vary_city$p <= p_value_cutoff, 2, 1),
-                linetype = ifelse(rdd_vary_city$p <= p_value_cutoff, 2, 1),
-                width = 0.5) +
-  geom_hline(aes(yintercept = 0), linetype = "dotted") +
-  scale_y_continuous(labels = scales::percent) +
-  labs(y = y_lab_RDD)
-```
-
-*Preliminary conclusion here*
-
-
-Interaction-term method using an IV approach:
-
-```{r, eval=FALSE}
-df <- data %>%
-  filter(closest <= 0.1)
-rdd <- fixest::feols(ln_gross_expenditure_pc ~
-                       1  | # controls
-                       inhabitants_treshold_factor + state + year | # fixed-effect controls
-                       # First stage regression:
-                       inhabs_rel_to_cutoff*total_seats*year ~ # Instrument our standard RDD...
-                       inhabs_rel_to_cutoff*above_cutoff*year, # ... with being above the cutoff
-                     vcov = "threeway",
-                     data = df)
-summary(rdd)
-# joint test on interactions
-fixest::wald(rdd, "fit_total_seats:year")
-#rm(df)
-```
-
-*Conclusion*
-
-
-
+Extremely high p value for the joint test: No significant differences from baseline (independent large cities).
 
 
 # Concluding Remarks

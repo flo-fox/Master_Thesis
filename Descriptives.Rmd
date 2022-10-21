@@ -18,6 +18,7 @@ Note: Since this script serves as exploratory data analysis with respect to the 
 
 ```{r Packages}
 library(tidyverse)
+library(haven)
 library(reshape2)
 library(ggcorrplot)
 library(xtable)
@@ -27,6 +28,7 @@ source("functions/functions.R")
 ```{r Data}
 data <-
   readRDS("data/gemeinderatswahlen_alldata.rds")
+thresholds <- haven::read_stata("data/All_discs.dta")
 ```
 
 ```{r}
@@ -132,7 +134,7 @@ d_rdd_bivariate_summary <- d_rdd_bivariate %>%
 # Multivariate RDD data
 d_rdd_multivariate_summary <- d_rdd %>%
   select(ln_gross_expenditure_pc, total_seats, above_cutoff, inhabs_rel_to_cutoff,
-         year, inhabitants_treshold, share_working_age, pop_over65, unempl_rate, total_area_ha,
+         year, inhabitants_treshold, inh_tot, share_working_age, pop_over65, unempl_rate, total_area_ha,
          kreisfreie_stadt, stadt, years_since_last_elec
          ) %>%
   mutate(across(where(is.factor),
@@ -154,7 +156,8 @@ d_rdd_het_summary <- data %>%
          absolute_majority, cdu_csu_majority, spd_majority, waehlergruppen_majority,
          starts_with("ln_expenditure"),
          female_share_council, female_share_largest_party,
-         kreisfreie_stadt, stadt) %>%
+         #kreisfreie_stadt, stadt
+         ) %>%
   mutate(across(where(is.factor),
                 ~as.numeric(.)-1)) %>% 
   summarize(across(everything(), summarize2)) %>%
@@ -174,14 +177,14 @@ univar_descriptives <-
       Statistic == "total_seats" ~ "Council size",
       Statistic == "above_cutoff" ~ "Above cutoff (dummy, instrument)",
       Statistic == "inhabs_rel_to_cutoff" ~ "Running variable (inhabitants relative to thresholds)",
-      #`Population (as of 12-31)` = inh_tot,
       #`Population (for coun. size)` = exact_pop,
       Statistic == "inhabitants_treshold" ~ "Council size population thresholds",
+      Statistic == "inh_tot" ~ "Population (as of 12-31)",
       Statistic == "share_working_age" ~ "Share of working-age population",
       Statistic == "pop_over65" ~ "Share of poplation aged > 65 years",
       Statistic == "unempl_rate" ~ "Unemployment rate",
       Statistic == "total_area_ha" ~ "Total area in ha",
-      Statistic == "kreisfreie_stadt" ~ "District-free city (dummy)",
+      Statistic == "kreisfreie_stadt" ~ "Independent large city (dummy)",
       Statistic == "stadt" ~ "City (dummy)",
       Statistic == "years_since_last_elec" ~ "Years since last election",
       Statistic == "ln_gross_revenue_pc" ~ "Ln of gross revenue p. c.",
@@ -212,15 +215,14 @@ univar_descriptives <-
       TRUE ~ paste(toupper(substr(Statistic, 1, 1)), substr(Statistic, 2, nchar(Statistic)), sep="")
     )
   ) %>%
-  mutate(`Data Set` = "", .before = 1,
-         n = trimws(format(n, big.mark = ",") ) ) %>%
-  add_row(`Data Set` = "RDD without controls", .before = 1) %>%
-  add_row(`Data Set` = "RDD with controls", .before = 8) %>%
-  add_row(`Data Set` = "Potentially heterogeneity-inducing variables/Potential mechanisms", .before = 22)
+  mutate(n = trimws(format(n, big.mark = ",") ) ) %>%
+  add_row(Statistic = "RDD without controls", .before = 1) %>%
+  add_row(Statistic = "RDD with controls", .before = 8) %>%
+  add_row(Statistic = "Potentially heterogeneity-inducing variables/Potential mechanisms", .before = 23)
 # Maybe add states whose valid values there are for each variable
 univar_descriptives
 # Export
-print(xtable::xtable(univar_descriptives, digits = c(rep(2, times = 10), 0)),
+print(xtable::xtable(univar_descriptives, digits = c(rep(2, times = 9), 0)),
       file = "tables/descriptives.tex",
       booktabs = TRUE, floating = FALSE,
       include.rownames = FALSE)
@@ -279,6 +281,126 @@ cor(d_rdd_bivariate2 %>% filter(closest <= 0.1) %>% pull(total_seats),
     d_rdd_bivariate2 %>% filter(closest <= 0.1) %>% pull(by_law_seats),
     use = "pairwise.complete.obs")
 ```
+
+
+# Thresholds
+
+## Unweighted
+
+Unweighted, that is all thresholds found in the legal documents.
+
+Prepare data set, i. e. use only data from states also used in analysis downstream.
+
+```{r}
+th <- thresholds %>%
+  select(!starts_with("lag")) %>%
+  filter(!(state %in% c("03", "12"))) %>% # No data on these two
+  filter(state != "13") %>% # Höhmann: No data
+  arrange(state)
+```
+
+Equality of my research results to Höhmann (2017):
+
+```{r}
+# Total:
+th %>%
+  summarize(
+    sum_differences = sum(clear_disc_acc_Höhmann != clear_disc_acc_to_my_research, na.rm = TRUE),
+    share_differences = sum(clear_disc_acc_Höhmann != clear_disc_acc_to_my_research, na.rm = TRUE) / n()
+    ) %>%
+  arrange(-share_differences)
+# For each state:
+th %>%
+  group_by(state) %>%
+  summarize(
+    sum_differences = sum(clear_disc_acc_Höhmann != clear_disc_acc_to_my_research, na.rm = TRUE),
+    share_differences = sum(clear_disc_acc_Höhmann != clear_disc_acc_to_my_research, na.rm = TRUE) / n()
+    ) %>%
+  arrange(-share_differences)
+```
+
+Show cases where I think of threshold as unconfounded but Höhmann does not:
+
+```{r}
+th %>% filter(clear_disc_acc_Höhmann < clear_disc_acc_to_my_research)
+```
+
+The Hessian threshold is not a real difference to Höhmann as the confounded policy was only introduced in 2014.
+
+Where am I more "conservative" in designating thresholds as confounded?
+
+```{r}
+# Total:
+th %>%
+  summarize(
+    sum_differences = sum(clear_disc_acc_Höhmann < clear_disc_acc_to_my_research, na.rm = TRUE),
+    share_differences = sum(clear_disc_acc_Höhmann < clear_disc_acc_to_my_research, na.rm = TRUE) / n()
+    ) %>%
+  arrange(-share_differences)
+# For each state:
+th %>%
+  group_by(state) %>%
+  summarize(
+    sum_differences = sum(clear_disc_acc_Höhmann < clear_disc_acc_to_my_research, na.rm = TRUE),
+    share_differences = sum(clear_disc_acc_Höhmann < clear_disc_acc_to_my_research, na.rm = TRUE) / n()
+    ) %>%
+  arrange(-share_differences)
+```
+
+## Weighted
+
+Use data set used for bivariate RDDs:
+
+```{r}
+# Total:
+d_rdd_bivariate %>%
+  summarize(
+    sum_differences = sum(clean_disc_acc_Höhmann != clean_disc_acc_to_my_research, na.rm = TRUE),
+    share_differences = sum(clean_disc_acc_Höhmann != clean_disc_acc_to_my_research, na.rm = TRUE) / n()
+    ) %>%
+  arrange(-share_differences)
+# For each state:
+d_rdd_bivariate %>%
+  group_by(state) %>%
+  summarize(
+    sum_differences = sum(clean_disc_acc_Höhmann != clean_disc_acc_to_my_research, na.rm = TRUE),
+    share_differences = sum(clean_disc_acc_Höhmann != clean_disc_acc_to_my_research, na.rm = TRUE) / n()
+    ) %>%
+  arrange(-share_differences)
+```
+
+Confounded/nonconfounded thresholds (unweighted):
+
+```{r}
+# Total -- confounded:
+th %>%
+  summarize(
+    sum_confounded = sum(clear_disc_acc_to_my_research == 0, na.rm = TRUE),
+    #share_confounded = sum_confounded / n(), # does not add up to 100 %, maybe b/c of missings
+    sum_nonconfouned = sum(clear_disc_acc_to_my_research == 1, na.rm = TRUE),
+    #share_nonconfouned = sum_nonconfouned / n(),
+    sum_confounded_Hohm = sum(clear_disc_acc_Höhmann == 0, na.rm = TRUE),
+    #share_confounded_Hohm = sum_confounded_Hohm / n(),
+    sum_nonconfouned_Hohm = sum(clear_disc_acc_Höhmann == 1, na.rm = TRUE),
+    #share_nonconfouned_Hohm = sum_nonconfouned_Hohm / n()
+    ) %>%
+  arrange(-sum_confounded)
+# For each state -- confounded:
+th %>%
+  group_by(state) %>%
+  summarize(
+    sum_confounded = sum(clear_disc_acc_to_my_research == 0, na.rm = TRUE),
+    #share_confounded = sum_confounded / n(),
+    sum_nonconfouned = sum(clear_disc_acc_to_my_research == 1, na.rm = TRUE),
+    #share_nonconfouned = sum_nonconfouned / n(),
+    sum_confounded_Hohm = sum(clear_disc_acc_Höhmann == 0, na.rm = TRUE),
+    #share_confounded_Hohm = sum_confounded_Hohm / n(),
+    sum_nonconfouned_Hohm = sum(clear_disc_acc_Höhmann == 1, na.rm = TRUE),
+    #share_nonconfouned_Hohm = sum_nonconfouned_Hohm / n()
+    ) %>%
+  arrange(-sum_confounded)
+```
+
 
 
 # Investigating covariate imbalance
