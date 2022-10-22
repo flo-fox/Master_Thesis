@@ -694,6 +694,7 @@ data_state <- data %>% # prepare data set used for analysis
 all_states <- data_state %>% distinct(state) %>% filter(state %in% c(7, 9, 10, 16)) %>% pull() # vector of states
 ```
 ```{r, state_variation_shp, eval=FALSE}
+# to do: remove eval=FALSE
 # rdd_vary_states <- # prepare data set to store the results
 #   tibble(state = "", point_estimate = "", se = "", se_robust = "",
 #          ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "",

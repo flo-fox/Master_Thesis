@@ -76,6 +76,21 @@ d_ttest <- data %>%
   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff) %>% drop_na()
 ```
 
+Additional functions:
+
+```{r}
+rdrobust_wrapper <- function(ccluster = NULL, ccovs = NULL) {
+  rdrobust::rdrobust(
+      y = df$ln_gross_expenditure_pc,
+      x = df$inhabs_rel_to_cutoff,
+      fuzzy = df$total_seats,
+      cluster = ccluster,
+      covs = ccovs,
+      level = (1-p_value_cutoff)*100
+  )
+}
+```
+
 
 
 # Introduction
