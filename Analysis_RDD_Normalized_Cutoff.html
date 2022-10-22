@@ -2806,45 +2806,45 @@ library(rdrobust)
 #library(rdmulti)
 library(rddensity)
 library(rdd) # For the McCrary (2008) test</code></pre>
-<pre><code>## Lade nötiges Paket: sandwich</code></pre>
-<pre><code>## Lade nötiges Paket: lmtest</code></pre>
-<pre><code>## Lade nötiges Paket: zoo</code></pre>
+<pre><code>## Loading required package: sandwich</code></pre>
+<pre><code>## Loading required package: lmtest</code></pre>
+<pre><code>## Loading required package: zoo</code></pre>
 <pre><code>## 
-## Attache Paket: &#39;zoo&#39;</code></pre>
-<pre><code>## Die folgenden Objekte sind maskiert von &#39;package:base&#39;:
+## Attaching package: &#39;zoo&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
 ## 
 ##     as.Date, as.Date.numeric</code></pre>
-<pre><code>## Lade nötiges Paket: AER</code></pre>
-<pre><code>## Lade nötiges Paket: car</code></pre>
-<pre><code>## Lade nötiges Paket: carData</code></pre>
+<pre><code>## Loading required package: AER</code></pre>
+<pre><code>## Loading required package: car</code></pre>
+<pre><code>## Loading required package: carData</code></pre>
 <pre><code>## 
-## Attache Paket: &#39;car&#39;</code></pre>
-<pre><code>## Das folgende Objekt ist maskiert &#39;package:dplyr&#39;:
+## Attaching package: &#39;car&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
 ## 
 ##     recode</code></pre>
-<pre><code>## Das folgende Objekt ist maskiert &#39;package:purrr&#39;:
+<pre><code>## The following object is masked from &#39;package:purrr&#39;:
 ## 
 ##     some</code></pre>
-<pre><code>## Lade nötiges Paket: survival</code></pre>
-<pre><code>## Lade nötiges Paket: Formula</code></pre>
+<pre><code>## Loading required package: survival</code></pre>
+<pre><code>## Loading required package: Formula</code></pre>
 <pre class="r"><code>library(RDHonest)
 library(xtable)
 library(scales)</code></pre>
 <pre><code>## 
-## Attache Paket: &#39;scales&#39;</code></pre>
-<pre><code>## Das folgende Objekt ist maskiert &#39;package:fixest&#39;:
+## Attaching package: &#39;scales&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:fixest&#39;:
 ## 
 ##     pvalue</code></pre>
-<pre><code>## Das folgende Objekt ist maskiert &#39;package:purrr&#39;:
+<pre><code>## The following object is masked from &#39;package:purrr&#39;:
 ## 
 ##     discard</code></pre>
-<pre><code>## Das folgende Objekt ist maskiert &#39;package:readr&#39;:
+<pre><code>## The following object is masked from &#39;package:readr&#39;:
 ## 
 ##     col_factor</code></pre>
 <pre class="r"><code>library(janitor)</code></pre>
 <pre><code>## 
-## Attache Paket: &#39;janitor&#39;</code></pre>
-<pre><code>## Die folgenden Objekte sind maskiert von &#39;package:stats&#39;:
+## Attaching package: &#39;janitor&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
 ## 
 ##     chisq.test, fisher.test</code></pre>
 <pre class="r"><code>library(latex2exp) # For mathematical notation in ggplot
@@ -3020,7 +3020,7 @@ summary(rdd_bivariate, vcov = &quot;hetero&quot;)</code></pre>
 ## above_cutoff                      -0.0000000000000000260 0.0000000000000000119
 ## inhabs_rel_to_cutoff:above_cutoff -0.0000000000000026645 0.0000000000000011950
 ##                                                  t value  Pr(&gt;|t|)    
-## inhabs_rel_to_cutoff              1658683354947119.00000 &lt; 2.2e-16 ***
+## inhabs_rel_to_cutoff              1658683354947119.50000 &lt; 2.2e-16 ***
 ## above_cutoff                                    -2.17980  0.049912 *  
 ## inhabs_rel_to_cutoff:above_cutoff               -2.22972  0.045634 *  
 ## ---
@@ -3259,8 +3259,8 @@ fixest::feols(ln_gross_expenditure_pc ~
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## RMSE: 0.210514     Adj. R2:  0.642786
 ##                  Within R2: -0.43039 
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 2)1            : stat =     4.383e+30, p &lt; 2.2e-16, on 5 and 10,355 DoF.
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 2)2            : stat =     4.922e+31, p &lt; 2.2e-16, on 5 and 10,355 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 2)1            : stat =     1.476e+31, p &lt; 2.2e-16, on 5 and 10,355 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 2)2            : stat =     7.052e+31, p &lt; 2.2e-16, on 5 and 10,355 DoF.
 ## F-test (1st stage), total_seats                               : stat =   670.6      , p &lt; 2.2e-16, on 5 and 10,355 DoF.
 ## F-test (1st stage), poly(inhabs_rel_to_cutoff, 2):total_seats1: stat = 9,297.5      , p &lt; 2.2e-16, on 5 and 10,355 DoF.
 ## F-test (1st stage), poly(inhabs_rel_to_cutoff, 2):total_seats2: stat = 8,861.3      , p &lt; 2.2e-16, on 5 and 10,355 DoF.
@@ -3298,9 +3298,9 @@ fixest::feols(ln_gross_expenditure_pc ~
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## RMSE: 0.189835     Adj. R2:  0.709451
 ##                  Within R2: -0.163168
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 3)1            : stat =     2.599e+28, p &lt; 2.2e-16, on 7 and 10,353 DoF.
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 3)2            : stat =     2.24e+28 , p &lt; 2.2e-16, on 7 and 10,353 DoF.
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 3)3            : stat =     2.67e+29 , p &lt; 2.2e-16, on 7 and 10,353 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 3)1            : stat =     7.581e+27, p &lt; 2.2e-16, on 7 and 10,353 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 3)2            : stat =     1.658e+28, p &lt; 2.2e-16, on 7 and 10,353 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 3)3            : stat =     2.857e+28, p &lt; 2.2e-16, on 7 and 10,353 DoF.
 ## F-test (1st stage), total_seats                               : stat =   482.3      , p &lt; 2.2e-16, on 7 and 10,353 DoF.
 ## F-test (1st stage), poly(inhabs_rel_to_cutoff, 3):total_seats1: stat = 6,714.0      , p &lt; 2.2e-16, on 7 and 10,353 DoF.
 ## F-test (1st stage), poly(inhabs_rel_to_cutoff, 3):total_seats2: stat = 6,341.4      , p &lt; 2.2e-16, on 7 and 10,353 DoF.
@@ -3320,7 +3320,7 @@ fixest::feols(ln_gross_expenditure_pc ~
 ## Fixed-effects: inhabitants_treshold_factor: 29,  year: 13,  ags: 1,816
 ## Standard-errors: Clustered (inhabitants_treshold_factor &amp; year &amp; ags) 
 ##                                                  Estimate Std. Error   t value
-## fit_poly(inhabs_rel_to_cutoff, 4)1               9.650966  64.434656  0.149779
+## fit_poly(inhabs_rel_to_cutoff, 4)1               9.650966  64.434657  0.149779
 ## fit_poly(inhabs_rel_to_cutoff, 4)2              -1.417774  32.405196 -0.043751
 ## fit_poly(inhabs_rel_to_cutoff, 4)3              12.705658  57.387741  0.221400
 ## fit_poly(inhabs_rel_to_cutoff, 4)4             -19.826611  43.890222 -0.451732
@@ -3343,10 +3343,10 @@ fixest::feols(ln_gross_expenditure_pc ~
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## RMSE: 0.188753     Adj. R2:  0.712684
 ##                  Within R2: -0.149953
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 4)1            : stat =     2.775e+25, p &lt; 2.2e-16, on 9 and 10,351 DoF.
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 4)2            : stat =     1.974e+25, p &lt; 2.2e-16, on 9 and 10,351 DoF.
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 4)3            : stat =     1.941e+25, p &lt; 2.2e-16, on 9 and 10,351 DoF.
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 4)4            : stat =     1.853e+26, p &lt; 2.2e-16, on 9 and 10,351 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 4)1            : stat =     8.454e+24, p &lt; 2.2e-16, on 9 and 10,351 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 4)2            : stat =     1.047e+25, p &lt; 2.2e-16, on 9 and 10,351 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 4)3            : stat =     6.218e+25, p &lt; 2.2e-16, on 9 and 10,351 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 4)4            : stat =     2.274e+26, p &lt; 2.2e-16, on 9 and 10,351 DoF.
 ## F-test (1st stage), total_seats                               : stat =   377.8      , p &lt; 2.2e-16, on 9 and 10,351 DoF.
 ## F-test (1st stage), poly(inhabs_rel_to_cutoff, 4):total_seats1: stat = 5,225.7      , p &lt; 2.2e-16, on 9 and 10,351 DoF.
 ## F-test (1st stage), poly(inhabs_rel_to_cutoff, 4):total_seats2: stat = 4,946.8      , p &lt; 2.2e-16, on 9 and 10,351 DoF.
@@ -3394,11 +3394,11 @@ fixest::feols(ln_gross_expenditure_pc ~
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## RMSE: 0.195342     Adj. R2:  0.692203
 ##                  Within R2: -0.23164 
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 5)1            : stat =     3.927e+21, p &lt; 2.2e-16, on 11 and 10,349 DoF.
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 5)2            : stat =     6.353e+21, p &lt; 2.2e-16, on 11 and 10,349 DoF.
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 5)3            : stat =     1.124e+22, p &lt; 2.2e-16, on 11 and 10,349 DoF.
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 5)4            : stat =     4.121e+23, p &lt; 2.2e-16, on 11 and 10,349 DoF.
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 5)5            : stat =     1.575e+23, p &lt; 2.2e-16, on 11 and 10,349 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 5)1            : stat =     1.126e+22, p &lt; 2.2e-16, on 11 and 10,349 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 5)2            : stat =     4.675e+22, p &lt; 2.2e-16, on 11 and 10,349 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 5)3            : stat =     2.227e+23, p &lt; 2.2e-16, on 11 and 10,349 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 5)4            : stat =     1.423e+24, p &lt; 2.2e-16, on 11 and 10,349 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 5)5            : stat =     1.068e+24, p &lt; 2.2e-16, on 11 and 10,349 DoF.
 ## F-test (1st stage), total_seats                               : stat =   309.5      , p &lt; 2.2e-16, on 11 and 10,349 DoF.
 ## F-test (1st stage), poly(inhabs_rel_to_cutoff, 5):total_seats1: stat = 4,276.7      , p &lt; 2.2e-16, on 11 and 10,349 DoF.
 ## F-test (1st stage), poly(inhabs_rel_to_cutoff, 5):total_seats2: stat = 4,128.4      , p &lt; 2.2e-16, on 11 and 10,349 DoF.
@@ -3420,12 +3420,12 @@ fixest::feols(ln_gross_expenditure_pc ~
 ## Fixed-effects: inhabitants_treshold_factor: 29,  year: 13,  ags: 1,816
 ## Standard-errors: Clustered (inhabitants_treshold_factor &amp; year &amp; ags) 
 ##                                                  Estimate Std. Error   t value
-## fit_poly(inhabs_rel_to_cutoff, 6)1              13.652226 137.180560  0.099520
-## fit_poly(inhabs_rel_to_cutoff, 6)2              -7.404596  62.274822 -0.118902
-## fit_poly(inhabs_rel_to_cutoff, 6)3              -9.117295  90.012149 -0.101290
+## fit_poly(inhabs_rel_to_cutoff, 6)1              13.652225 137.180557  0.099520
+## fit_poly(inhabs_rel_to_cutoff, 6)2              -7.404596  62.274824 -0.118902
+## fit_poly(inhabs_rel_to_cutoff, 6)3              -9.117296  90.012147 -0.101290
 ## fit_poly(inhabs_rel_to_cutoff, 6)4              11.539442  71.137461  0.162213
-## fit_poly(inhabs_rel_to_cutoff, 6)5             -81.100229 160.575039 -0.505061
-## fit_poly(inhabs_rel_to_cutoff, 6)6               1.462069  57.131025  0.025591
+## fit_poly(inhabs_rel_to_cutoff, 6)5             -81.100228 160.575041 -0.505061
+## fit_poly(inhabs_rel_to_cutoff, 6)6               1.462069  57.131027  0.025592
 ## fit_total_seats                                  0.093795   0.174297  0.538133
 ## fit_poly(inhabs_rel_to_cutoff, 6):total_seats1  -1.208054   8.370624 -0.144321
 ## fit_poly(inhabs_rel_to_cutoff, 6):total_seats2   0.387109   3.833526  0.100980
@@ -3451,12 +3451,12 @@ fixest::feols(ln_gross_expenditure_pc ~
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## RMSE: 0.305927     Adj. R2: 0.244888
 ##                  Within R2: -2.02084
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 6)1            : stat =     1.949e+19, p &lt; 2.2e-16, on 13 and 10,347 DoF.
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 6)2            : stat =     4.294e+18, p &lt; 2.2e-16, on 13 and 10,347 DoF.
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 6)3            : stat =     5.282e+19, p &lt; 2.2e-16, on 13 and 10,347 DoF.
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 6)4            : stat =     1.397e+20, p &lt; 2.2e-16, on 13 and 10,347 DoF.
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 6)5            : stat =     1.271e+21, p &lt; 2.2e-16, on 13 and 10,347 DoF.
-## F-test (1st stage), poly(inhabs_rel_to_cutoff, 6)6            : stat =     1.91e+21 , p &lt; 2.2e-16, on 13 and 10,347 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 6)1            : stat =     5.928e+19, p &lt; 2.2e-16, on 13 and 10,347 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 6)2            : stat =     8.431e+18, p &lt; 2.2e-16, on 13 and 10,347 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 6)3            : stat =     1.853e+19, p &lt; 2.2e-16, on 13 and 10,347 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 6)4            : stat =     1.06e+20 , p &lt; 2.2e-16, on 13 and 10,347 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 6)5            : stat =     4.818e+20, p &lt; 2.2e-16, on 13 and 10,347 DoF.
+## F-test (1st stage), poly(inhabs_rel_to_cutoff, 6)6            : stat =     4.836e+21, p &lt; 2.2e-16, on 13 and 10,347 DoF.
 ## F-test (1st stage), total_seats                               : stat =   262.7      , p &lt; 2.2e-16, on 13 and 10,347 DoF.
 ## F-test (1st stage), poly(inhabs_rel_to_cutoff, 6):total_seats1: stat = 3,627.9      , p &lt; 2.2e-16, on 13 and 10,347 DoF.
 ## F-test (1st stage), poly(inhabs_rel_to_cutoff, 6):total_seats2: stat = 3,499.1      , p &lt; 2.2e-16, on 13 and 10,347 DoF.
@@ -3694,7 +3694,7 @@ rdd_w_covs &lt;- fixest::feols(ln_gross_expenditure_pc ~
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## RMSE: 0.172711     Adj. R2:  0.754034
 ##                  Within R2: -0.024608
-## F-test (1st stage), inhabs_rel_to_cutoff            : stat =      1.493e+33, p &lt; 2.2e-16, on 3 and 10,125 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff            : stat =      7.072e+33, p &lt; 2.2e-16, on 3 and 10,125 DoF.
 ## F-test (1st stage), total_seats                     : stat =  1,012.1      , p &lt; 2.2e-16, on 3 and 10,125 DoF.
 ## F-test (1st stage), inhabs_rel_to_cutoff:total_seats: stat = 15,237.9      , p &lt; 2.2e-16, on 3 and 10,125 DoF.
 ##                                           Wu-Hausman: stat =     NA        , p = NA     , on 3 and 8,284 DoF.</code></pre>
@@ -3818,7 +3818,7 @@ d_rdd_bivariate %&gt;%
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## RMSE: 0.174883     Adj. R2:  0.75305 
 ##                  Within R2: -0.035378
-## F-test (1st stage), inhabs_rel_to_cutoff            : stat =     2.114e+33, p &lt; 2.2e-16, on 3 and 5,176 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff            : stat =     1.874e+33, p &lt; 2.2e-16, on 3 and 5,176 DoF.
 ## F-test (1st stage), total_seats                     : stat =   526.8      , p &lt; 2.2e-16, on 3 and 5,176 DoF.
 ## F-test (1st stage), inhabs_rel_to_cutoff:total_seats: stat = 8,771.4      , p &lt; 2.2e-16, on 3 and 5,176 DoF.
 ##                                           Wu-Hausman: stat =    NA        , p = NA     , on 3 and 4,043 DoF.</code></pre>
@@ -3845,7 +3845,7 @@ d_rdd_bivariate %&gt;%
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## RMSE: 0.185917     Adj. R2:  0.737995
 ##                  Within R2: -0.001843
-## F-test (1st stage), inhabs_rel_to_cutoff            : stat =      3.155e+33, p &lt; 2.2e-16, on 3 and 20,719 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff            : stat =      3.189e+35, p &lt; 2.2e-16, on 3 and 20,719 DoF.
 ## F-test (1st stage), total_seats                     : stat =  2,487.4      , p &lt; 2.2e-16, on 3 and 20,719 DoF.
 ## F-test (1st stage), inhabs_rel_to_cutoff:total_seats: stat = 28,894.7      , p &lt; 2.2e-16, on 3 and 20,719 DoF.
 ##                                           Wu-Hausman: stat =     NA        , p = NA     , on 3 and 17,851 DoF.</code></pre>
@@ -6992,9 +6992,10 @@ as well as nonconfounded thresholds.</p>
 <code>clean_disc_acc_to_my_research</code></h4>
 <p>… is first up.</p>
 <p>Subsample method:</p>
-<pre class="r"><code>data_subset &lt;- data %&gt;% # prepare data set used for analysis
-  select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year, clean_disc_acc_to_my_research) %&gt;%
-  drop_na()
+<pre class="r"><code># data_subset &lt;- data %&gt;% # prepare data set used for analysis
+#   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year, clean_disc_acc_to_my_research) %&gt;%
+#   drop_na()
+data_subset &lt;- d_rdd_bivariate
 all_values &lt;- data_subset %&gt;% distinct(clean_disc_acc_to_my_research) %&gt;% pull() # vector of values
 rdd_vary_clean_disc1 &lt;- # prepare data set to store the results
   tibble(value = &quot;&quot;, point_estimate = &quot;&quot;, se = &quot;&quot;, se_robust = &quot;&quot;,
@@ -7050,7 +7051,7 @@ rdd_vary_clean_disc1</code></pre>
 <p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABUAAAAPACAMAAADDuCPrAAABSlBMVEUAAAAAADoAAGYAOjoAOmYAOpAAZrYzMzM6AAA6OgA6Ojo6OmY6OpA6ZmY6ZpA6ZrY6kLY6kNtNTU1NTW5NTY5Nbo5NbqtNjshmAABmADpmOgBmOjpmOpBmZgBmZjpmZmZmZpBmkGZmkJBmkLZmkNtmtttmtv9uTU1ubo5ujqtujshuq8huq+SOTU2Obk2Obm6Oq6uOq8iOyOSOyP+QOgCQOjqQZjqQZmaQZpCQkGaQkLaQtraQttuQ2/+rbk2rjm6ryOSr5P+2ZgC2Zjq2Zma2kDq2kGa2kJC2tpC2tra2ttu229u22/+2///Ijk3Ijm7IyKvI5P/I///bkDrbkGbbtmbbtpDbtrbbttvb27bb29vb2//b///kq27kyI7kyKvk////tmb/yI7/25D/27b/29v/5Kv/5Mj/5OT//7b//8j//9v//+T///8GaFc/AAAACXBIWXMAAB2HAAAdhwGP5fFlAAAgAElEQVR4nO3d/39T153n8ePwJcIZYBApccgspmGBzbSk20kKbSclE2eSXafgbuKQTAFv8Rdgjaz//9fVvZKMZesI6+p87ODX6/l4DHZcptfvk4/evdK9OkpdSVIj6bh/AUl6W1mgktSQBSpJDVmgktSQBSpJDVmgktSQBSpJDVmgktSQBSpJDVmgktSQBSpJDVmgktSQBSpJDR1VgSabWtJJY4FKUkMWqCQ1ZIFKUkMWqCQ1ZIFKUkMWqCQ1ZIFKUkMWqCQ1ZIFKUkMWqCQ1ZIFKUkMWqCQ1ZIFKUkMWqCQ1ZIFKUkMWqCQ1ZIFKUkMWqCQ1ZIFKUkMWqCQ1ZIFKUkMWqCQ1ZIFKUkMWqCQ1ZIFKUkMWqCQ1ZIFKUkMWqCQ1ZIFKUkMWqCQ1ZIFKUkMWqCQ1ZIFKUkMWqCQ1ZIFKUkMWqCQ1ZIFKUkO/9AJNOnJl/81LJ5gFqv3K/puXTrBfeoG+tXCBJSALNAgusARkgQbBBZaALNAguMASkAUaBBdYArJAg+ACS0AWaBBcYAnIAg2CCywBWaBBcIElIAs0CC6wBGSBBsEFloAs0CC4wBKQBRoEF1gCskCD4AJLQBZoEFxgCcgCDYILLAFZoEFwgSUgCzQILrAEZIEGwQWWgCzQILjAEpAFGgQXWAKyQIPgAktAFmgQXGAJyAINggssAVmgQXCBJSALNAgusARkgQbBBZaALNAguMASkAUaBBdYArJAg+ACS0AWaBBcYAnIAg2CCywBWaBBcIElIAs0CC6wBGSBBsEFloAs0CC4wBKQBRoEF1gCskCD4AJLQBZoEFxgCcgCDYILLAFZoEFwgSUgCzQILrAEZIEGwQWWgCzQILjAEpAFGgQXWAKyQIPgAktAFmgQXGAJyAINggssAVmgQXCBJSALNAgusARkgQbBBZaALNAguMASkAUaBBdYArJAg+ACS0AWaBBcYAnIAg2CCywBWaBBcIElIAs0CC6wBGSBBsEFloAs0CC4wBKQBRoEF1gCskCD4AJLQBZoEFxgCcgCDYILLAFZoEFwgSUgCzQILrAEZIEGwQWWgCzQILjAEpAFGgQXWAKyQIPgAktAFmgQXGAJyAINggssAVmgQXCBJSALNAgusARkgQbBBZaALNAguMASkAUaBBdYArJAg+ACS0AWaBBcYAnIAg2CCywBWaBBcIElIAs0CC6wBGSBBsEFloAs0CC4wBKQBRoEF1gCskCD4AJLQBZoEFxgCcgCDYILLAFZoEFwgSUgCzQILrAEZIEGwQWWgCzQILjAEpAFGgQXWAKyQIPgAktAFmgQXGAJyAINggssAVmgQXCBJSALNAgusARkgQbBBZaALNAguMASkAUaBBdYArJAg+ACS0AWaBBcYAnIAg2CCywBWaBBcIElIAs0CC6wBGSBBsEFloAs0CC4wBKQBRoEF1gCskCD4AJLQBZoEFxgCcgCDYILLAFZoEFwgSUgCzQILrAEZIEGwQWWgCzQILjAEpAFGgQXWAKyQIPgAktAFmgQXGAJyAINggssAVmgQXCBJSALNAgusARkgQbBBZaALNAguMASkAUaBBdYArJAg+ACS0AWaBBcYAnIAg2CCywBWaBBcIElIAs0CC6wBGSBBsEFloAs0CC4wBKQBRoEF1gCskCD4AJLQBZoEFxgCcgCDYILLAFZoEFwgSWgmR/mL25feVZ9fflp+/Jv6u+6K/2fjB6H1ie4wBLQrA/znfvtui5f3bny7MXtD6ofvbj92Zjj0PoEF1gCmvVhvtbuF+hau9eaK5e/6o4/AeX1CS6wBDTjw/zF7UGB1t1Zt+hGe8wJKK9PcIEloNke5r0n8P/z9miB7twfdwLK6xNcYAlotof5SvuDF3sKdKVXoONPQHl9ggssAc30MN9oV1eORl4DPXAC+u4ArU8sUOnkm+Vh/upO77RzUKDDq/AHTkAtUEkn1SwP85X2b0fvA/39s+oEdOfLdvuT/a+D4voEF1gCmuFhvlZffx8WaF/vBHTn/vvfv7yz/0oSrk9wgSWgNzzMOz8vf5f5j17cru/6HCnQ6gS0vp1+bf8zeVyf4AJLQNmH+dYfn3a721dTSqf/MvYvrLV3vf/D4GfVK6Br1RP7jeqPkePQ+gQXWALKPcxX0zsPu92lVKm+O2hMgdaX4Ad303+w7zi0PsEFloAyD/P1ujY3W+nM062FdGnCf8Hep/D1JXjPQGu4wBJQ5mG+1GvOqkbn/lL9WX2fs6dA+/eA+hpoDRdYAhr/MO98XjXnoEa3F8Y/h+/bU6D9e0B37l/+yqvwvMAS0PiHeb8ztxfS2e7hC3T4JiTvA63gAktAkwp0s5Vudd9UoIc9Dq1PcIEloElP4Vfrl0Df8BroYY9D6xNcYAkoexHpbHX5vWrON1yFP+xxaH2CCywB5W9jqtzqdu6m/nnorMeh9QkusASUv5G+52x9IWnuVonj0PoEF1gCyr+V8971L3pftj+88KDIcWh9ggssAfm58EFwgSUgCzQILrAEdOBh/vzxQU8KHIfWJ7jAEtD+h/n2QjrIG+mnhwssAVmgQXCBJaD9D/POz8u1b1Kau/7vy8t/OpfmbnznO5GmhgssAWUe5tuv3370qMQJKK9PcIEloOxbOV+/fXO13pNp1uPQ+gQXWAKauB9o32bLzUSmhwssAU3azm7cPzQ+Dq1PcIEloFyBjpyBWqDTwwWWgPLb2Y39vvlxaH2CCywB5bezu9h/4bPzdUoFtmPC9QkusASUe5hXnwj/3uLi4rne14sljkPrE1xgCSj3MK9OPAcK7EcP7BNcYAko/zB//m119nnqRoGdRLrAPsEFloDczi4ILrAEZIEGwQWWgA5sJnJv8aDrvhNparjAEpDb2QXBBZaALNAguMASkK+BBsEFloAs0CC4wBKQBRoEF1gCmnQj/XxKc/PeSN8MLrAElH2Yr/pWzpngAktAuYd51Z+nzi9eO1eoQXF9ggssAWUe5putdOZB/d3W52nP5srNj0PrE1xgCSi7ofLu5yB1PndD5QZwgSUgP1QuCC6wBOSHygXBBZaALNAguMASUO4p/J7PQVpPPoWfHi6wBORFpCC4wBJQ/jam03+tv/v7VW9jagIXWAKadCN9mp+fL/VWJFyf4AJLQNmH+aPW4J2cczeLHIfWJ7jAElD+Yd756VrvDPT8F7NfQKqPQ+sTXGAJyO3sguACS0AWaBBcYAlo0sP88VCBLUFxfYILLAHlHuadu36o3ExwgSWgzMN89MM5LdDp4QJLQJmH+WpKpz5eHvrOt3JODRdYAsq+F77A2zdHjkPrE1xgCSi3G1OJt2+OHIfWJ7jAEtAhtrMrcxxan+ACS0CH2JG+zHFofYILLAFlLyIV+TDjPceh9QkusASUvY2pzB4ir49D6xNcYAlo/8O8c2+x9lFKc+cXB657G9PUcIEloP0P89E76L2RvjFcYAnIAg2CCywBuRtTEFxgCcgCDYILLAFZoEFwgSWgNzzMOz8vf1fmOLQ+wQWWgLIP860/Pu12t6+mlE6XeFMSrk9wgSWg/McaV5fel0pdhOf1CS6wBJR5mK/XtbnZSmeebi2UeFsnrk9wgSWgzMN8qdecVY1We4qs19/Pehxan+ACS0ATd2Pq12iRve1wfYILLAFN2g90e6Hel94CbQIXWAKaVKCbrXSra4E2gwssAU16Cr9avwTqa6CN4AJLQNmLSGery+9Vc3oVvhFcYM1gzA4+ilXq39z4H6/3D3Kr27mbUomP98D1CS6wZnC8XYJU6t9c5uer1THO1heS5m6VOA6tT3CBRYQf8/xbOe9d/6L3ZfvDCw+KHIe20LjAIsKPubsxBcEFFhF+zCfm7zwpdxzaQuMCiwg/5vn8P31UvR9++8Mbs9/D1AUuNC6wiPBjnsvf+bq6itQr0IV0+mGJ49AWGhdYRPgxz+VfSun0r1vvPOz8IZW4j5630LjAIsKPef4+0JuD93A+6r+hc9bj0BYaF1hE+DHPvhPp0u6b4FfrLUVmPQ5toXGBRYQf80nvhR8U6GbLzUSmhwssIvyYT97Orm5Od2NqAhdYRPgxt0CD4AKLCD/muafw1YWjQXO6nV0TuMAiwo95Jv9qfyORqkB7ZepFpOnhAosIP+aZ/JutdPFpXaBbV93OrglcYBHhx3zSdnbzrbnz53pfC+ynzFtoXGAR4cc8m//H1nDn0RL9yVtoXGAR4cc8n//5t/O99jxVZjtQ3kLjAosIP+buBxoEF1hE+DHPvZWz0Inn6+PQFhoXWET4Mc/dSF9iA5GR49AWGhdYRPgxn/ROpKLHoS00LrCI8GM+aTORosehLTQusIjwY559J9KZsi+C4hYaF1hE+DHP5H/+TUqnzi8OXPe98FPDBRYRfsyzF5H2cjem6eECiwg/5hZoEFxgEeHH3Bvpg+ACiwg/5hZoEFxgEeHH3AINggssIvyYT8r/eOhJgePQFhoXWET4Mc/l79z1ItJMcIFFhB/zTP7Ry/AW6PRwgUWEH/PsO5HSqY+Xh77zRvqp4QKLCD/m2U/lLPBBciPHoS00LrCI8GOeu5HezURmhAssIvyYu51dEFxgEeHH3O3sguACiwg/5tmLSEU+i3PPcWgLjQssIvyYZ29jmrtZ9ji0hcYFFhF+zPfn79zrbwH6UUpz7gc6A1xgEeHHfH/+fRvZeSN9U7jAIsKPuQUaBBdYRPgxdzemILjAIsKPuQUaBBdYRPgxz9wHem/PdaPNa//kRaSp4QKLCD/mh3gnUpG3JeEWGhdYRPgxP0SBbrYs0OnhAosIP+YH8o+7DH/Gp/BTwwUWEX7MD+ZfP1igtwoch7bQuMAiwo/5wfyd/1xcvNZ6/TakxY//WuI4tIXGBRYRfszdzi4ILrCI8GN+iNuYyhyHttC4wCLCj7k30gfBBRYRfswt0CC4wCLCj7kFGgQXWET4MbdAg+ACiwg/5hZoEFxgEeHH3AINggssIvyYW6BBcIFFhB9zCzQILrCI8GM+MX/nSbnj0BYaF1hE+DHP5//po+rDkLY/vFHkPUm4hcYFFhF+zHP5O1/3P01ueyGdfljiOLSFxgUWEX7Mc/mXUjr969Y7Dzt/KLIdKG+hcYFFhB/zTP71lG4O9mR61HI/0AZwgUWEH/NM/qV0aXdTu9V0tsBxaAuNCywi/JhntrP7fO4vuwXqZyI1gQssIvyYT9pQeVCgfipnE7jAIsKPuQUaBBdYRPgxzz2Fry4cDZpz3U/lbAAXWET4Mc/kry8c9Qu0V6ZeRJoeLrCI8GOeyb/ZShef1gW6dTVVF5RmPg5toXGBRYQf81z+1ZTSfGvu/Lne10sljkNbaFxgEeHHPJv/x1YaKNGfvIXGBRYRfszz+Z9/O99rz1MXHpQ5Dm2hcYFFhB9z9wMNggssIvyYW6BBcIFFhB/zSfkfDxXYVxm30LjAIsKPeXY/0LvpNd+JND1cYBHhxzyTf3shWaAzwQUWEX7Ms+9ESqc+Xh76zrdyTg0XWET4Mc++F77A2zdHjkNbaFxgEeHHPLcbU4m3b44ch7bQuMAiwo/5pO3sih6HttC4wCLCj/mkHemLHoe20LjAIsKPefYiUpF3wO85Dm2hcYFFhB/z7G1MczfLHoe20LjAIsKP+f78nXuLtY9Smju/OHDd25imhgssIvyY788/ege9N9I3hgssIvyYW6BBcIFFhB9zd2MKggssIvyYW6BBcIFFhB/zzH2g9/ZcN9q89k9eRJoaLrCI8GN+iHciFXlbEm6hcYFFhB/zQxToZssCnR4usIjwY34g/7jL8Gd8Cj81XGAR4cf8YP71gwV6q8BxaAuNCywi/JgfzN/5z8XFa63Xb0Na/PivJY5DW2hcYBHhx9zt7ILgAosIP+aHuI2pzHFoC40LLCL8mHsjfRBcYBHhx9wCDYILLCL8mFugQXCBRYQfcws0CC6wiPBjboEGwQUWEX7MLdAguMAiwo+5BRoEF1hE+DG3QIPgAosIP+buBxoEF1hE+DF3P9AguMAiwo+5+4EGwQUWEX7M3Q80CC6wiPBj7n6gQXCBRYQfc/cDDYILLCL8mLsfaBBcYBHhx9z9QIPgAosIP+beSB8EF1hE+DGfkL/zeOCnf3k4+3FoC40LLCL8mOfyb93dcxXe+0CnhwssIvyYZ/KP3g165uHsx6EtNC6wiPBjnsm/mtLc+epmpmutNHezxHFoC40LLCL8mGeuwn9evfuo9+etqksLvBGJt9C4wCLCj3nuPtC5v3Sr7rzU+3PJdyI1gAssIvyYT7yRfj2d3f1z1uPQFhoXWET4MX9DgVbP3rcX3ExkerjAIsKPee410PopfH8jO/cDbQIXWET4Mc/kX6pf/ey/FJrfD/Qfv2u3L3/yff39y0/bl3/zrP525cqzg8ehLTQusIjwY57Jv9lKFx5Ul+EvVWWaeQr/t3bt8le971/dufLsxe0Pqh+/uP3ZmOPQFhoXWET4Mc/lX6rff7Se0lwr1WejB220L/9b78zzfvv9H7rdtXavNVfqLh13AspbaFxgEeHHPJv/x+qJe2cpvyH9zv12fab56s5ud9YtutEecwLKW2hcYBHhx3xC/v/q9Wbn0fz8jfFP4F/dqc48e1bav91ToDv3x52A8hYaF1hE+DEvkP91ga70CnT8CShvoXGBRYQf89nzv7qz++y916IHTkDfHaAtNH6yRIAf89nzr7Wra+/Dq/AHTkAtUOnEwo/5zPk3+rcx1feB/v5ZdQK682W7/cn+10FxC40LLCL8mM+af+P25b2nnL0T0J3773//8s7+K0m4hcYFFhF+zGfMvzY4/xyoTkDr2+nX9j+Txy00LrCI8GM+W/6/jfZn/QroWnVRfqP6Y+Q4tIXGBRYRfsxnyb+z0v7VDyM/qC7BD+6m/2DfcWgLjQssIvyYz5J/pb3vlc76ErxnoDVcYBHhx3yG/Gv7+7N/D6ivgdZwgUWEH/NM/ueP9xr7V17daQ8Nnq737wHduX/5K6/C8wKLCD/muR3p06hTB98Qv9HeV6DDNyF5H2gFF1hE+DE/ZIGmVG9RP8NxaAuNCywi/JhnPtLj5296lXl9eXn5XivN3Vj+00f19qCzHIe20LjAIsKPeSZ/7xR0uIvyo7o6txYy2yof9ji0hcYFFhF+zCd+JlLf6uDDjWf6bE7cQuMCiwg/5hM/lbNvs1VVZ/6j5Q53HNpC4wKLCD/mEz8Xfu8/zPjhxriFxgUWEX7McwU6cgZqgU4PF1hE+DHPvgZ6dt/3vgY6HVxgEeHHPJN/PaWL/b7sfJ3SrW73Ucur8FPBBRYRfswnfC58em9xcXG+9/VsfWP9bHfS4xYaF1hE+DHP5a9OPAf++WlVoHO3ZjsObaFxgUWEH/N8/uffztdvgn/S+75z78+zvADaBS40LrCI8GN+VPlxC40LLCL8mFugQXCBRYQf80n5d/cDfVLgOLSFxgUWEX7Mc/m37u7Zym62jZj6x6EtNC6wiPBjnt+NyQKdCS6wiPBjnsm/mtLpj5eHvpvxEnwXuNC4wCLCj3luN6Y9b+UscxzaQuMCiwg/5ofYTKTMcWgLjQssIvyYH2I7uzLHoS00LrCI8GN+iA2VyxyHttC4wCLCj3n2ItJMey+NOQ5toXGBRYQf80z+3inozbLHoS00LrCI8GOeeQp/71pKc+cXB657G9PUcIFFhB/z3EWk5I30M6mW7bh/Bykafsot0BD9dTvu30IKhh9yd2OKMPxfnuP+PaRY+Bm3QAO8Pnc/7t9ECoUfcQs0gAUqCPyI78/fuVddc+/9uZdX4adjgQoCP+L7828vVJeMvIg0EwtUEPgRt0Aj2J9iwM+4r4GGsD+FgB9yCzSG/SkC/JRboEFwgUWEH/MD+Z8/PshP5ZweLrCI8GM+5iLSQV5Emh4usIjwY26BBsEFFhF+zA/cSP9z/4M4v0lp7vq/Ly//6Vyau+Gnck4PF1hE+DHPfy78cEv6RyVOQHkLjQssIvyYZ/Iv7flIj9USH3GMW2hcYBHhx/wQHyq32TrjU/ip4QKLCD/mh/hY4yKfcYxbaFxgEeHHPFegI2egFuj0cIFFhB/z7GugZ8d+3/w4tIXGBRYRfswz+ddTuth/4bPzdUq3ChyHttC4wCLCj3ku/1JK6b3FxcVzva8XSxyHttC4wCLCj3kuf3XiOXAp81emOw5toXGBRYQf83z+599WZ5+nbhTYSaQLXGhcYBHhx9zt7ILgAosIP+YWaBBcYBHhx3xSfvcDnQEusIjwY57Lv3XX7exmggssIvyY53djskBnggssIvyYZ/KvpnT64+Uh9wOdHi6wiPBjntuNqcTbN0eOQ1toXGAR4cf8EJuJlDkObaFxgUWEH/NDbGdX5ji0hcYFFhF+zA+xoXKZ49AWGhdYRPgxz15EKvIO+D3HoS00LrCI8GOeyd87Bb1Z9ji0hcYFFhF+zDNP4e9dS2nu/OLAdW9jmhousIjwY567iJS8kX42uMAiwo+5BRoEF1hE+DF3N6YguMAiwo+5BRoEF1hE+DGfmL9TZjf6+ji0hcYFFhF+zPP5f/qoevFz+8Mbs1+C7wIXGhdYRPgxn/yhcr0CXUinH5Y4Dm2hcYFFhB/zCR9rfPrXrXcedv6Q0pkC56C4hcYFFhF+zDP511O6OdhS5FEr3SpwHNpC4wKLCD/mmfxL1XvhB3syrZbYGxS30LjAIsKP+aTdmAYFutnyRvrp4QKLCD/mk/YDHRRokc1BcQuNCywi/JhboEFwgUWEH/PsZyLd2m3O9RKX4XELjQssIvyYZzdUPjss0DIfMIdbaFxgEeHHPJN/s5UuPq0LdOtqKvHxHriFxgUWEX7Mc/lXU0rzrbnz53pfS3y6B26hcYFFhB/zbP4fW8PdQIt8OhJuoXGBRYQf83z+59/O99rz1IUHZY5DW2hcYBHhx9z9QIPgAosIP+aT8z8udxzaQuMCiwg/5pP3A01pzqfwzeACiwg/5tn9QD/f/Ui5iyV2VMYtNC6wiPBjnslf9efc+X9f/l/XWqnEffS8hcYFFhF+zLPvREr/3D/x7HyT3A+0AVxgEeHHPPte+Nd3fy75Vs4GcIFFhB/z3G5Me96+6X6gTeACiwg/5pO2sxv3D42PQ1toXGAR4cd80o70A5stt7ObHi6wiPBjPmk7uzHfNz8ObaFxgUWEH/P8bUzD2z9XU4Fn8LyFxgUWEX7MM0/h71X3f56/sfy/q6/vLdauz/JEHrfQuMAiwo957iJSOmimE1HcQuMCiwg/5hZoEFxgEeHH3O3sguACiwg/5hZoEFxgEeHH3AINggssIvyYvyF/5+fl78och7bQuMAiwo95Nv/WH592u9tXU0qnC3yqMW+hcYFFhB/z/McaVxfdl2a//D48Dm2hcYFFhB/zTP71ujY3W+nM062FEh9sjFtoXGAR4cc8k38pVRuIrKdqT5H15GYi08MFFhF+zCfuxtSvUbezawIXWET4MZ+0H+j2Qr0PkwXaBC6wiPBjPqlAN1v1pyFZoE3gAosIP+aTnsKv1i+B+hpoI7jAIsKPefYi0tnq8nvVnF6FbwQXWET4Mc/fxlS51e3cTWmuwJ30uIXGBRYRfszzN9L3nK0vJM0V+Fh43kLjAosIP+b5t3Leu/5F78v2hxceFDkObaFxgUWEH3N3YwqCCywi/JhboEFwgUWEH3MLNAgusIjwY26BBsEFFhF+zC3QILjAIsKPuQUaBBdYRPgxt0CD4AKLCD/mFmgQXGAR4cfcAg2CCywi/JhboEFwgUWEH/NJ+R8PPSlwHNpC4wKLCD/mufxbd9Nrbqg8PVxgEeHHPJN/eyFZoDPBBRYRfswz+VdTOv3x8tB37kg/NVxgEeHHPPeRHvXHyZU8Dm2hcYFFhB/z3IfKldiFfuQ4tIXGBRYRfswnfSpn0ePQFhoXWET4MZ/0qZxFj0NbaFxgEeHHPHsRqcAncY4ch7bQuMAiwo95Jn/vFPRm2ePQFhoXWET4Mc88hb93LaW584sD172NaWq4wCLCj3nuIlLyRvrZ4AKLCD/mFmgQXGAR4cfc3ZiC4AKLCD/mFmgQXGAR4cfcAg2CCywi/Jjvz9+5V11z7/25l1fhp4cLLCL8mO/Pv71QXTLyItLMcIFFhB9zCzQILrCAqnY47t/hePkaaBBcYPH0z6+O+7c4VhZoEFxg4QyfoR7373GcLNAguMCief0a33H/JsfIAg2CCywaC7RrgYbBBRaNBdq1QMPgAovGAu1aoGFwgYVjf1qgYXCBxWN/WqBRcIEFhO9PCzQKLrCI8GM+MX/nSbnj0BYaF1hE+DHP5//po+pN8Nsf3ph9K6YucKFxgUWEH/Nc/s7X/V1EthfS6YcljkNbaFxgEeHHPJd/KaXTv26987Dzh5TOFDgHxS00LrCI8GOeyb+e0s3u9kK1j92jVrpV4Di0hcYFFhF+zDP5l9Kl7qBAu6vpbIHj0BYaF1hE+DEfn7/z+dxfdgt0s+WGytPDBRYRfsxznwtfdeagQAdfZjwObaFxgUWEH3MLNAgusIjwY557Cl9dOBo053qJy/C4hcYFFhF+zDP56wtH/QLtlakXkaaHCywi/Jhn8m+20sWndYFuXU3VBaWZj0NbaFxgEeHHPJd/NaU035o7f6739VKJ49AWGhdYRPgxz+b/sTXcLrVEf/IWGhdYRPgxz+d//u18rz1PXXhQ5ji0hcYFFhF+zN0PNAgusIjwY26BBsEFFhF+zN+Qv/Pz8ndljkNbaFxgEeHHPJt/649Pu93tqyml0wXuYuItNC6wiPBjnr+NqbqJfin1t1UucBzaQuMCiwg/5vn9QHu1udlKZ55uLZS4kQm30LjAIsKPeXY/0Or97+v1m5B8L3wTuMAiwo/5pP1ABzXqbkxN4AKLCD/mk7ezq7cRsUCbwAUWEX7MJxXoZv/TkCzQJnCBRYQf80lP4Vf7+zD5GmgTuMAiwo959iLS2erye78rSvAAABLNSURBVNWcXoVvBBdYRPgxz9/GVLnV7dxN7gfaBC6wiPBjPmk/0P6u9GmuwMfC8xYaF1hE+DHPv5Xz3vUvel+2Pyyznx1uoXGBRYQfc3djCoILLCL8mFugQXCBRYQf8wn5O48HfvqXh7Mfh7bQuMAiwo95Lv/W3fSaN9JPDxdYRPgxz+TfXtjTn+nMw9mPQ1toXGAR4cc8k381pbnz11rV/6W5myWOQ1toXGAR4cc891bO6k1IvT9vVV1a4J2cvIXGBRYRfsxzm4nU7z5ard/EuZQK3EmPW2hcYBHhx3zSbkzd9Xo7u/6fsx6HttC4wCLCj/kbCrS/obK7MU0PF1hE+DGfuCP9Zqu/r7K3MU0PF1hE+DHPbmdXvfrZfym0X6OzHoe20LjAIsKPeSb/ZitdeFBdhr80/GSkWY9DW2hcYBHhxzyXf6l+/9F6SnOt5IbKDeACiwg/5tn8P1ZP3DtL9RuRvA90erjAIsKP+YT8/9Xrzc6j+fkbBfqTt9C4wCLCj7nb2QXBBRYRfswn5u88mfz/vPPl7Xb7k+/r719+2r78m2f1tytXnh08Dm2hcYFFhB/zfP6fPqquI21/mH8G/+pOu/L+D/X3V569uP1B9eMXtz8bcxzaQuMCiwg/5rn8na/7G4FuL6TTDzN/Z6V95fvuy/vt6oRzrd1rzZXLX3XHn4DyFhoXWET4MZ9wG9PpX7feedj5Q/Yq/Ivbg3PPqjbr7qxbdKM95gSUt9C4wCLCj3n+c+FvDt7D+aiV2Y1prf3B4Otv9xTozv1xJ6C8hcYFFhF+zCe9lXPwJvjVzG5MK4NTzY2qSOsCrX4y/gSUt9C4wCLCj/mkzUQGBZp5L/zO/foVz+qpfO+cc/ga6IET0HcHhivtV7/69cR8Tb+Q3+PovnZH7f/nvn51Dgo0sxvTaIEOr8IfOAG1QP3q1xP71QLtjjNlgVYXk6r7QH//rDoB3fmy3f7k2f7jjD/QyYULLCL8mI/P3/80pJFtlQ8YPQMd6J2A7tx///uXd/ZfScItNC6wiPBjnslfXzjqF2ivTMdeRBpXoNUJaH07/dr+Z/K4hcYFFhF+zDP5N1vp4tO6QLeupnp3+oNGrsJ3B99+1r+raaP6Y+Q4tIXGBRYRfsxz+VdTSvOtufPnUnY70LVBSa7tlmV9CX5wN/0Ho38Zt9C4wCLCj3k2/4+tNJDbTnnknUi1+hK8Z6A1XGAR4cc8n//5t/O99jx14UHuL+zcb/9q973w/R9U3/kaaA0XWET4MZ8l/8s9uzFV+veAVheXvArPCywi/Jhn8i/lTzz3ePlle88tn8M3IXkfaAUXWET4Mc/dSJ/ZQKT5cWgLjQssIvyYT3onUtHj0BYaF1hE+DHPvRMpc+9n8+PQFhoXWET4Mc++E+nMYV4EneI4tIXGBRYRfswz+Z9/k9Kp84sD12f/YGPcQuMCiwg/5tmLSHsVeEEUt9C4wCLCj7kFGgQXWET4MT+q/LiFxgUWEX7MLdAguMAiwo+5BRoEF1hE+DF/U/7HpY5DW2hcYBHhxzybv/Ptew/rq0mHelf8m49DW2hcYBHhxzyXf72V+p8rl9JcibfF4xYaF1hE+DHPf6RH/6Pkfr7byn2kx3THoS00LrCI8GOe284unR4+c899qNyUx6EtNC6wiPBjnruRfs9Z52bLG+mnhwssIvyYH2I7uyJ72+EWGhdYRPgx9ww0CC6wiPBjnn0N9OzY75sfh7bQuMAiwo95Jv96Shee1N89/zqV+HgP3ELjAosIP+a5/Esppbn5+fnq0+ELnIDyFhoXWET4Mc/l73wz3Mtu7r8XOQ5toXGBRYQf83z+zk/Xemeg5/88+2709XFoC40LLCL8mLsbUxBcYBHhx9wCDYILLCL8mE/K/3joSYHj0BYaF1hE+DHP5d+662cizQQXWET4Mc/kH/1UOQt0erjAIsKPeSb/akqnP14e+s7PhZ8aLrCI8GM+Pn+ZLexGjkNbaFxgEeHH/BCbiZQ5Dm2hcYFFhB/zQ2xnV+Y4tIXGBRYRfsxzT+E9A50RLrCI8GOevYh0qfBxaAuNCywi/Jhn8vdOQW+WPQ5toXGBRYQf88xT+HvXUpo7vzhw3duYpoYLLCL8mOcuIiVvpJ8NLrCI8GNugQbBBRYRfszdjSkILrCI8GNugQbBBRYRfswt0CC4wCLCj7kFGgQXWET4MT+Q//njg9xQeXq4wCLCj/n+/Puuv3sVvilcYBHhx9wCDYILLCL8mO/P3/l5+SA3VJ4eLrCI8GPuRaQguMAiwo+5BRoEF1hE+DG3QIPgAosIP+YWaBBcYBHhx9wCDYILLCL8mFugQXCBRYQfcws0CC6wiPBjboEGwQUWEX7MLdAguMAiwo+5BRoEF1hE+DG3QIPgAosIP+YWaBBcYBHhx9wCDYILLCL8mFugQXCBRYQfcws0CC6wiPBjboEGwQUWEX7MLdAguMAiwo+5BRoEF1hE+DG3QIPgAosIP+YWaBBcYBHhx9wCDYILLCL8mFugQXCBRYQfcws0CC6wiPBjboEGwQUWEX7MLdAguMAiwo+5BRoEF1hE+DG3QIPgAosIP+YWaBBcYBHhx9wCDYILLCL8mFugQXCBRYQfcws0CC6wiPBjboEGwQUWEX7MLdAguMAiwo+5BRoEF1hE+DG3QIPgAosIP+YWaBBcYBHhx9wCDYILLCL8mFugQXCBRYQfcws0CC6wiPBjboEGwQUWEX7MLdAguMAiwo+5BRoEF1hE+DG3QIPgAosIP+YWaBBcYBHhx9wCDYILLCL8mFugQXCBRYQfcws0CC6wiPBjboEGwQUWEX7MLdAguMAiwo+5BRoEF1hE+DG3QIPgAosIP+YWaBBcYBHhx9wCDYILLCL8mFugQXCBRYQfcws0CC6wiPBjboEGwQUWEX7MLdAguMAiwo+5BRoEF1hE+DG3QIPgAosIP+YWaBBcYBHhx9wCDYILLCL8mFugQXCBRYQfcws0CC6wiPBjboEGwQUWEX7MLdAguMAiwo+5BRoEF1hE+DG3QIPgAosIP+YWaBBcYBHhx9wCDYILLCL8mFugQXCBRYQfcws0CC6wiPBjboEGwQUWEX7MLdAguMAiwo+5BRoEF1hE+DG3QIPgAosIP+YWaBBcYBHhx9wCDYILLCL8mFugQXCBRYQfcws0CC6wiPBjboEGwQUWEX7MLdAguMAiwo+5BRoEF1hE+DG3QIPgAosIP+YWaBBcYBHhx9wCDYILLCL8mFugQXCBRYQfcws0CC6wiPBjboEGwQUWEX7MLdAguMAiwo+5BRoEF1hE+DG3QIPgAosIP+YWaBBcYBHhx9wCDYILLCL8mFugQXCBRYQfcws0CC6wiPBjboEGwQUWEX7MLdAguMAiwo+5BRoEF1hE+DG3QIPgAosIP+YWaBBcYBHhx9wCDYILLCL8mFugQXCBRYQfcws0CC6wiPBjboEGwQUWEX7MLdAguMAiwo+5BRoEF1hE+DG3QIPgAosIP+YWaBBcYBHhx9wCDYILLCL8mFugQXCBRYQfcws0CC6wiPBjboEGwQUWEX7MLdAguMAiwo+5BRoEF1hE+DG3QIPgAosIP+YWaBBcYBHhx9wCDYILLCL8mFugQXCBRYQfcws0CC6wiPBjboEGwQUWEX7MLdAguMAiwo+5BRoEF1hE+DG3QIPgAosIP+YWaBBcYBHhx9wCDYILLCL8mFugQXCBRYQfcws0CC6wiPBjboEGwQUWEX7MLdAguMAiwo+5BRoEF1hE+DG3QIPgAosIP+YWaBBcYBHhx9wCDYILLCL8mFugQXCBRYQf8196gSYdubL/5nWS4afFAtV+Zf/N6yTDT8svvUAl/XLhH9cWqKSm8I9rC1RSU/jHtQUqqSn849oCldQU/nFtgUpqCv+4tkAlNYV/XFugkprCP64tUElN4R/XFqikpvCPawtUOnbH/e5doFL/5gr997zxOBaolHPcbQJU6t9cof+eNx7HApV00ligktSQBSpJDVmgktSQBSpJDc3Ua//4Xbt9+ZPv6+9fftq+/Jtn9bcrV54dPI4FKumkmaXX/tauXf6q9/2rO1eevbj9QfXjF7c/G3McC1TSSTNDr220L/9b78zzfvv9H7rdtXavNVfqLh13AmqBSjp5mvfazv12fab56s5ud9YtutEecwJqgUo6eZr32qs71Zlnz0r7t3sKdOf+uBNQC1TSyVOg114X6EqvQMefgFqgkk6e2Xvt1Z3dZ++9Fj1wAvrugAUq6aSZvdfW2tW19+FV+AMnoBaopJNq5l7b6N/GVN8H+vtn1Qnozpft9if7Xwf1KbykE2fWXtu4fXnvKWfvBHTn/vvfv7yz/0qSBSrpxJm+1zb6t8/3a3NtcP45UJ2A1rfTr+1/Jm+BSjpxZivQv432Z/0K6Fp1UX6j+mPkOBaopJNmll7bWWn/6oeRH1SX4Ad303+w7zgWqKSTZpZeW2nve6WzvgTvGagkiBl6bW1/f/bvAfU1UEkQs7yVsz00eLrevwd05/7lr7wKLwmgea9ttPcV6PBNSN4HKonBHeklqSELVJIaskAlqSELVJIaskAlqSELVJIaskAlqSELVJIaskAlqSELVJIaskAlqSELVJIaskAlqSELVJIaskAlqaGjK1BJetsdU4HiGvTdd4/7N8BxyY8eb82Pq0Bp3n33uH8DHJf86OHX3AINgp+so+eSHz38mlugQfCTdfRc8qOHX3MLNAh+so6eS3708GtugQbBT9bRc8mPHn7NLdAg+Mk6ei750cOvuQUaBD9ZR88lP3r4NbdAJakhC1SSGrJAJakhC1SSGrJAJakhC1SSGrJAJakhC1SSGrJAC9r58na7/cn3b/iRCjq4vq/utGvv/3Bsv9TJ9+rOByP/zB1zC7ScwUN37yN3zI9U0Jj1fXHbAg230h4pUPCYW6DlrLSvfN99eb995dmkH6mgMeu7MfrYVnk7K+3RRQaPuQVazIvb9f8Cv7pz+asJP1JB49Z3pf3b4/uFEP7xaXu0QMljboEWszYYqrXXj+AxP1JBY9Z35z7wUXyk1trtf/2/IwVKHnMLtJiV9mf11z3PIcf8SAWNWd9Xd678n94Z0v8gXtA4Gmu/+o99A00ecwu0lN1Tnxe3hy8FjfmRChq3vsNrSIPHtEKMVCV6zC3QUizQIzdufTd6TzCfdf/fl22fyQeyQIcs0FL2jNHwdo4xP1JB49Z3+Hqc15Ii5QqUN+YWaCmegR65Seu7Qbyn5sh4BjpkgZZigR65SetLPBs6OhbokAVajFfhj9yE9SU+mI+OV+GHLNBihnfBjdwHeuBHKujg+u7cBz+Yj87GvvtAuWNugRbjO5GO3Jj1HbxLe7dIFWHDdyINWKDF9B6zv9r3juAxP1JBY9b3xe3qNqaXn7rkkUYLlDzmFmg5L/fsSfPidv2/xi+529QciTFLvjbYjMm3IgUaFqhjboEW9PLL3hR9Uv+v8GCy9v5IAcYt+e/a7cv/6pJH2leg4DG3QCWpIQtUkhqyQCWpIQtUkhqyQCWpIQtUkhqyQCWpIQtUkhqyQCWpIQtUkhqyQCWpIQtUkhqyQCWpIQtUJ8NSOvP0uH8H4VigOhksUB0DC1QngwWqY2CB6mSwQHUMLFCdDBaojoEFqpPBAtUxsED1llhK7zysv+l83u/Kv99tpZTmbzwd/MfVD7cX0qX+X18d/vWt6q/NXXhw9L+xTj4LVG+J9ZRu1d9stqqS7HydBk4/rH6aK9DV4V+7eCy/tU42C1RviV43nq2/WU1zf6mL8WKvMbeupv6PMwXa+2vVyefzr21QBbBA9bYYvMrZfwa/W6e9b+ofjy/Q3tnq2eE/V7UrFWWB6m2x3q/AXife2v2Huk/rU83xBbr7Smj1984e/e+sE84C1duiV47Vi6CvO7FvaUKB7m1NL9OrPAtUb42lqg13n7v3PP/78r1zaUKB9v5xj9HilWZngeqtsV5V4O5z90fnRorRAtUxsED11the6HXn60tJ1U2gi39+Mukp/N7TVak8C1Rvj6V0adiQg7uYutnXQJcGr4H6wqcCWaB6e6ynM4/6z+BfN2OvMkcLtH/KObg4v7R785JdqgAWqN4e2wvv/Ld+Qb6uw9WR10B3f76ehveBDv7e7huZpHIsUL1FltKwBgdP4f9+tfeT+iRz8Npo7+dnHnQ737bS7juRTn/RK9ZvkiegKs8C1VtkffdS+vbVwaX1C9/0O3Xk4lKvLb/Z/154+1PlWaB6i7y+RtQ7yTxXbbL01+HLnsP75Oufn7q5dzem6n6n9744nt9YJ5sFKkkNWaCS1JAFKkkNWaCS1JAFKkkNWaCS1JAFKkkNWaCS1JAFKkkNWaCS1JAFKkkNWaCS1JAFKkkNWaCS1JAFKkkNWaCS1JAFKkkNWaCS1JAFKkkNWaCS1ND/B4fukJL9TonrAAAAAElFTkSuQmCC" width="672" /></p>
 <p>Looks like there is no difference.</p>
 <p>Interaction-term method using an IV approach:</p>
-<pre class="r"><code>df &lt;- data %&gt;%
+<pre class="r"><code>df &lt;- d_rdd_bivariate %&gt;%
   filter(closest &lt;= 0.1)
 rdd_conf_1 &lt;- fixest::feols(ln_gross_expenditure_pc ~
                        1  | # controls
@@ -7059,62 +7060,61 @@ rdd_conf_1 &lt;- fixest::feols(ln_gross_expenditure_pc ~
                        inhabs_rel_to_cutoff*total_seats*clean_disc_acc_to_my_research ~
                        inhabs_rel_to_cutoff*above_cutoff*clean_disc_acc_to_my_research,
                      vcov = &quot;threeway&quot;,
-                     data = df)</code></pre>
-<pre><code>## NOTE: 10,673 observations removed because of NA values (LHS: 10,673).</code></pre>
-<pre class="r"><code># Observations below and above:
+                     data = df)
+# Observations below and above:
 rdd_conf_1_obs &lt;- d_rdd_bivariate %&gt;% nrow()
 rdd_conf_1_below &lt;- df %&gt;% filter(above_cutoff == 0) %&gt;% nrow()
 rdd_conf_1_above &lt;- df %&gt;% filter(above_cutoff == 1) %&gt;% nrow()
 summary(rdd_conf_1)</code></pre>
 <pre><code>## TSLS estimation, Dep. Var.: ln_gross_expenditure_pc, Endo.: inhabs_rel_to_cutoff, total_seats, clean_disc_acc_to_my_research, inhabs_rel_to_cutoff:total_seats, inhabs_rel_to_cutoff:clean_disc_acc_to_my_research, total_seats:clean_disc_acc_to_my_research, inhabs_rel_to_cutoff:total_seats:clean_disc_acc_to_my_research, Instr.: inhabs_rel_to_cutoff, above_cutoff, clean_disc_acc_to_my_research, inhabs_rel_to_cutoff:above_cutoff, inhabs_rel_to_cutoff:clean_disc_acc_to_my_research, above_cutoff:clean_disc_acc_to_my_research, inhabs_rel_to_cutoff:above_cutoff:clean_disc_acc_to_my_research
 ## Second stage: Dep. Var.: ln_gross_expenditure_pc
-## Observations: 12,520 
-## Fixed-effects: inhabitants_treshold_factor: 30,  state: 10,  year: 13
+## Observations: 10,361 
+## Fixed-effects: inhabitants_treshold_factor: 29,  state: 10,  year: 13
 ## Standard-errors: Clustered (inhabitants_treshold_factor &amp; state &amp; year) 
-##                                                                     Estimate
-## fit_inhabs_rel_to_cutoff                                            3.257599
-## fit_total_seats                                                     0.019690
-## fit_clean_disc_acc_to_my_research                                   0.283800
-## fit_inhabs_rel_to_cutoff:total_seats                               -0.236507
-## fit_inhabs_rel_to_cutoff:clean_disc_acc_to_my_research             47.028245
-## fit_total_seats:clean_disc_acc_to_my_research                      -0.011998
-## fit_inhabs_rel_to_cutoff:total_seats:clean_disc_acc_to_my_research -2.760721
+##                                                                       Estimate
+## fit_inhabs_rel_to_cutoff                                             11.601397
+## fit_total_seats                                                      -0.000012
+## fit_clean_disc_acc_to_my_research                                    -0.784988
+## fit_inhabs_rel_to_cutoff:total_seats                                 -0.669560
+## fit_inhabs_rel_to_cutoff:clean_disc_acc_to_my_research             -111.520588
+## fit_total_seats:clean_disc_acc_to_my_research                         0.037735
+## fit_inhabs_rel_to_cutoff:total_seats:clean_disc_acc_to_my_research    6.331297
 ##                                                                    Std. Error
-## fit_inhabs_rel_to_cutoff                                             3.991072
-## fit_total_seats                                                      0.022816
-## fit_clean_disc_acc_to_my_research                                    0.737675
-## fit_inhabs_rel_to_cutoff:total_seats                                 0.259512
-## fit_inhabs_rel_to_cutoff:clean_disc_acc_to_my_research              55.051136
-## fit_total_seats:clean_disc_acc_to_my_research                        0.041494
-## fit_inhabs_rel_to_cutoff:total_seats:clean_disc_acc_to_my_research   3.396397
+## fit_inhabs_rel_to_cutoff                                            14.082984
+## fit_total_seats                                                      0.040929
+## fit_clean_disc_acc_to_my_research                                    4.147534
+## fit_inhabs_rel_to_cutoff:total_seats                                 1.000739
+## fit_inhabs_rel_to_cutoff:clean_disc_acc_to_my_research             329.944258
+## fit_total_seats:clean_disc_acc_to_my_research                        0.234497
+## fit_inhabs_rel_to_cutoff:total_seats:clean_disc_acc_to_my_research  17.263320
 ##                                                                      t value
-## fit_inhabs_rel_to_cutoff                                            0.816222
-## fit_total_seats                                                     0.863001
-## fit_clean_disc_acc_to_my_research                                   0.384722
-## fit_inhabs_rel_to_cutoff:total_seats                               -0.911352
-## fit_inhabs_rel_to_cutoff:clean_disc_acc_to_my_research              0.854265
-## fit_total_seats:clean_disc_acc_to_my_research                      -0.289147
-## fit_inhabs_rel_to_cutoff:total_seats:clean_disc_acc_to_my_research -0.812838
+## fit_inhabs_rel_to_cutoff                                            0.823788
+## fit_total_seats                                                    -0.000297
+## fit_clean_disc_acc_to_my_research                                  -0.189266
+## fit_inhabs_rel_to_cutoff:total_seats                               -0.669066
+## fit_inhabs_rel_to_cutoff:clean_disc_acc_to_my_research             -0.337998
+## fit_total_seats:clean_disc_acc_to_my_research                       0.160920
+## fit_inhabs_rel_to_cutoff:total_seats:clean_disc_acc_to_my_research  0.366749
 ##                                                                    Pr(&gt;|t|) 
-## fit_inhabs_rel_to_cutoff                                            0.43544 
-## fit_total_seats                                                     0.41054 
-## fit_clean_disc_acc_to_my_research                                   0.70938 
-## fit_inhabs_rel_to_cutoff:total_seats                                0.38587 
-## fit_inhabs_rel_to_cutoff:clean_disc_acc_to_my_research              0.41512 
-## fit_total_seats:clean_disc_acc_to_my_research                       0.77902 
-## fit_inhabs_rel_to_cutoff:total_seats:clean_disc_acc_to_my_research  0.43728 
+## fit_inhabs_rel_to_cutoff                                            0.43135 
+## fit_total_seats                                                     0.99977 
+## fit_clean_disc_acc_to_my_research                                   0.85408 
+## fit_inhabs_rel_to_cutoff:total_seats                                0.52025 
+## fit_inhabs_rel_to_cutoff:clean_disc_acc_to_my_research              0.74312 
+## fit_total_seats:clean_disc_acc_to_my_research                       0.87571 
+## fit_inhabs_rel_to_cutoff:total_seats:clean_disc_acc_to_my_research  0.72228 
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## RMSE: 0.395492     Adj. R2: -0.015673
-##                  Within R2: -0.800323
-## F-test (1st stage), inhabs_rel_to_cutoff                                          : stat =     3.719e+32, p &lt; 2.2e-16, on 7 and 12,512 DoF.
-## F-test (1st stage), total_seats                                                   : stat =   623.2      , p &lt; 2.2e-16, on 7 and 12,512 DoF.
-## F-test (1st stage), clean_disc_acc_to_my_research                                 : stat =     3.29e+33 , p &lt; 2.2e-16, on 7 and 12,512 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:total_seats                              : stat = 7,623.4      , p &lt; 2.2e-16, on 7 and 12,512 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:clean_disc_acc_to_my_research            : stat =     1.223e+33, p &lt; 2.2e-16, on 7 and 12,512 DoF.
-## F-test (1st stage), total_seats:clean_disc_acc_to_my_research                     : stat = 4,675.8      , p &lt; 2.2e-16, on 7 and 12,512 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:total_seats:clean_disc_acc_to_my_research: stat = 4,745.4      , p &lt; 2.2e-16, on 7 and 12,512 DoF.
-##                                                                         Wu-Hausman: stat =    NA        , p = NA     , on 7 and 12,455 DoF.</code></pre>
+## RMSE: 0.558578     Adj. R2: -1.07466
+##                  Within R2: -2.65106
+## F-test (1st stage), inhabs_rel_to_cutoff                                          : stat =     3.223e+32, p &lt; 2.2e-16, on 7 and 10,353 DoF.
+## F-test (1st stage), total_seats                                                   : stat =   496.7      , p &lt; 2.2e-16, on 7 and 10,353 DoF.
+## F-test (1st stage), clean_disc_acc_to_my_research                                 : stat =     9.619e+32, p &lt; 2.2e-16, on 7 and 10,353 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:total_seats                              : stat = 6,327.5      , p &lt; 2.2e-16, on 7 and 10,353 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:clean_disc_acc_to_my_research            : stat =     2.437e+32, p &lt; 2.2e-16, on 7 and 10,353 DoF.
+## F-test (1st stage), total_seats:clean_disc_acc_to_my_research                     : stat = 3,868.6      , p &lt; 2.2e-16, on 7 and 10,353 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:total_seats:clean_disc_acc_to_my_research: stat = 3,591.4      , p &lt; 2.2e-16, on 7 and 10,353 DoF.
+##                                                                         Wu-Hausman: stat =    NA        , p = NA     , on 7 and 10,297 DoF.</code></pre>
 <pre class="r"><code>rm(df)</code></pre>
 </div>
 <div id="höhmanns-2017-research-variable-clean_disc_acc_höhmann" class="section level4">
@@ -7123,10 +7123,14 @@ summary(rdd_conf_1)</code></pre>
 <p>Next up are the reevaluation of what Höhmann (2017) determines as
 confounded thresholds.</p>
 <p>Subsample method:</p>
-<pre class="r"><code>data_subset &lt;- data %&gt;% # prepare data set used for analysis
-  select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year, clean_disc_acc_Höhmann) %&gt;%
-  drop_na()
-all_values &lt;- data_subset %&gt;% distinct(clean_disc_acc_Höhmann) %&gt;% pull() # vector of values
+<pre class="r"><code># data_subset &lt;- data %&gt;% # prepare data set used for analysis
+#   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year, clean_disc_acc_Höhmann) %&gt;%
+#   drop_na()
+data_subset &lt;- d_rdd_bivariate
+all_values &lt;- data_subset %&gt;%
+  distinct(clean_disc_acc_Höhmann) %&gt;%
+  filter(!is.na(clean_disc_acc_Höhmann)) %&gt;%
+  pull() # vector of values
 rdd_vary_clean_disc2 &lt;- # prepare data set to store the results
   tibble(value = &quot;&quot;, point_estimate = &quot;&quot;, se = &quot;&quot;, se_robust = &quot;&quot;,
          ci_lower = &quot;&quot;, ci_upper = &quot;&quot;, p = &quot;&quot;, bw = &quot;&quot;, obs_below = &quot;&quot;, obs_above = &quot;&quot;) %&gt;%
@@ -7181,7 +7185,7 @@ rdd_vary_clean_disc2</code></pre>
 <p><img src="data:image/png;base64,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" width="672" /></p>
 <p>Looks like there is no difference, again.</p>
 <p>Interaction-term method using an IV approach:</p>
-<pre class="r"><code>df &lt;- data %&gt;%
+<pre class="r"><code>df &lt;- d_rdd_bivariate %&gt;%
   filter(closest &lt;= 0.1)
 rdd_conf_2 &lt;- fixest::feols(ln_gross_expenditure_pc ~
                        1  | # controls
@@ -7191,8 +7195,7 @@ rdd_conf_2 &lt;- fixest::feols(ln_gross_expenditure_pc ~
                        inhabs_rel_to_cutoff*above_cutoff*clean_disc_acc_Höhmann,
                      vcov = &quot;threeway&quot;,
                      data = df)</code></pre>
-<pre><code>## NOTE: 10,707 observations removed because of NA values (LHS: 10,673, IV: 1,702/1,702).</code></pre>
-<pre><code>## Variance contained negative values in the diagonal and was &#39;fixed&#39; (a la Cameron, Gelbach &amp; Miller 2011).</code></pre>
+<pre><code>## NOTE: 29 observations removed because of NA values (IV: 29/29).</code></pre>
 <pre class="r"><code># Observations below and above:
 rdd_conf_2_obs &lt;- d_rdd_bivariate %&gt;% nrow()
 rdd_conf_2_below &lt;- df %&gt;% filter(above_cutoff == 0) %&gt;% nrow()
@@ -7200,56 +7203,48 @@ rdd_conf_2_above &lt;- df %&gt;% filter(above_cutoff == 1) %&gt;% nrow()
 summary(rdd_conf_2)</code></pre>
 <pre><code>## TSLS estimation, Dep. Var.: ln_gross_expenditure_pc, Endo.: inhabs_rel_to_cutoff, total_seats, clean_disc_acc_Höhmann, inhabs_rel_to_cutoff:total_seats, inhabs_rel_to_cutoff:clean_disc_acc_Höhmann, total_seats:clean_disc_acc_Höhmann, inhabs_rel_to_cutoff:total_seats:clean_disc_acc_Höhmann, Instr.: inhabs_rel_to_cutoff, above_cutoff, clean_disc_acc_Höhmann, inhabs_rel_to_cutoff:above_cutoff, inhabs_rel_to_cutoff:clean_disc_acc_Höhmann, above_cutoff:clean_disc_acc_Höhmann, inhabs_rel_to_cutoff:above_cutoff:clean_disc_acc_Höhmann
 ## Second stage: Dep. Var.: ln_gross_expenditure_pc
-## Observations: 12,486 
-## Fixed-effects: inhabitants_treshold_factor: 29,  state: 9,  year: 13
+## Observations: 10,332 
+## Fixed-effects: inhabitants_treshold_factor: 28,  state: 9,  year: 13
 ## Standard-errors: Clustered (inhabitants_treshold_factor &amp; state &amp; year) 
-##                                                              Estimate
-## fit_inhabs_rel_to_cutoff                                     3.678930
-## fit_total_seats                                             -0.028242
-## fit_clean_disc_acc_Höhmann                                  -1.340781
-## fit_inhabs_rel_to_cutoff:total_seats                        -0.090358
-## fit_inhabs_rel_to_cutoff:clean_disc_acc_Höhmann             -6.734911
-## fit_total_seats:clean_disc_acc_Höhmann                       0.070457
-## fit_inhabs_rel_to_cutoff:total_seats:clean_disc_acc_Höhmann  0.186589
-##                                                             Std. Error
-## fit_inhabs_rel_to_cutoff                                      6.865718
-## fit_total_seats                                               0.011995
-## fit_clean_disc_acc_Höhmann                                    0.653884
-## fit_inhabs_rel_to_cutoff:total_seats                          0.304005
-## fit_inhabs_rel_to_cutoff:clean_disc_acc_Höhmann               8.894486
-## fit_total_seats:clean_disc_acc_Höhmann                        0.031223
-## fit_inhabs_rel_to_cutoff:total_seats:clean_disc_acc_Höhmann   0.552408
-##                                                               t value Pr(&gt;|t|)
-## fit_inhabs_rel_to_cutoff                                     0.535841 0.606641
-## fit_total_seats                                             -2.354474 0.046356
-## fit_clean_disc_acc_Höhmann                                  -2.050489 0.074452
-## fit_inhabs_rel_to_cutoff:total_seats                        -0.297227 0.773865
-## fit_inhabs_rel_to_cutoff:clean_disc_acc_Höhmann             -0.757201 0.470641
-## fit_total_seats:clean_disc_acc_Höhmann                       2.256603 0.054008
-## fit_inhabs_rel_to_cutoff:total_seats:clean_disc_acc_Höhmann  0.337773 0.744227
-##                                                                
-## fit_inhabs_rel_to_cutoff                                       
-## fit_total_seats                                             *  
-## fit_clean_disc_acc_Höhmann                                  .  
-## fit_inhabs_rel_to_cutoff:total_seats                           
-## fit_inhabs_rel_to_cutoff:clean_disc_acc_Höhmann                
-## fit_total_seats:clean_disc_acc_Höhmann                      .  
-## fit_inhabs_rel_to_cutoff:total_seats:clean_disc_acc_Höhmann    
+##                                                               Estimate
+## fit_inhabs_rel_to_cutoff                                     17.104779
+## fit_total_seats                                              -0.021461
+## fit_clean_disc_acc_Höhmann                                   -0.816092
+## fit_inhabs_rel_to_cutoff:total_seats                         -0.787674
+## fit_inhabs_rel_to_cutoff:clean_disc_acc_Höhmann             -13.664674
+## fit_total_seats:clean_disc_acc_Höhmann                        0.042818
+## fit_inhabs_rel_to_cutoff:total_seats:clean_disc_acc_Höhmann   0.532136
+##                                                             Std. Error  t value
+## fit_inhabs_rel_to_cutoff                                      6.998896  2.44393
+## fit_total_seats                                               0.003768 -5.69512
+## fit_clean_disc_acc_Höhmann                                    0.282464 -2.88919
+## fit_inhabs_rel_to_cutoff:total_seats                          0.325614 -2.41904
+## fit_inhabs_rel_to_cutoff:clean_disc_acc_Höhmann               9.133648 -1.49608
+## fit_total_seats:clean_disc_acc_Höhmann                        0.013012  3.29055
+## fit_inhabs_rel_to_cutoff:total_seats:clean_disc_acc_Höhmann   0.526723  1.01028
+##                                                               Pr(&gt;|t|)    
+## fit_inhabs_rel_to_cutoff                                    0.04031690 *  
+## fit_total_seats                                             0.00045694 ***
+## fit_clean_disc_acc_Höhmann                                  0.02022423 *  
+## fit_inhabs_rel_to_cutoff:total_seats                        0.04191259 *  
+## fit_inhabs_rel_to_cutoff:clean_disc_acc_Höhmann             0.17299956    
+## fit_total_seats:clean_disc_acc_Höhmann                      0.01101297 *  
+## fit_inhabs_rel_to_cutoff:total_seats:clean_disc_acc_Höhmann 0.34193885    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## RMSE: 0.329602     Adj. R2:  0.293233
-##                  Within R2: -0.249093
-## F-test (1st stage), inhabs_rel_to_cutoff                                   : stat =      8.913e+31, p &lt; 2.2e-16, on 7 and 12,478 DoF.
-## F-test (1st stage), total_seats                                            : stat =    571.1      , p &lt; 2.2e-16, on 7 and 12,478 DoF.
-## F-test (1st stage), clean_disc_acc_Höhmann                                : stat =      4.12e+33 , p &lt; 2.2e-16, on 7 and 12,478 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:total_seats                       : stat =  9,123.1      , p &lt; 2.2e-16, on 7 and 12,478 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:clean_disc_acc_Höhmann           : stat =      1.067e+32, p &lt; 2.2e-16, on 7 and 12,478 DoF.
-## F-test (1st stage), total_seats:clean_disc_acc_Höhmann                    : stat =  6,662.4      , p &lt; 2.2e-16, on 7 and 12,478 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:total_seats:clean_disc_acc_Höhmann: stat = 10,576.5      , p &lt; 2.2e-16, on 7 and 12,478 DoF.
-##                                                                  Wu-Hausman: stat =     NA        , p = NA     , on 7 and 12,423 DoF.</code></pre>
+## RMSE: 0.318294     Adj. R2:  0.324557
+##                  Within R2: -0.184154
+## F-test (1st stage), inhabs_rel_to_cutoff                                   : stat =     3.118e+33, p &lt; 2.2e-16, on 7 and 10,324 DoF.
+## F-test (1st stage), total_seats                                            : stat =   442.5      , p &lt; 2.2e-16, on 7 and 10,324 DoF.
+## F-test (1st stage), clean_disc_acc_Höhmann                                : stat =     2.087e+33, p &lt; 2.2e-16, on 7 and 10,324 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:total_seats                       : stat = 7,364.8      , p &lt; 2.2e-16, on 7 and 10,324 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:clean_disc_acc_Höhmann           : stat =     1.715e+32, p &lt; 2.2e-16, on 7 and 10,324 DoF.
+## F-test (1st stage), total_seats:clean_disc_acc_Höhmann                    : stat = 5,774.7      , p &lt; 2.2e-16, on 7 and 10,324 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:total_seats:clean_disc_acc_Höhmann: stat = 8,312.6      , p &lt; 2.2e-16, on 7 and 10,324 DoF.
+##                                                                  Wu-Hausman: stat =    NA        , p = NA     , on 7 and 10,270 DoF.</code></pre>
 <pre class="r"><code>rdd_conf_2$coefficients[2] + rdd_conf_2$coefficients[6]</code></pre>
 <pre><code>## fit_total_seats 
-##      0.04221477</code></pre>
+##      0.02135686</code></pre>
 <pre class="r"><code>rm(df)</code></pre>
 <p>Looks like there is a difference after all.</p>
 <pre class="r"><code>etable(rdd_conf_1, rdd_conf_2,
@@ -8971,7 +8966,7 @@ is, however, apparently not part of the package.</p>
 <h1>Concluding Remarks</h1>
 <p>For references, see the paper.</p>
 <pre class="r"><code>Sys.time() - time</code></pre>
-<pre><code>## Time difference of 1.141457 hours</code></pre>
+<pre><code>## Time difference of 1.073623 hours</code></pre>
 </div>
 
 

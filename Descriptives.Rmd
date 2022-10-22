@@ -151,9 +151,9 @@ d_rdd_het_summary <- data %>%
   drop_na(ln_gross_expenditure_pc, total_seats, inhabs_rel_to_cutoff) %>%
   select(ln_gross_revenue_pc, ln_net_expenditure_pc,
          #contains("revenue"),
-         ward_elections, const_typ_sueddt, ends_with("mayor"),
+         ward_elections, const_typ_sueddt, const_typ_magistrat, ends_with("mayor"),
          no_parties_in_parliament, parties_in_parliament_hhi,
-         absolute_majority, cdu_csu_majority, spd_majority, waehlergruppen_majority,
+         absolute_majority, cdu_csu_majority, spd_majority, #waehlergruppen_majority,
          starts_with("ln_expenditure"),
          female_share_council, female_share_largest_party,
          #kreisfreie_stadt, stadt
@@ -181,7 +181,7 @@ univar_descriptives <-
       Statistic == "inhabitants_treshold" ~ "Council size population thresholds",
       Statistic == "inh_tot" ~ "Population (as of 12-31)",
       Statistic == "share_working_age" ~ "Share of working-age population",
-      Statistic == "pop_over65" ~ "Share of poplation aged > 65 years",
+      Statistic == "pop_over65" ~ "Share of population aged > 65 years",
       Statistic == "unempl_rate" ~ "Unemployment rate",
       Statistic == "total_area_ha" ~ "Total area in ha",
       Statistic == "kreisfreie_stadt" ~ "Independent large city (dummy)",
@@ -196,22 +196,23 @@ univar_descriptives <-
       #"ln_revenue_capital_loans_pc"          "ln_tax_prop_a_revenue_pc"
       Statistic == "ward_elections" ~ "Ward elections (dummy)",
       Statistic == "const_typ_sueddt" ~ "Southern-German type local constitution (dummy)",
-      Statistic == "cdu_csu_mayor" ~ "CDU/CSU mayor (dummy, BY only)",
-      Statistic == "spd_mayor" ~ "SPD mayor (dummy, BY only)",
+      Statistic == "const_typ_magistrat" ~ "Magistrate local constitution (dummy)",
+      Statistic == "cdu_csu_mayor" ~ "CDU/CSU mayor (dummy, BY)",
+      Statistic == "spd_mayor" ~ "SPD mayor (dummy, BY)",
       Statistic == "no_parties_in_parliament" ~ "Number of parties in council (NW, BW, BY, SL, MV, SN)",
       Statistic == "parties_in_parliament_hhi" ~ "Number of parties in council by HHI (NW, BW, BY, SL, MV, SN)",
       Statistic == "absolute_majority" ~ "Absolute majority (dummy, NW, BW, BY, SL, MV, SN)",
       Statistic == "cdu_csu_majority" ~ "Absolute CDU/CSU majority (dummy, NW, BW, BY, SL, MV, SN)",
       Statistic == "spd_majority" ~ "Absolute SPD majority (dummy, NW, BW, BY, SL, MV, SN)",
-      Statistic == "waehlergruppen_majority" ~ "Absolute majority by independent election group (dummy, BY only)",
+      #Statistic == "waehlergruppen_majority" ~ "Absolute majority by independent election group (dummy, BY)",
       Statistic == "ln_expenditure_administrative_pc" ~ "Ln of administrative expenditure p. c.",
       Statistic == "ln_expenditure_admin_personel_pc" ~ "Ln of personnel expenditure p. c.", #admin
       Statistic == "ln_expenditure_adminoperating_pc" ~ "Ln of operating expenditure p. c.", #admin
       Statistic == "ln_expenditure_capital_pc" ~ "Ln of capital expenditure p. c.",
       Statistic == "ln_expenditure_capital_loans_pc" ~ "Ln of loan expenditure p. c.", #capital
       Statistic == "ln_expenditure_capital_prop_inv_pc" ~ "Ln of property investment expenditure p. c.", #capital
-      Statistic == "female_share_council" ~ "Female share in council (SH, BW, BY, SA, TH)",
-      Statistic == "female_share_largest_party" ~ "Female share in largest council party (BW, BY only)",
+      Statistic == "female_share_council" ~ "Female share in council (SH, BW, BY, ST, TH)",
+      Statistic == "female_share_largest_party" ~ "Female share in largest council party (BW, BY)",
       TRUE ~ paste(toupper(substr(Statistic, 1, 1)), substr(Statistic, 2, nchar(Statistic)), sep="")
     )
   ) %>%

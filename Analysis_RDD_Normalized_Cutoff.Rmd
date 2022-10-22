@@ -1112,9 +1112,10 @@ Subsample method:
 
 ```{r, eval=FALSE}
 # to do: remove eval=FALSE
-data_subset <- data %>% # prepare data set used for analysis
-  select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year, clean_disc_acc_to_my_research) %>%
-  drop_na()
+# data_subset <- data %>% # prepare data set used for analysis
+#   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year, clean_disc_acc_to_my_research) %>%
+#   drop_na()
+data_subset <- d_rdd_bivariate
 all_values <- data_subset %>% distinct(clean_disc_acc_to_my_research) %>% pull() # vector of values
 rdd_vary_clean_disc1 <- # prepare data set to store the results
   tibble(value = "", point_estimate = "", se = "", se_robust = "",
@@ -1171,7 +1172,7 @@ Looks like there is no difference.
 Interaction-term method using an IV approach:
 
 ```{r}
-df <- data %>%
+df <- d_rdd_bivariate %>%
   filter(closest <= 0.1)
 rdd_conf_1 <- fixest::feols(ln_gross_expenditure_pc ~
                        1  | # controls
@@ -1199,10 +1200,14 @@ Subsample method:
 
 ```{r, eval=FALSE}
 # to do: remove eval=FALSE
-data_subset <- data %>% # prepare data set used for analysis
-  select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year, clean_disc_acc_Höhmann) %>%
-  drop_na()
-all_values <- data_subset %>% distinct(clean_disc_acc_Höhmann) %>% pull() # vector of values
+# data_subset <- data %>% # prepare data set used for analysis
+#   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year, clean_disc_acc_Höhmann) %>%
+#   drop_na()
+data_subset <- d_rdd_bivariate
+all_values <- data_subset %>%
+  distinct(clean_disc_acc_Höhmann) %>%
+  filter(!is.na(clean_disc_acc_Höhmann)) %>%
+  pull() # vector of values
 rdd_vary_clean_disc2 <- # prepare data set to store the results
   tibble(value = "", point_estimate = "", se = "", se_robust = "",
          ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
@@ -1257,7 +1262,7 @@ Looks like there is no difference, again.
 Interaction-term method using an IV approach:
 
 ```{r}
-df <- data %>%
+df <- d_rdd_bivariate %>%
   filter(closest <= 0.1)
 rdd_conf_2 <- fixest::feols(ln_gross_expenditure_pc ~
                        1  | # controls

@@ -403,7 +403,7 @@ Run balance test in both sharp and fuzzy design for non-dummy variables:
 # to do: remove eval=FALSE
 rdd_balance_tests <-
   tibble(variable = "", method = "", bw_procedure = "", point_estimate = "", se = "", se_robust = "",
-         ci_lower = "", ci_upper = "", p = "", bw = "", obs_below = "", obs_above = "") %>%
+         ci_lower = "", ci_upper = "", p = "", n = "", bw = "", obs_below = "", obs_above = "") %>%
   mutate(across(4:last_col(), as.numeric))
 bal_vars <- c("inh_tot", "pop_over65", "unempl_rate", "total_area_ha", "share_working_age", "kreisfreie_stadt", "stadt", "lag_total_seats")
 for (i in bal_vars) {
@@ -423,6 +423,7 @@ for (i in bal_vars) {
       ci_lower = rdd_bt$ci[3,1],
       ci_upper = rdd_bt$ci[3,2],
       p = rdd_bt$pv[3],
+      n = nrow(d_rdd_balance_test),
       bw = rdd_bt$bws[1,1],
       obs_below = rdd_bt$N_h[1],
       obs_above = rdd_bt$N_h[2]
@@ -443,6 +444,7 @@ for (i in bal_vars) {
       ci_lower = rdd_bt$ci[3,1],
       ci_upper = rdd_bt$ci[3,2],
       p = rdd_bt$pv[3],
+      n = nrow(d_rdd_balance_test),
       bw = rdd_bt$bws[1,1],
       obs_below = rdd_bt$N_h[1],
       obs_above = rdd_bt$N_h[2]
@@ -503,9 +505,9 @@ df <- rdd_balance_tests %>%
   t() %>%
   tibble::as_tibble() %>%
   janitor::row_to_names(row_number = 1) %>%
-  mutate(`Dependent variable` = c("Point estimate", "SE", "CI", "p value", "Bandwidth", "Obs. below", "Obs. above"),
+  mutate(`Dependent variable` = c("Point estimate", "SE", "CI", "p value", "Obs.", "Bandwidth", "Obs. below", "Obs. above"),
          .before = 1) %>%
-  dplyr::rename(`Population (as of 12-31)` = inh_tot, `Share of poplation aged > 65 years` = pop_over65, `Unemployment rate` = unempl_rate, `Total area in ha` = total_area_ha, `Share of working-age population` = share_working_age, `Independent large city (dummy)` = kreisfreie_stadt, `City (dummy)` = stadt, `Lagged council size` = lag_total_seats)
+  dplyr::rename(`Population (as of 12-31)` = inh_tot, `Share of population aged > 65 years` = pop_over65, `Unemployment rate` = unempl_rate, `Total area in ha` = total_area_ha, `Share of working-age population` = share_working_age, `Independent large city (dummy)` = kreisfreie_stadt, `City (dummy)` = stadt, `Lagged council size` = lag_total_seats)
 df
 print(
   xtable::xtable(
