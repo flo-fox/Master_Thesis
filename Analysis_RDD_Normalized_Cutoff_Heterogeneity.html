@@ -11,7 +11,7 @@
 
 <meta name="author" content="Florian Fox" />
 
-<meta name="date" content="2022-10-21" />
+<meta name="date" content="2022-10-22" />
 
 <title>Master Thesis: A Causal Test of the Law of 1/n and its Mechanisms – Analysis: RDD, Normalized Cutoff, Investigating the Heterogeneity</title>
 
@@ -2785,7 +2785,7 @@ div.tocify {
 1/n and its Mechanisms – Analysis: RDD, Normalized Cutoff, Investigating
 the Heterogeneity</h1>
 <h4 class="author">Florian Fox</h4>
-<h4 class="date">2022-10-21</h4>
+<h4 class="date">2022-10-22</h4>
 
 </div>
 
@@ -3108,8 +3108,7 @@ rdd_tex_export</code></pre>
 <div id="digression-all-revenue-categories" class="section level2">
 <h2>Digression: All revenue categories</h2>
 <p>Run regressions over all revenue categories:</p>
-<pre class="r"><code># to do: remove eval=FALSE
-rev_category &lt;- data %&gt;%
+<pre class="r"><code>rev_category &lt;- data %&gt;%
   select(contains(&quot;revenue&quot;)) %&gt;% # select expenditure categories
   names() # pull their names
 rdd_vary_rev_category &lt;- # prepare data set to store the results
@@ -3143,8 +3142,23 @@ for (i in rev_category) {
       obs_below = rdd$N_h[1],
       obs_above = rdd$N_h[2]
   )
-}
-rdd_vary_rev_category &lt;- rdd_vary_rev_category %&gt;%
+}</code></pre>
+<pre><code>## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;</code></pre>
+<pre class="r"><code>rdd_vary_rev_category &lt;- rdd_vary_rev_category %&gt;%
   drop_na() %&gt;%
   mutate(
     rev_category2 = c(
@@ -3308,7 +3322,6 @@ summary(rdd)</code></pre>
 ## fit_total_seats                        0.007555   0.010148  0.744472  0.49008 
 ## fit_inhabs_rel_to_cutoff:total_seats   0.603274   0.465589  1.295724  0.25166</code></pre>
 <pre class="r"><code>rm(df, rev_category)</code></pre>
-<pre><code>## Warning in rm(df, rev_category): object &#39;rev_category&#39; not found</code></pre>
 <p>Similar conclusions: No effect is singificant at commonly used
 significance levels, lowest p value: 0.2.</p>
 </div>
@@ -3410,8 +3423,7 @@ latter allows for inference, e. g. employing multiple testing.</p>
 <div id="years" class="section level2">
 <h2>Years</h2>
 <p>Subsample method:</p>
-<pre class="r"><code># to do: remove eval=FALSE
-data_year &lt;- data %&gt;% # prepare data set used for analysis
+<pre class="r"><code>data_year &lt;- data %&gt;% # prepare data set used for analysis
   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year) %&gt;%
   drop_na()
 all_years &lt;- data_year %&gt;% distinct(year) %&gt;% pull() # vector of years
@@ -3446,8 +3458,34 @@ for (i in all_years) {
       obs_below = rdd$N_h[1],
       obs_above = rdd$N_h[2]
   )
-}
-rdd_vary_year &lt;- rdd_vary_year %&gt;% drop_na()
+}</code></pre>
+<pre><code>## [1] &quot;year: 2002&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;year: 2003&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;year: 2004&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;year: 2005&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;year: 2006&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;year: 2007&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;year: 2008&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;year: 2009&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;year: 2010&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;year: 2011&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;year: 2012&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;year: 2013&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;year: 2014&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;</code></pre>
+<pre class="r"><code>rdd_vary_year &lt;- rdd_vary_year %&gt;% drop_na()
 save(rdd_vary_year, file = &quot;tables_robustness_checks/rdd_vary_year.Rdata&quot;)
 rm(all_years, data_year, df, i, rdd)</code></pre>
 <pre class="r"><code>load(file = &quot;tables_robustness_checks/rdd_vary_year.Rdata&quot;)
@@ -3524,7 +3562,6 @@ rdd &lt;- fixest::feols(ln_gross_expenditure_pc ~
                      data = df)</code></pre>
 <pre><code>## NOTE: 2,600 observations removed because of NA values (LHS: 2,600).</code></pre>
 <pre><code>## Variance contained negative values in the diagonal and was &#39;fixed&#39; (a la Cameron, Gelbach &amp; Miller 2011).
-## Variance contained negative values in the diagonal and was &#39;fixed&#39; (a la Cameron, Gelbach &amp; Miller 2011).
 ## Variance contained negative values in the diagonal and was &#39;fixed&#39; (a la Cameron, Gelbach &amp; Miller 2011).
 ## Variance contained negative values in the diagonal and was &#39;fixed&#39; (a la Cameron, Gelbach &amp; Miller 2011).
 ## Variance contained negative values in the diagonal and was &#39;fixed&#39; (a la Cameron, Gelbach &amp; Miller 2011).
@@ -3645,33 +3682,33 @@ rdd &lt;- fixest::feols(ln_gross_expenditure_pc ~
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## RMSE: 0.318745     Adj. R2:  0.335409
 ##                  Within R2: -0.046837
-## F-test (1st stage), inhabs_rel_to_cutoff                     : stat =     6.983e+28, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff                     : stat =     7.957e+28, p &lt; 2.2e-16, on 51 and 12,912 DoF.
 ## F-test (1st stage), total_seats                              : stat =    82.9      , p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), year2003                                 : stat =     7.132e+29, p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), year2004                                 : stat =     4.27e+30 , p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), year2005                                 : stat =     1.949e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), year2006                                 : stat =     2.61e+30 , p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), year2007                                 : stat =     1.226e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), year2008                                 : stat =     1.014e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), year2009                                 : stat =     9.131e+29, p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), year2010                                 : stat =     2.437e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), year2011                                 : stat =     1.297e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), year2012                                 : stat =     2.057e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), year2013                                 : stat =     4.944e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), year2014                                 : stat =     2.134e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), year2003                                 : stat =     1.851e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), year2004                                 : stat =     2.591e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), year2005                                 : stat =     1.117e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), year2006                                 : stat =     2.663e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), year2007                                 : stat =     4.404e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), year2008                                 : stat =     1.96e+30 , p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), year2009                                 : stat =     2.67e+30 , p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), year2010                                 : stat =     2.425e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), year2011                                 : stat =     2.585e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), year2012                                 : stat =     1.552e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), year2013                                 : stat =     1.433e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), year2014                                 : stat =     1.161e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
 ## F-test (1st stage), inhabs_rel_to_cutoff:total_seats         : stat = 1,081.6      , p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:year2003            : stat =     3.649e+29, p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:year2004            : stat =     3.033e+29, p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:year2005            : stat =     3.153e+29, p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:year2006            : stat =     7.89e+29 , p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:year2007            : stat =     6.911e+29, p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:year2008            : stat =     1.035e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:year2009            : stat =     7.285e+29, p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:year2010            : stat =     1.172e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:year2011            : stat =     3.572e+29, p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:year2012            : stat =     3.948e+29, p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:year2013            : stat =     1.381e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:year2014            : stat =     1.092e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:year2003            : stat =     1.19e+30 , p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:year2004            : stat =     1.044e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:year2005            : stat =     8.058e+29, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:year2006            : stat =     1.007e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:year2007            : stat =     9.534e+29, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:year2008            : stat =     8.957e+29, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:year2009            : stat =     7.055e+29, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:year2010            : stat =     3.645e+29, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:year2011            : stat =     4.173e+29, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:year2012            : stat =     7.684e+29, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:year2013            : stat =     1.327e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:year2014            : stat =     1.492e+30, p &lt; 2.2e-16, on 51 and 12,912 DoF.
 ## F-test (1st stage), total_seats:year2003                     : stat =   861.4      , p &lt; 2.2e-16, on 51 and 12,912 DoF.
 ## F-test (1st stage), total_seats:year2004                     : stat =   853.9      , p &lt; 2.2e-16, on 51 and 12,912 DoF.
 ## F-test (1st stage), total_seats:year2005                     : stat =   853.9      , p &lt; 2.2e-16, on 51 and 12,912 DoF.
@@ -3708,8 +3745,7 @@ baseline treatment effect in 2002.</p>
 <div id="states" class="section level2">
 <h2>States</h2>
 <p>Subsample method, fuzzy RDD:</p>
-<pre class="r"><code># to do: remove eval=FALSE
-data_state &lt;- data %&gt;% # prepare data set used for analysis
+<pre class="r"><code>data_state &lt;- data %&gt;% # prepare data set used for analysis
   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year) %&gt;%
   drop_na()
 all_states &lt;- data_state %&gt;% distinct(state) %&gt;% filter(state != &quot;15&quot;) %&gt;% pull() # vector of states
@@ -3759,8 +3795,28 @@ for (i in all_states) {
       obs_above = rdd$N_h[2],
       stage = 1
     )
-}
-rdd_vary_states &lt;- rdd_vary_states %&gt;% drop_na() %&gt;% mutate(method = &quot;fuzzy&quot;)
+}</code></pre>
+<pre><code>## [1] &quot;state: 1&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;state: 5&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;state: 6&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;state: 7&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;state: 8&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;state: 9&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;state: 10&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;state: 13&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;state: 14&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;state: 16&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;</code></pre>
+<pre class="r"><code>rdd_vary_states &lt;- rdd_vary_states %&gt;% drop_na() %&gt;% mutate(method = &quot;fuzzy&quot;)
 save(rdd_vary_states, file = &quot;tables_robustness_checks/rdd_vary_states.Rdata&quot;)
 rm(all_states, df, i, rdd)</code></pre>
 <pre class="r"><code>load(file = &quot;tables_robustness_checks/rdd_vary_states.Rdata&quot;)
@@ -3896,8 +3952,16 @@ for (i in all_states) {
       obs_above = rdd$N_h[2],
       method = &quot;sharp&quot;
       )
-}
-rdd_vary_states &lt;- rdd_vary_states %&gt;% drop_na(state)
+}</code></pre>
+<pre><code>## [1] &quot;state: 7&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;state: 9&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;state: 10&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;state: 16&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;</code></pre>
+<pre class="r"><code>rdd_vary_states &lt;- rdd_vary_states %&gt;% drop_na(state)
 save(rdd_vary_states, file = &quot;tables_robustness_checks/rdd_vary_states.Rdata&quot;)
 rm(data_state, df, i, rdd)</code></pre>
 <pre class="r"><code>load(file = &quot;tables_robustness_checks/rdd_vary_states.Rdata&quot;)
@@ -4195,43 +4259,43 @@ rdd &lt;- fixest::feols(ln_gross_expenditure_pc ~
 ## Fixed-effects: inhabitants_treshold_factor: 30,  year: 13
 ## Standard-errors: Clustered (inhabitants_treshold_factor &amp; year) 
 ##                                                 Estimate  Std. Error   t value
-## fit_inhabs_rel_to_cutoff                      -89.093240 2008.749828 -0.044353
-## fit_total_seats                                 0.022175    0.680926  0.032566
-## fit_state5                                      8.902806  149.031421  0.059738
-## fit_state6                                     -0.183534   22.144308 -0.008288
-## fit_state7                                     -4.004769   36.734494 -0.109019
-## fit_state8                                      3.102553   65.800812  0.047151
-## fit_state9                                      1.141682   21.254302  0.053715
-## fit_state10                                    -0.222068   62.738943 -0.003540
-## fit_state13                                     6.293297   75.700600  0.083134
-## fit_state14                                     1.553842  126.272418  0.012305
-## fit_state16                                    -0.098885   44.624107 -0.002216
-## fit_inhabs_rel_to_cutoff:total_seats            6.936123  156.537313  0.044310
-## fit_inhabs_rel_to_cutoff:state5                38.153087 2277.021436  0.016756
-## fit_inhabs_rel_to_cutoff:state6               103.832116 2406.619212  0.043144
-## fit_inhabs_rel_to_cutoff:state7                81.269096 1998.117826  0.040673
-## fit_inhabs_rel_to_cutoff:state8                60.549544 2216.199230  0.027321
-## fit_inhabs_rel_to_cutoff:state9                99.047216 2091.394187  0.047359
-## fit_inhabs_rel_to_cutoff:state10              134.047799 2696.974233  0.049703
-## fit_inhabs_rel_to_cutoff:state13               80.149234 2715.385961  0.029517
-## fit_inhabs_rel_to_cutoff:state14             -108.845910 4123.695186 -0.026395
-## fit_inhabs_rel_to_cutoff:state16              102.102206 2343.071964  0.043576
-## fit_total_seats:state5                         -0.239674    3.982522 -0.060181
-## fit_total_seats:state6                          0.001962    0.887645  0.002210
-## fit_total_seats:state7                          0.216997    1.819706  0.119248
-## fit_total_seats:state8                         -0.171198    3.883800 -0.044080
-## fit_total_seats:state9                         -0.054578    0.979175 -0.055739
-## fit_total_seats:state10                        -0.004050    2.521400 -0.001606
-## fit_total_seats:state14                        -0.096369    7.746265 -0.012441
-## fit_total_seats:state16                        -0.021367    3.126111 -0.006835
-## fit_inhabs_rel_to_cutoff:total_seats:state5    -4.865798  158.622850 -0.030675
-## fit_inhabs_rel_to_cutoff:total_seats:state6    -7.589615  167.045195 -0.045434
-## fit_inhabs_rel_to_cutoff:total_seats:state7    -7.213387  159.641647 -0.045185
-## fit_inhabs_rel_to_cutoff:total_seats:state8    -5.172386  164.442938 -0.031454
-## fit_inhabs_rel_to_cutoff:total_seats:state9    -7.459197  161.411910 -0.046212
-## fit_inhabs_rel_to_cutoff:total_seats:state10   -8.387563  161.068737 -0.052074
-## fit_inhabs_rel_to_cutoff:total_seats:state14    4.939528  256.507058  0.019257
-## fit_inhabs_rel_to_cutoff:total_seats:state16   -7.766184  181.928582 -0.042688
+## fit_inhabs_rel_to_cutoff                      -89.093240 2008.527318 -0.044357
+## fit_total_seats                                 0.022175    0.680906  0.032567
+## fit_state5                                      8.902806  149.040271  0.059734
+## fit_state6                                     -0.183534   22.147095 -0.008287
+## fit_state7                                     -4.004769   36.736509 -0.109013
+## fit_state8                                      3.102553   65.796596  0.047154
+## fit_state9                                      1.141682   21.251651  0.053722
+## fit_state10                                    -0.222068   62.731832 -0.003540
+## fit_state13                                     6.293297   75.715128  0.083118
+## fit_state14                                     1.553842  126.196418  0.012313
+## fit_state16                                    -0.098885   44.629657 -0.002216
+## fit_inhabs_rel_to_cutoff:total_seats            6.936123  156.520306  0.044315
+## fit_inhabs_rel_to_cutoff:state5                38.153087 2276.828838  0.016757
+## fit_inhabs_rel_to_cutoff:state6               103.832116 2406.443570  0.043148
+## fit_inhabs_rel_to_cutoff:state7                81.269096 1997.846780  0.040678
+## fit_inhabs_rel_to_cutoff:state8                60.549544 2216.075838  0.027323
+## fit_inhabs_rel_to_cutoff:state9                99.047216 2091.196228  0.047364
+## fit_inhabs_rel_to_cutoff:state10              134.047799 2695.202437  0.049736
+## fit_inhabs_rel_to_cutoff:state13               80.149234 2715.383661  0.029517
+## fit_inhabs_rel_to_cutoff:state14             -108.845910 4121.231887 -0.026411
+## fit_inhabs_rel_to_cutoff:state16              102.102206 2342.534076  0.043586
+## fit_total_seats:state5                         -0.239674    3.982495 -0.060182
+## fit_total_seats:state6                          0.001962    0.887740  0.002210
+## fit_total_seats:state7                          0.216997    1.819732  0.119247
+## fit_total_seats:state8                         -0.171198    3.883573 -0.044082
+## fit_total_seats:state9                         -0.054578    0.979037 -0.055747
+## fit_total_seats:state10                        -0.004050    2.520215 -0.001607
+## fit_total_seats:state14                        -0.096369    7.741704 -0.012448
+## fit_total_seats:state16                        -0.021367    3.127141 -0.006833
+## fit_inhabs_rel_to_cutoff:total_seats:state5    -4.865798  158.608452 -0.030678
+## fit_inhabs_rel_to_cutoff:total_seats:state6    -7.589615  167.029473 -0.045439
+## fit_inhabs_rel_to_cutoff:total_seats:state7    -7.213387  159.619551 -0.045191
+## fit_inhabs_rel_to_cutoff:total_seats:state8    -5.172386  164.431268 -0.031456
+## fit_inhabs_rel_to_cutoff:total_seats:state9    -7.459197  161.396824 -0.046217
+## fit_inhabs_rel_to_cutoff:total_seats:state10   -8.387563  161.027883 -0.052088
+## fit_inhabs_rel_to_cutoff:total_seats:state14    4.939528  256.374270  0.019267
+## fit_inhabs_rel_to_cutoff:total_seats:state16   -7.766184  181.881659 -0.042699
 ##                                              Pr(&gt;|t|) 
 ## fit_inhabs_rel_to_cutoff                      0.96535 
 ## fit_total_seats                               0.97456 
@@ -4239,43 +4303,43 @@ rdd &lt;- fixest::feols(ln_gross_expenditure_pc ~
 ## fit_state6                                    0.99352 
 ## fit_state7                                    0.91499 
 ## fit_state8                                    0.96317 
-## fit_state9                                    0.95805 
+## fit_state9                                    0.95804 
 ## fit_state10                                   0.99723 
-## fit_state13                                   0.93512 
+## fit_state13                                   0.93513 
 ## fit_state14                                   0.99038 
 ## fit_state16                                   0.99827 
-## fit_inhabs_rel_to_cutoff:total_seats          0.96539 
+## fit_inhabs_rel_to_cutoff:total_seats          0.96538 
 ## fit_inhabs_rel_to_cutoff:state5               0.98691 
-## fit_inhabs_rel_to_cutoff:state6               0.96630 
-## fit_inhabs_rel_to_cutoff:state7               0.96823 
+## fit_inhabs_rel_to_cutoff:state6               0.96629 
+## fit_inhabs_rel_to_cutoff:state7               0.96822 
 ## fit_inhabs_rel_to_cutoff:state8               0.97865 
-## fit_inhabs_rel_to_cutoff:state9               0.96301 
-## fit_inhabs_rel_to_cutoff:state10              0.96118 
+## fit_inhabs_rel_to_cutoff:state9               0.96300 
+## fit_inhabs_rel_to_cutoff:state10              0.96115 
 ## fit_inhabs_rel_to_cutoff:state13              0.97694 
-## fit_inhabs_rel_to_cutoff:state14              0.97938 
-## fit_inhabs_rel_to_cutoff:state16              0.96596 
+## fit_inhabs_rel_to_cutoff:state14              0.97936 
+## fit_inhabs_rel_to_cutoff:state16              0.96595 
 ## fit_total_seats:state5                        0.95300 
 ## fit_total_seats:state6                        0.99827 
 ## fit_total_seats:state7                        0.90705 
-## fit_total_seats:state8                        0.96557 
-## fit_total_seats:state9                        0.95647 
+## fit_total_seats:state8                        0.96556 
+## fit_total_seats:state9                        0.95646 
 ## fit_total_seats:state10                       0.99874 
-## fit_total_seats:state14                       0.99028 
+## fit_total_seats:state14                       0.99027 
 ## fit_total_seats:state16                       0.99466 
 ## fit_inhabs_rel_to_cutoff:total_seats:state5   0.97603 
-## fit_inhabs_rel_to_cutoff:total_seats:state6   0.96451 
+## fit_inhabs_rel_to_cutoff:total_seats:state6   0.96450 
 ## fit_inhabs_rel_to_cutoff:total_seats:state7   0.96470 
 ## fit_inhabs_rel_to_cutoff:total_seats:state8   0.97542 
 ## fit_inhabs_rel_to_cutoff:total_seats:state9   0.96390 
-## fit_inhabs_rel_to_cutoff:total_seats:state10  0.95933 
-## fit_inhabs_rel_to_cutoff:total_seats:state14  0.98495 
-## fit_inhabs_rel_to_cutoff:total_seats:state16  0.96665 
+## fit_inhabs_rel_to_cutoff:total_seats:state10  0.95932 
+## fit_inhabs_rel_to_cutoff:total_seats:state14  0.98494 
+## fit_inhabs_rel_to_cutoff:total_seats:state16  0.96664 
 ## ... 8 variables were removed because of collinearity (fit_state15, fit_inhabs_rel_to_cutoff:state15 and 6 others [full set in $collin.var])
 ## Important note: six endogenous regressors were removed =&gt; IV estimation not valid.
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## RMSE: 12.0     Adj. R2:   -941.3
-##              Within R2: -1,453.7
+## RMSE: 12.0     Adj. R2:   -941.4
+##              Within R2: -1,453.8
 ## F-test (1st stage), inhabs_rel_to_cutoff                    : stat =      3.802e+29, p &lt; 2.2e-16, on 37 and 12,926 DoF.
 ## F-test (1st stage), total_seats                             : stat =    610.7      , p &lt; 2.2e-16, on 37 and 12,926 DoF.
 ## F-test (1st stage), state5                                  : stat =      2.45e+31 , p &lt; 2.2e-16, on 37 and 12,926 DoF.
@@ -4323,7 +4387,7 @@ rdd &lt;- fixest::feols(ln_gross_expenditure_pc ~
 <pre class="r"><code># joint test on interactions
 fixest::wald(rdd, &quot;fit_total_seats:state&quot;)</code></pre>
 <pre><code>## Wald test, H0: joint nullity of fit_total_seats:state5, fit_total_seats:state6, fit_total_seats:state7, fit_total_seats:state8, fit_total_seats:state9, fit_total_seats:state10 and 2 others
-##  stat = 8.454e-4, p-value = 1, on 8 and 12,885 DoF, VCOV: Clustered (inhabitants_treshold_factor &amp; year).</code></pre>
+##  stat = 8.386e-4, p-value = 1, on 8 and 12,885 DoF, VCOV: Clustered (inhabitants_treshold_factor &amp; year).</code></pre>
 <pre class="r"><code>rm(df)</code></pre>
 <p>Test more extreme “individual” values:</p>
 <pre class="r"><code>df &lt;- data %&gt;%
@@ -4662,8 +4726,7 @@ differences between states, interaction shows no significant results</p>
 <p>Dummy <code>ward_elections</code> is 1 for states 01 and 05, 0
 otherwise. 01 &amp; 05 have</p>
 <p>Subsample method:</p>
-<pre class="r"><code># to do: remove eval=FALSE
-data_subset &lt;- data %&gt;% # prepare data set used for analysis
+<pre class="r"><code>data_subset &lt;- data %&gt;% # prepare data set used for analysis
   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year, ward_elections) %&gt;%
   drop_na()
 all_values &lt;- data_subset %&gt;% distinct(ward_elections) %&gt;% pull() # vector of values
@@ -4694,8 +4757,12 @@ for (i in all_values) {
       obs_below = rdd$N_h[1],
       obs_above = rdd$N_h[2]
   )
-}
-rdd_vary_ward &lt;- rdd_vary_ward %&gt;% drop_na()
+}</code></pre>
+<pre><code>## [1] &quot;ward (0 is at large, 1 is partly in wards): 1&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;ward (0 is at large, 1 is partly in wards): 0&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;</code></pre>
+<pre class="r"><code>rdd_vary_ward &lt;- rdd_vary_ward %&gt;% drop_na()
 save(rdd_vary_ward, file = &quot;tables_robustness_checks/rdd_vary_ward.Rdata&quot;)
 rm(all_values, data_subset, df, i, rdd)</code></pre>
 <pre class="r"><code>load(file = &quot;tables_robustness_checks/rdd_vary_ward.Rdata&quot;)
@@ -4750,8 +4817,7 @@ Hesse has pure “Magistratsverfassung”.</li>
 <h3><code>const_typ_sueddt</code> – Süddeutsche Ratsverfassung</h3>
 <p>(Main specification)</p>
 <p>Subsample method:</p>
-<pre class="r"><code># to do: remove eval=FALSE
-data_subset &lt;- data %&gt;% # prepare data set used for analysis
+<pre class="r"><code>data_subset &lt;- data %&gt;% # prepare data set used for analysis
   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year, const_typ_sueddt) %&gt;%
   drop_na()
 all_values &lt;- data_subset %&gt;% distinct(const_typ_sueddt) %&gt;% pull() # vector of values
@@ -4782,8 +4848,12 @@ for (i in all_values) {
       obs_below = rdd$N_h[1],
       obs_above = rdd$N_h[2]
   )
-}
-rdd_vary_const_type &lt;- rdd_vary_const_type %&gt;% drop_na()
+}</code></pre>
+<pre><code>## [1] &quot;constitutional type: 1&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;constitutional type: 0&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;</code></pre>
+<pre class="r"><code>rdd_vary_const_type &lt;- rdd_vary_const_type %&gt;% drop_na()
 save(rdd_vary_const_type, file = &quot;tables_robustness_checks/rdd_vary_const_type.Rdata&quot;)
 rm(all_values, data_subset, df, i, rdd)</code></pre>
 <pre class="r"><code>load(file = &quot;tables_robustness_checks/rdd_vary_const_type.Rdata&quot;)
@@ -4825,25 +4895,25 @@ rdd &lt;- fixest::feols(ln_gross_expenditure_pc ~
 ## Fixed-effects: inhabitants_treshold_factor: 30,  state: 10,  year: 13
 ## Standard-errors: Clustered (inhabitants_treshold_factor &amp; state &amp; year) 
 ##                                                        Estimate Std. Error
-## fit_inhabs_rel_to_cutoff                              -4.936108  39.567058
-## fit_total_seats                                       -0.013325   0.144503
-## fit_inhabs_rel_to_cutoff:total_seats                   0.327036   3.921465
-## fit_inhabs_rel_to_cutoff:const_typ_sueddt              6.063686 129.097278
-## fit_total_seats:const_typ_sueddt                       0.034994   0.211508
-## fit_inhabs_rel_to_cutoff:total_seats:const_typ_sueddt -0.436922   8.288144
+## fit_inhabs_rel_to_cutoff                              -4.936108  39.666360
+## fit_total_seats                                       -0.013325   0.150461
+## fit_inhabs_rel_to_cutoff:total_seats                   0.327036   3.963227
+## fit_inhabs_rel_to_cutoff:const_typ_sueddt              6.063686  78.417723
+## fit_total_seats:const_typ_sueddt                       0.034994   0.171518
+## fit_inhabs_rel_to_cutoff:total_seats:const_typ_sueddt -0.436922   5.503271
 ##                                                         t value Pr(&gt;|t|) 
-## fit_inhabs_rel_to_cutoff                              -0.124753  0.90346 
-## fit_total_seats                                       -0.092211  0.92855 
-## fit_inhabs_rel_to_cutoff:total_seats                   0.083396  0.93536 
-## fit_inhabs_rel_to_cutoff:const_typ_sueddt              0.046970  0.96356 
-## fit_total_seats:const_typ_sueddt                       0.165452  0.87225 
-## fit_inhabs_rel_to_cutoff:total_seats:const_typ_sueddt -0.052717  0.95911 
+## fit_inhabs_rel_to_cutoff                              -0.124441  0.90370 
+## fit_total_seats                                       -0.088560  0.93137 
+## fit_inhabs_rel_to_cutoff:total_seats                   0.082518  0.93604 
+## fit_inhabs_rel_to_cutoff:const_typ_sueddt              0.077325  0.94006 
+## fit_total_seats:const_typ_sueddt                       0.204027  0.84287 
+## fit_inhabs_rel_to_cutoff:total_seats:const_typ_sueddt -0.079393  0.93846 
 ## ... 2 variables were removed because of collinearity (fit_const_typ_sueddt and const_typ_sueddt)
 ## Important note: one endogenous regressor was removed =&gt; IV estimation not valid.
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## RMSE: 2.5112     Adj. R2: -40.1
-##                Within R2: -72.3
+## RMSE: 1.58975     Adj. R2: -15.5
+##                 Within R2: -28.4
 ## F-test (1st stage), inhabs_rel_to_cutoff                             : stat =      1.998e+30, p &lt; 2.2e-16, on 6 and 12,957 DoF.
 ## F-test (1st stage), total_seats                                      : stat =    733.9      , p &lt; 2.2e-16, on 6 and 12,957 DoF.
 ## F-test (1st stage), const_typ_sueddt                                 : stat =     NA        , p = NA     , on 6 and 12,957 DoF.
@@ -4861,8 +4931,7 @@ rdd &lt;- fixest::feols(ln_gross_expenditure_pc ~
 significant as it only consists of Hesse, which had a large positive
 effect in the state-heterogeneity section (subsection method).</p>
 <p>Subsample method:</p>
-<pre class="r"><code># to do: remove eval=FALSE
-data_subset &lt;- data %&gt;% # prepare data set used for analysis
+<pre class="r"><code>data_subset &lt;- data %&gt;% # prepare data set used for analysis
   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year, const_typ_magistrat) %&gt;%
   drop_na()
 all_values &lt;- data_subset %&gt;% distinct(const_typ_magistrat) %&gt;% pull() # vector of values
@@ -4893,8 +4962,12 @@ for (i in all_values) {
       obs_below = rdd$N_h[1],
       obs_above = rdd$N_h[2]
   )
-}
-rdd_vary_const_type2 &lt;- rdd_vary_const_type2 %&gt;% drop_na()
+}</code></pre>
+<pre><code>## [1] &quot;constitutional type: 0&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;constitutional type: 1&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;</code></pre>
+<pre class="r"><code>rdd_vary_const_type2 &lt;- rdd_vary_const_type2 %&gt;% drop_na()
 save(rdd_vary_const_type2, file = &quot;tables_robustness_checks/rdd_vary_const_type2.Rdata&quot;)
 rm(all_values, data_subset, df, i, rdd)</code></pre>
 <pre class="r"><code>load(file = &quot;tables_robustness_checks/rdd_vary_const_type2.Rdata&quot;)
@@ -4984,8 +5057,7 @@ table(data_subset$mayor_party_affiliation)</code></pre>
 <pre><code>## 
 ## cdu_csu  others     spd 
 ##   11858   11305    3539</code></pre>
-<pre class="r"><code># to do: remove eval=FALSE
-all_values &lt;- data_subset %&gt;% distinct(mayor_party_affiliation) %&gt;% pull() # vector of values
+<pre class="r"><code>all_values &lt;- data_subset %&gt;% distinct(mayor_party_affiliation) %&gt;% pull() # vector of values
 rdd_vary_may_affil &lt;- # prepare data set to store the results
   tibble(mayor_party_affiliation = &quot;&quot;, method = &quot;&quot;, point_estimate = &quot;&quot;, se = &quot;&quot;, se_robust = &quot;&quot;,
          ci_lower = &quot;&quot;, ci_upper = &quot;&quot;, p = &quot;&quot;, bw = &quot;&quot;, obs_below = &quot;&quot;, obs_above = &quot;&quot;) %&gt;%
@@ -5038,8 +5110,23 @@ for (i in all_values) {
       obs_below = rdd$N_h[1],
       obs_above = rdd$N_h[2]
   )
-}
-rdd_vary_may_affil &lt;- rdd_vary_may_affil %&gt;%
+}</code></pre>
+<pre><code>## [1] &quot;Mayoral party affiliation: cdu_csu&quot;
+## [1] &quot;fuzzy&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;sharp&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;Mayoral party affiliation: others&quot;
+## [1] &quot;fuzzy&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;sharp&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;Mayoral party affiliation: spd&quot;
+## [1] &quot;fuzzy&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;sharp&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;</code></pre>
+<pre class="r"><code>rdd_vary_may_affil &lt;- rdd_vary_may_affil %&gt;%
   mutate(mayor_party_affiliation = case_when(
     mayor_party_affiliation == &quot;cdu_csu&quot; ~ &quot;CDU/CSU&quot;,
     mayor_party_affiliation == &quot;others&quot; ~ &quot;Others&quot;,
@@ -5268,8 +5355,7 @@ table(data_subset$state)</code></pre>
 <pre><code>## 
 ##     5     8     9    10    13    14 
 ##  2772 13710 26702   364    54  4887</code></pre>
-<pre class="r"><code># to do: remove eval=FALSE
-all_values &lt;- data_subset %&gt;%
+<pre class="r"><code>all_values &lt;- data_subset %&gt;%
   arrange(no_parties_in_parliament) %&gt;%
   filter(no_parties_in_parliament &lt;= 7) %&gt;%
   distinct(no_parties_in_parliament) %&gt;%
@@ -5301,8 +5387,22 @@ for (i in all_values) {
       obs_below = rdd$N_h[1],
       obs_above = rdd$N_h[2]
   )
-}
-rdd_vary_no_of_part &lt;- rdd_vary_no_of_part %&gt;% drop_na()
+}</code></pre>
+<pre><code>## [1] &quot;no_parties_in_parliament: 1&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;no_parties_in_parliament: 2&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;no_parties_in_parliament: 3&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;no_parties_in_parliament: 4&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;no_parties_in_parliament: 5&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;no_parties_in_parliament: 6&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;no_parties_in_parliament: 7&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;</code></pre>
+<pre class="r"><code>rdd_vary_no_of_part &lt;- rdd_vary_no_of_part %&gt;% drop_na()
 save(rdd_vary_no_of_part, file = &quot;tables_robustness_checks/rdd_vary_no_of_part.Rdata&quot;)
 rm(all_values, data_subset, df, i, rdd)</code></pre>
 <pre class="r"><code>load(file = &quot;tables_robustness_checks/rdd_vary_no_of_part.Rdata&quot;)
@@ -5418,14 +5518,14 @@ rdd &lt;- fixest::feols(ln_gross_expenditure_pc ~
 ## fit_inhabs_rel_to_cutoff:total_seats:no_parties_in_parliament27   -3.367166
 ##                                                                    Std. Error
 ## fit_inhabs_rel_to_cutoff                                            14.047542
-## fit_total_seats                                                      0.104346
+## fit_total_seats                                                      0.104345
 ## fit_no_parties_in_parliament22                                       2.610717
 ## fit_no_parties_in_parliament23                                       0.931339
 ## fit_no_parties_in_parliament24                                       5.333294
 ## fit_no_parties_in_parliament25                                      18.129698
 ## fit_no_parties_in_parliament26                                       6.179767
 ## fit_no_parties_in_parliament27                                       5.968276
-## fit_no_parties_in_parliament28                                  197182.817411
+## fit_no_parties_in_parliament28                                  197182.817404
 ## fit_inhabs_rel_to_cutoff:total_seats                                 1.072912
 ## fit_inhabs_rel_to_cutoff:no_parties_in_parliament22                 27.225968
 ## fit_inhabs_rel_to_cutoff:no_parties_in_parliament23                 84.939460
@@ -5449,7 +5549,7 @@ rdd &lt;- fixest::feols(ln_gross_expenditure_pc ~
 ## fit_inhabs_rel_to_cutoff:total_seats:no_parties_in_parliament27      4.142443
 ##                                                                   t value
 ## fit_inhabs_rel_to_cutoff                                        -1.134707
-## fit_total_seats                                                  0.700463
+## fit_total_seats                                                  0.700464
 ## fit_no_parties_in_parliament22                                   0.758568
 ## fit_no_parties_in_parliament23                                   1.046629
 ## fit_no_parties_in_parliament24                                  -0.023445
@@ -5550,7 +5650,7 @@ rdd &lt;- fixest::feols(ln_gross_expenditure_pc ~
 <pre class="r"><code># joint test on interactions
 fixest::wald(rdd, &quot;fit_total_seats:no_parties_in_parliament2&quot;)</code></pre>
 <pre><code>## Wald test, H0: joint nullity of fit_total_seats:no_parties_in_parliament22, fit_total_seats:no_parties_in_parliament23, fit_total_seats:no_parties_in_parliament24, fit_total_seats:no_parties_in_parliament25, fit_total_seats:no_parties_in_parliament26, fit_total_seats:no_parties_in_parliament27 and fit_total_seats:no_parties_in_parliament28
-##  stat = 1.02143, p-value = 0.41354, on 7 and 6,977 DoF, VCOV: Clustered (inhabitants_treshold_factor &amp; state &amp; year).</code></pre>
+##  stat = 1.02143, p-value = 0.413541, on 7 and 6,977 DoF, VCOV: Clustered (inhabitants_treshold_factor &amp; state &amp; year).</code></pre>
 <pre class="r"><code># no_parties_in_parliament continuously
 rdd &lt;- fixest::feols(ln_gross_expenditure_pc ~
                        1  | # controls
@@ -5619,8 +5719,7 @@ parties in parliament.</p>
 <div id="hhi" class="section level3">
 <h3>HHI</h3>
 <p>Subsample method:</p>
-<pre class="r"><code># to do: remove eval=FALSE
-data_subset &lt;- data %&gt;% # prepare data set used for analysis
+<pre class="r"><code>data_subset &lt;- data %&gt;% # prepare data set used for analysis
   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year, parties_in_parliament_hhi) %&gt;%
   mutate(parties_in_parliament_hhi_quant = cut(
     parties_in_parliament_hhi,
@@ -5655,8 +5754,16 @@ for (i in all_values) {
       obs_below = rdd$N_h[1],
       obs_above = rdd$N_h[2]
   )
-}
-rdd_vary_no_of_part2 &lt;- rdd_vary_no_of_part2 %&gt;% drop_na()
+}</code></pre>
+<pre><code>## [1] &quot;parties_in_parliament_hhi_quant: (0.352,0.441]&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;parties_in_parliament_hhi_quant: (0.161,0.352]&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;parties_in_parliament_hhi_quant: (0.441,0.594]&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;parties_in_parliament_hhi_quant: (0.594,1]&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;</code></pre>
+<pre class="r"><code>rdd_vary_no_of_part2 &lt;- rdd_vary_no_of_part2 %&gt;% drop_na()
 save(rdd_vary_no_of_part2, file = &quot;tables_robustness_checks/rdd_vary_no_of_part2.Rdata&quot;)
 rm(all_values, data_subset, df, i, rdd)</code></pre>
 <pre class="r"><code>load(file = &quot;tables_robustness_checks/rdd_vary_no_of_part2.Rdata&quot;)
@@ -5767,8 +5874,7 @@ table(data_subset$state)</code></pre>
 ##     5     8     9    10    13    14 
 ##  2772 13710 26702   364    54  4887</code></pre>
 <pre class="r"><code>lims &lt;- c(-0.05, 0.04) # ggplot y axis limits</code></pre>
-<pre class="r"><code># to do: remove eval=FALSE
-all_values &lt;- data_subset %&gt;% distinct(absolute_majority) %&gt;% pull() # vector of values
+<pre class="r"><code>all_values &lt;- data_subset %&gt;% distinct(absolute_majority) %&gt;% pull() # vector of values
 rdd_vary_abs_majority &lt;- # prepare data set to store the results
   tibble(absolute_majority = &quot;&quot;, point_estimate = &quot;&quot;, se = &quot;&quot;, se_robust = &quot;&quot;,
          ci_lower = &quot;&quot;, ci_upper = &quot;&quot;, p = &quot;&quot;, bw = &quot;&quot;, obs_below = &quot;&quot;, obs_above = &quot;&quot;) %&gt;%
@@ -5796,8 +5902,12 @@ for (i in all_values) {
       obs_below = rdd$N_h[1],
       obs_above = rdd$N_h[2]
   )
-}
-rdd_vary_abs_majority &lt;- rdd_vary_abs_majority %&gt;% drop_na()
+}</code></pre>
+<pre><code>## [1] &quot;absolute_majority: 0&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;absolute_majority: 1&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;</code></pre>
+<pre class="r"><code>rdd_vary_abs_majority &lt;- rdd_vary_abs_majority %&gt;% drop_na()
 save(rdd_vary_abs_majority, file = &quot;tables_robustness_checks/rdd_vary_abs_majority1.Rdata&quot;)
 rm(all_values, data_subset, df, i, rdd)</code></pre>
 <pre class="r"><code>load(file = &quot;tables_robustness_checks/rdd_vary_abs_majority1.Rdata&quot;)
@@ -5918,8 +6028,7 @@ table(data_subset$state)</code></pre>
 <pre><code>## 
 ##     5     8     9    10    13    14 
 ##  2772  7840 23854   364    54  3444</code></pre>
-<pre class="r"><code># to do: remove eval=FALSE
-all_values &lt;- data_subset %&gt;% distinct(abs_majority_party) %&gt;% pull() # vector of values
+<pre class="r"><code>all_values &lt;- data_subset %&gt;% distinct(abs_majority_party) %&gt;% pull() # vector of values
 rdd_vary_abs_majority2 &lt;- # prepare data set to store the results
   tibble(abs_majority_party = &quot;&quot;, point_estimate = &quot;&quot;, se = &quot;&quot;, se_robust = &quot;&quot;,
          ci_lower = &quot;&quot;, ci_upper = &quot;&quot;, p = &quot;&quot;, bw = &quot;&quot;, obs_below = &quot;&quot;, obs_above = &quot;&quot;) %&gt;%
@@ -5947,8 +6056,14 @@ for (i in all_values) {
       obs_below = rdd$N_h[1],
       obs_above = rdd$N_h[2]
   )
-}
-rdd_vary_abs_majority2 &lt;- rdd_vary_abs_majority2 %&gt;% drop_na()
+}</code></pre>
+<pre><code>## [1] &quot;abs_majority_party: No abs. majority&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;abs_majority_party: CDU/CSU abs. majority&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;abs_majority_party: Non CDU/CSU abs. majority&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;</code></pre>
+<pre class="r"><code>rdd_vary_abs_majority2 &lt;- rdd_vary_abs_majority2 %&gt;% drop_na()
 save(rdd_vary_abs_majority2, file = &quot;tables_robustness_checks/rdd_vary_abs_majority2.Rdata&quot;)
 rm(all_values, df, i, rdd)</code></pre>
 <pre class="r"><code>load(file = &quot;tables_robustness_checks/rdd_vary_abs_majority2.Rdata&quot;)
@@ -6116,8 +6231,7 @@ table(data_subset$state)</code></pre>
 <pre><code>## 
 ##     9 
 ## 26702</code></pre>
-<pre class="r"><code># to do: remove eval=FALSE
-all_values &lt;- data_subset %&gt;% distinct(abs_majority_party) %&gt;% pull() # vector of values
+<pre class="r"><code>all_values &lt;- data_subset %&gt;% distinct(abs_majority_party) %&gt;% pull() # vector of values
 rdd_vary_abs_majority &lt;- # prepare data set to store the results
   tibble(abs_majority_party = &quot;&quot;, point_estimate = &quot;&quot;, se = &quot;&quot;, se_robust = &quot;&quot;,
          ci_lower = &quot;&quot;, ci_upper = &quot;&quot;, p = &quot;&quot;, bw = &quot;&quot;, obs_below = &quot;&quot;, obs_above = &quot;&quot;) %&gt;%
@@ -6145,8 +6259,14 @@ for (i in all_values) {
       obs_below = rdd$N_h[1],
       obs_above = rdd$N_h[2]
   )
-}
-rdd_vary_abs_majority &lt;- rdd_vary_abs_majority %&gt;% drop_na()
+}</code></pre>
+<pre><code>## [1] &quot;abs_majority_party: cdu_csu&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;abs_majority_party: neither cdu_csu nor waehlergruppen&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;abs_majority_party: waehlergruppen&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;</code></pre>
+<pre class="r"><code>rdd_vary_abs_majority &lt;- rdd_vary_abs_majority %&gt;% drop_na()
 save(rdd_vary_abs_majority, file = &quot;tables_robustness_checks/rdd_vary_abs_majority_by.Rdata&quot;)
 rm(all_values, df, i, rdd)</code></pre>
 <pre class="r"><code>load(file = &quot;tables_robustness_checks/rdd_vary_abs_majority_by.Rdata&quot;)
@@ -6293,8 +6413,7 @@ plot_council_majorities</code></pre>
 <div id="digression-all-expenditure-categories" class="section level2">
 <h2>Digression: All expenditure categories</h2>
 <p>Run regressions over all expenditure categories</p>
-<pre class="r"><code># to do: remove eval=FALSE
-exp_category &lt;- data %&gt;%
+<pre class="r"><code>exp_category &lt;- data %&gt;%
   select(starts_with(&quot;ln_expenditure&quot;)) %&gt;% # select expenditure categories
   names() # pull their names
 rdd_vary_exp_category &lt;- # prepare data set to store the results
@@ -6330,8 +6449,32 @@ for (i in exp_category) {
       obs_below = rdd$N_h[1],
       obs_above = rdd$N_h[2]
   )
-}
-rdd_vary_exp_category &lt;- rdd_vary_exp_category %&gt;%
+}</code></pre>
+<pre><code>## 
+##     1     5     6     7     8     9    10    13    14    15    16 
+## 11274  2772  5536 29819 14305 26702   364    54  4887    28  7875 
+## [1] &quot;Mass points detected in the running variable.&quot;
+## 
+##     1     5     6     7     8     9    10    13    14    15    16 
+## 11267  2772  5536 29800 14305 26702   364    54  4887    28  7875 
+## [1] &quot;Mass points detected in the running variable.&quot;
+## 
+##     1     5     6     7     8     9    10    13    14    15    16 
+## 11273  2772  5534 29811 14305 26701   364    54  4885    28  7875 
+## [1] &quot;Mass points detected in the running variable.&quot;
+## 
+##     1     5     6     7     8     9    10    13    14    15    16 
+## 11108  2772  5533 29141 14304 26694   364    54  4887    28  7870 
+## [1] &quot;Mass points detected in the running variable.&quot;
+## 
+##     1     5     6     7     8     9    10    13    14    15    16 
+##  7903  2713  5486 20676 12549 25028   364    54  4724    28  6993 
+## [1] &quot;Mass points detected in the running variable.&quot;
+## 
+##     1     5     6     7     8     9    10    13    14    15    16 
+## 10425  2772  5530 27277 14297 26691   364    54  4886    28  7738 
+## [1] &quot;Mass points detected in the running variable.&quot;</code></pre>
+<pre class="r"><code>rdd_vary_exp_category &lt;- rdd_vary_exp_category %&gt;%
   drop_na() %&gt;%
   mutate(exp_category2 = c(&quot;Administrative&quot;, &quot;Administrative: personnel&quot;, &quot;Administrative: operating&quot;,
                            &quot;Capital&quot;, &quot;Capital: loans&quot;, &quot;Capital: property investment&quot;))
@@ -6432,7 +6575,6 @@ rdd &lt;- fixest::feols(c(ln_expenditure_administrative_pc, ln_expenditure_admin
 ## fit_total_seats                       0.001333   0.029599  0.045024  0.96507 
 ## fit_inhabs_rel_to_cutoff:total_seats -0.061704   0.686343 -0.089902  0.93033</code></pre>
 <pre class="r"><code>rm(df, exp_category)</code></pre>
-<pre><code>## Warning in rm(df, exp_category): object &#39;exp_category&#39; not found</code></pre>
 <p>Similar conclusions: No effect is significant at commonly used
 significance levels, lowest p value: 0.2.</p>
 </div>
@@ -6450,8 +6592,7 @@ significance levels, lowest p value: 0.2.</p>
 <div id="overall-data" class="section level3">
 <h3>Overall data</h3>
 <p>Overall means 08 (BW) and 09 (BY)…</p>
-<pre class="r"><code># to do: remove eval=FALSE
-data_fem_rep1 &lt;- data %&gt;% # prepare data set used for analysis
+<pre class="r"><code>data_fem_rep1 &lt;- data %&gt;% # prepare data set used for analysis
   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor,
          state, year, female_share_council) %&gt;%
   mutate(
@@ -6465,8 +6606,11 @@ data_fem_rep1 &lt;- data %&gt;% # prepare data set used for analysis
       )
   ) %&gt;%
   drop_na()
-table(data_fem_rep1$state)
-data_fem_rep2 &lt;- data %&gt;% # prepare data set used for analysis
+table(data_fem_rep1$state)</code></pre>
+<pre><code>## 
+##     1     8     9    14    15 
+## 10108 13721 24526  4642    27</code></pre>
+<pre class="r"><code>data_fem_rep2 &lt;- data %&gt;% # prepare data set used for analysis
   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor,
          state, year, female_share_largest_party) %&gt;%
   mutate(
@@ -6481,8 +6625,11 @@ data_fem_rep2 &lt;- data %&gt;% # prepare data set used for analysis
       )
   ) %&gt;%
   drop_na()
-table(data_fem_rep2$state)
-data_fem_rep &lt;-
+table(data_fem_rep2$state)</code></pre>
+<pre><code>## 
+##     8     9 
+## 12641 21929</code></pre>
+<pre class="r"><code>data_fem_rep &lt;-
   bind_rows(data_fem_rep1, data_fem_rep2)
 all_values &lt;- data_fem_rep %&gt;% distinct(female_share_council) %&gt;% drop_na() %&gt;% pull() # vector of values
 rdd_vary_fem_rep &lt;- # prepare data set to store the results
@@ -6519,8 +6666,24 @@ for (i in c(&quot;female_share_council&quot;, &quot;female_share_largest_party&q
         obs_above = rdd$N_h[2]
       )
   }
-}
-rdd_vary_fem_rep &lt;- rdd_vary_fem_rep %&gt;% drop_na()
+}</code></pre>
+<pre><code>## [1] &quot;variable: female_share_council , value: 4&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;variable: female_share_council , value: 3&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;variable: female_share_council , value: 2&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;variable: female_share_council , value: 1&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;variable: female_share_largest_party , value: 4&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;variable: female_share_largest_party , value: 3&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;variable: female_share_largest_party , value: 2&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;variable: female_share_largest_party , value: 1&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;</code></pre>
+<pre class="r"><code>rdd_vary_fem_rep &lt;- rdd_vary_fem_rep %&gt;% drop_na()
 save(rdd_vary_fem_rep, file = &quot;tables_robustness_checks/rdrobust_vary_fem_rep.Rdata&quot;)
 rm(df, i, rdd)</code></pre>
 <pre class="r"><code>load(file = &quot;tables_robustness_checks/rdrobust_vary_fem_rep.Rdata&quot;)
@@ -6632,11 +6795,11 @@ rdd &lt;- fixest::feols(ln_gross_expenditure_pc ~
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## RMSE: 0.318695     Adj. R2:  0.112062
 ##                  Within R2: -0.407567
-## F-test (1st stage), inhabs_rel_to_cutoff                                 : stat =     6.904e+30, p &lt; 2.2e-16, on 7 and 7,769 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff                                 : stat =     8.007e+31, p &lt; 2.2e-16, on 7 and 7,769 DoF.
 ## F-test (1st stage), total_seats                                          : stat =   281.1      , p &lt; 2.2e-16, on 7 and 7,769 DoF.
-## F-test (1st stage), female_share_council                                 : stat =     4.355e+31, p &lt; 2.2e-16, on 7 and 7,769 DoF.
+## F-test (1st stage), female_share_council                                 : stat =     5.368e+31, p &lt; 2.2e-16, on 7 and 7,769 DoF.
 ## F-test (1st stage), inhabs_rel_to_cutoff:total_seats                     : stat = 8,360.6      , p &lt; 2.2e-16, on 7 and 7,769 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:female_share_council            : stat =     1.127e+31, p &lt; 2.2e-16, on 7 and 7,769 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:female_share_council            : stat =     2.248e+31, p &lt; 2.2e-16, on 7 and 7,769 DoF.
 ## F-test (1st stage), total_seats:female_share_council                     : stat = 5,821.6      , p &lt; 2.2e-16, on 7 and 7,769 DoF.
 ## F-test (1st stage), inhabs_rel_to_cutoff:total_seats:female_share_council: stat = 6,898.6      , p &lt; 2.2e-16, on 7 and 7,769 DoF.
 ##                                                                Wu-Hausman: stat =    NA        , p = NA     , on 7 and 7,728 DoF.</code></pre>
@@ -6734,8 +6897,7 @@ allowed in poly”.</p>
 </div>
 <div id="bavarian-data" class="section level3">
 <h3>Bavarian data</h3>
-<pre class="r"><code># to do: remove eval=FALSE
-data_fem_rep_by &lt;- data_by %&gt;% # prepare data set used for analysis
+<pre class="r"><code>data_fem_rep_by &lt;- data_by %&gt;% # prepare data set used for analysis
   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor,
          state, year, female_share_council, female_share_largest_party) %&gt;%
   mutate(
@@ -6758,8 +6920,11 @@ data_fem_rep_by &lt;- data_by %&gt;% # prepare data set used for analysis
       )
   ) %&gt;%
   drop_na()
-table(data_fem_rep_by$state)
-all_values &lt;- data_fem_rep %&gt;% distinct(female_share_council) %&gt;% drop_na() %&gt;% pull() # vector of values
+table(data_fem_rep_by$state)</code></pre>
+<pre><code>## 
+##     9 
+## 21929</code></pre>
+<pre class="r"><code>all_values &lt;- data_fem_rep %&gt;% distinct(female_share_council) %&gt;% drop_na() %&gt;% pull() # vector of values
 rdd_vary_fem_rep_by &lt;- # prepare data set to store the results
   tibble(var = &quot;&quot;, value = &quot;&quot;, point_estimate = &quot;&quot;, se = &quot;&quot;, se_robust = &quot;&quot;,
          ci_lower = &quot;&quot;, ci_upper = &quot;&quot;, p = &quot;&quot;, bw = &quot;&quot;, obs_below = &quot;&quot;, obs_above = &quot;&quot;) %&gt;%
@@ -6793,8 +6958,24 @@ for (i in c(&quot;female_share_council&quot;, &quot;female_share_largest_party&q
         obs_above = rdd$N_h[2]
       )
   }
-}
-rdd_vary_fem_rep_by &lt;- rdd_vary_fem_rep_by %&gt;% drop_na()
+}</code></pre>
+<pre><code>## [1] &quot;variable: female_share_council , value: 4&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;variable: female_share_council , value: 3&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;variable: female_share_council , value: 2&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;variable: female_share_council , value: 1&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;variable: female_share_largest_party , value: 4&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;variable: female_share_largest_party , value: 3&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;variable: female_share_largest_party , value: 2&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;variable: female_share_largest_party , value: 1&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;</code></pre>
+<pre class="r"><code>rdd_vary_fem_rep_by &lt;- rdd_vary_fem_rep_by %&gt;% drop_na()
 save(rdd_vary_fem_rep_by, file = &quot;tables_robustness_checks/rdrobust_vary_fem_rep_by.Rdata&quot;)
 rm(df, i, rdd)</code></pre>
 <pre class="r"><code>load(file = &quot;tables_robustness_checks/rdrobust_vary_fem_rep_by.Rdata&quot;)
@@ -6960,8 +7141,7 @@ summary(rdd)</code></pre>
 <h1>Municipality characteristics</h1>
 <div id="size-of-the-municipalities" class="section level2">
 <h2>Size of the municipalities</h2>
-<pre class="r"><code># to do: remove eval=FALSE
-data_th &lt;- data %&gt;% # prepare data set used for analysis
+<pre class="r"><code>data_th &lt;- data %&gt;% # prepare data set used for analysis
   select(ln_gross_expenditure_pc, inhabs_rel_to_cutoff, total_seats, inhabitants_treshold_factor, state, year) %&gt;%
   drop_na()
 all_th &lt;- data_th %&gt;%
@@ -7012,8 +7192,50 @@ for (i in all_th) {
       obs_below = rdd$N_h[1],
       obs_above = rdd$N_h[2]
   )
-}
-rdd_vary_th &lt;- rdd_vary_th %&gt;% drop_na() %&gt;% arrange(threshold)
+}</code></pre>
+<pre><code>## [1] &quot;thresholds: 5000&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 200&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 750&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 70&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 15000&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 1250&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 2000&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 25000&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 10000&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 1e+05&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 30000&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 50000&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 8000&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 3000&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 2500&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 1000&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 500&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 300&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 7500&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 20000&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;
+## [1] &quot;thresholds: 40000&quot;
+## [1] &quot;Mass points detected in the running variable.&quot;</code></pre>
+<pre class="r"><code>rdd_vary_th &lt;- rdd_vary_th %&gt;% drop_na() %&gt;% arrange(threshold)
 save(rdd_vary_th, file = &quot;tables_robustness_checks/rdd_vary_th.Rdata&quot;)
 rm(all_th, data_th, df, i, rdd, states_in_df)</code></pre>
 <pre class="r"><code>load(file = &quot;tables_robustness_checks/rdd_vary_th.Rdata&quot;)
@@ -7195,6 +7417,7 @@ rdd &lt;- fixest::feols(ln_gross_expenditure_pc ~
 ## Variance contained negative values in the diagonal and was &#39;fixed&#39; (a la Cameron, Gelbach &amp; Miller 2011).
 ## Variance contained negative values in the diagonal and was &#39;fixed&#39; (a la Cameron, Gelbach &amp; Miller 2011).
 ## Variance contained negative values in the diagonal and was &#39;fixed&#39; (a la Cameron, Gelbach &amp; Miller 2011).
+## Variance contained negative values in the diagonal and was &#39;fixed&#39; (a la Cameron, Gelbach &amp; Miller 2011).
 ## Variance contained negative values in the diagonal and was &#39;fixed&#39; (a la Cameron, Gelbach &amp; Miller 2011).</code></pre>
 <pre><code>## The endogenous regressors &#39;fit_inhabitants_treshold_factor100&#39;, &#39;fit_inhabitants_treshold_factor700&#39; and 51 others have been removed because of collinearity (see $collin.var).</code></pre>
 <pre class="r"><code>summary(rdd)</code></pre>
@@ -7202,7 +7425,7 @@ rdd &lt;- fixest::feols(ln_gross_expenditure_pc ~
 ## Second stage: Dep. Var.: ln_gross_expenditure_pc
 ## Observations: 12,964 
 ## Fixed-effects: year: 13,  state: 10
-## Standard-errors: NA (not-available) 
+## Standard-errors: Clustered (year &amp; state) 
 ##                                                                          Estimate
 ## fit_inhabs_rel_to_cutoff                                                23.112366
 ## fit_total_seats                                                         -0.090889
@@ -7310,333 +7533,440 @@ rdd &lt;- fixest::feols(ln_gross_expenditure_pc ~
 ## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor40000    0.607648
 ## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor50000   -3.676065
 ## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1e+05    6.694338
-##                                                                       Std. Error
-## fit_inhabs_rel_to_cutoff                                                     NaN
-## fit_total_seats                                                              NaN
-## fit_inhabitants_treshold_factor200                                           NaN
-## fit_inhabitants_treshold_factor300                                           NaN
-## fit_inhabitants_treshold_factor500                                           NaN
-## fit_inhabitants_treshold_factor750                                           NaN
-## fit_inhabitants_treshold_factor1000                                          NaN
-## fit_inhabitants_treshold_factor1250                                          NaN
-## fit_inhabitants_treshold_factor2000                                          NaN
-## fit_inhabitants_treshold_factor2500                                          NaN
-## fit_inhabitants_treshold_factor3000                                          NaN
-## fit_inhabitants_treshold_factor5000                                          NaN
-## fit_inhabitants_treshold_factor7500                                          NaN
-## fit_inhabitants_treshold_factor8000                                          NaN
-## fit_inhabitants_treshold_factor10000                                         NaN
-## fit_inhabitants_treshold_factor15000                                         NaN
-## fit_inhabitants_treshold_factor20000                                         NaN
-## fit_inhabitants_treshold_factor25000                                         NaN
-## fit_inhabitants_treshold_factor30000                                         NaN
-## fit_inhabitants_treshold_factor35000                                         NaN
-## fit_inhabitants_treshold_factor40000                                         NaN
-## fit_inhabitants_treshold_factor50000                                         NaN
-## fit_inhabitants_treshold_factor60000                                         NaN
-## fit_inhabitants_treshold_factor75000                                         NaN
-## fit_inhabitants_treshold_factor80000                                         NaN
-## fit_inhabitants_treshold_factor1e+05                                         NaN
-## fit_inhabitants_treshold_factor150000                                        NaN
-## fit_inhabitants_treshold_factor2e+05                                         NaN
-## fit_inhabitants_treshold_factor250000                                        NaN
-## fit_inhabitants_treshold_factor4e+05                                         NaN
-## fit_inhabitants_treshold_factor550000                                        NaN
-## fit_inhabs_rel_to_cutoff:total_seats                                         NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor200                      NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor300                      NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor500                      NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor750                      NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1000                     NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1250                     NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2000                     NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2500                     NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor3000                     NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor5000                     NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor7500                     NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor8000                     NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor10000                    NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor15000                    NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor20000                    NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor25000                    NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor30000                    NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor35000                    NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor40000                    NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor50000                    NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor80000                    NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1e+05                    NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor150000                   NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2e+05                    NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor250000                   NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor4e+05                    NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor550000                   NaN
-## fit_total_seats:inhabitants_treshold_factor200                               NaN
-## fit_total_seats:inhabitants_treshold_factor300                               NaN
-## fit_total_seats:inhabitants_treshold_factor500                               NaN
-## fit_total_seats:inhabitants_treshold_factor750                               NaN
-## fit_total_seats:inhabitants_treshold_factor1000                              NaN
-## fit_total_seats:inhabitants_treshold_factor1250                              NaN
-## fit_total_seats:inhabitants_treshold_factor2000                              NaN
-## fit_total_seats:inhabitants_treshold_factor2500                              NaN
-## fit_total_seats:inhabitants_treshold_factor3000                              NaN
-## fit_total_seats:inhabitants_treshold_factor5000                              NaN
-## fit_total_seats:inhabitants_treshold_factor7500                              NaN
-## fit_total_seats:inhabitants_treshold_factor8000                              NaN
-## fit_total_seats:inhabitants_treshold_factor10000                             NaN
-## fit_total_seats:inhabitants_treshold_factor15000                             NaN
-## fit_total_seats:inhabitants_treshold_factor20000                             NaN
-## fit_total_seats:inhabitants_treshold_factor25000                             NaN
-## fit_total_seats:inhabitants_treshold_factor30000                             NaN
-## fit_total_seats:inhabitants_treshold_factor35000                             NaN
-## fit_total_seats:inhabitants_treshold_factor40000                             NaN
-## fit_total_seats:inhabitants_treshold_factor50000                             NaN
-## fit_total_seats:inhabitants_treshold_factor80000                             NaN
-## fit_total_seats:inhabitants_treshold_factor1e+05                             NaN
-## fit_total_seats:inhabitants_treshold_factor150000                            NaN
-## fit_total_seats:inhabitants_treshold_factor2e+05                             NaN
-## fit_total_seats:inhabitants_treshold_factor250000                            NaN
-## fit_total_seats:inhabitants_treshold_factor4e+05                             NaN
-## fit_total_seats:inhabitants_treshold_factor550000                            NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor200          NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor300          NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor500          NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor750          NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1000         NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1250         NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor2000         NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor2500         NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor3000         NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor5000         NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor7500         NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor8000         NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor10000        NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor15000        NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor20000        NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor25000        NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor30000        NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor40000        NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor50000        NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1e+05        NaN
-##                                                                       t value
-## fit_inhabs_rel_to_cutoff                                                  NaN
-## fit_total_seats                                                           NaN
-## fit_inhabitants_treshold_factor200                                        NaN
-## fit_inhabitants_treshold_factor300                                        NaN
-## fit_inhabitants_treshold_factor500                                        NaN
-## fit_inhabitants_treshold_factor750                                        NaN
-## fit_inhabitants_treshold_factor1000                                       NaN
-## fit_inhabitants_treshold_factor1250                                       NaN
-## fit_inhabitants_treshold_factor2000                                       NaN
-## fit_inhabitants_treshold_factor2500                                       NaN
-## fit_inhabitants_treshold_factor3000                                       NaN
-## fit_inhabitants_treshold_factor5000                                       NaN
-## fit_inhabitants_treshold_factor7500                                       NaN
-## fit_inhabitants_treshold_factor8000                                       NaN
-## fit_inhabitants_treshold_factor10000                                      NaN
-## fit_inhabitants_treshold_factor15000                                      NaN
-## fit_inhabitants_treshold_factor20000                                      NaN
-## fit_inhabitants_treshold_factor25000                                      NaN
-## fit_inhabitants_treshold_factor30000                                      NaN
-## fit_inhabitants_treshold_factor35000                                      NaN
-## fit_inhabitants_treshold_factor40000                                      NaN
-## fit_inhabitants_treshold_factor50000                                      NaN
-## fit_inhabitants_treshold_factor60000                                      NaN
-## fit_inhabitants_treshold_factor75000                                      NaN
-## fit_inhabitants_treshold_factor80000                                      NaN
-## fit_inhabitants_treshold_factor1e+05                                      NaN
-## fit_inhabitants_treshold_factor150000                                     NaN
-## fit_inhabitants_treshold_factor2e+05                                      NaN
-## fit_inhabitants_treshold_factor250000                                     NaN
-## fit_inhabitants_treshold_factor4e+05                                      NaN
-## fit_inhabitants_treshold_factor550000                                     NaN
-## fit_inhabs_rel_to_cutoff:total_seats                                      NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor200                   NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor300                   NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor500                   NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor750                   NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1000                  NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1250                  NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2000                  NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2500                  NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor3000                  NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor5000                  NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor7500                  NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor8000                  NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor10000                 NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor15000                 NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor20000                 NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor25000                 NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor30000                 NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor35000                 NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor40000                 NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor50000                 NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor80000                 NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1e+05                 NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor150000                NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2e+05                 NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor250000                NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor4e+05                 NaN
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor550000                NaN
-## fit_total_seats:inhabitants_treshold_factor200                            NaN
-## fit_total_seats:inhabitants_treshold_factor300                            NaN
-## fit_total_seats:inhabitants_treshold_factor500                            NaN
-## fit_total_seats:inhabitants_treshold_factor750                            NaN
-## fit_total_seats:inhabitants_treshold_factor1000                           NaN
-## fit_total_seats:inhabitants_treshold_factor1250                           NaN
-## fit_total_seats:inhabitants_treshold_factor2000                           NaN
-## fit_total_seats:inhabitants_treshold_factor2500                           NaN
-## fit_total_seats:inhabitants_treshold_factor3000                           NaN
-## fit_total_seats:inhabitants_treshold_factor5000                           NaN
-## fit_total_seats:inhabitants_treshold_factor7500                           NaN
-## fit_total_seats:inhabitants_treshold_factor8000                           NaN
-## fit_total_seats:inhabitants_treshold_factor10000                          NaN
-## fit_total_seats:inhabitants_treshold_factor15000                          NaN
-## fit_total_seats:inhabitants_treshold_factor20000                          NaN
-## fit_total_seats:inhabitants_treshold_factor25000                          NaN
-## fit_total_seats:inhabitants_treshold_factor30000                          NaN
-## fit_total_seats:inhabitants_treshold_factor35000                          NaN
-## fit_total_seats:inhabitants_treshold_factor40000                          NaN
-## fit_total_seats:inhabitants_treshold_factor50000                          NaN
-## fit_total_seats:inhabitants_treshold_factor80000                          NaN
-## fit_total_seats:inhabitants_treshold_factor1e+05                          NaN
-## fit_total_seats:inhabitants_treshold_factor150000                         NaN
-## fit_total_seats:inhabitants_treshold_factor2e+05                          NaN
-## fit_total_seats:inhabitants_treshold_factor250000                         NaN
-## fit_total_seats:inhabitants_treshold_factor4e+05                          NaN
-## fit_total_seats:inhabitants_treshold_factor550000                         NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor200       NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor300       NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor500       NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor750       NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1000      NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1250      NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor2000      NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor2500      NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor3000      NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor5000      NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor7500      NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor8000      NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor10000     NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor15000     NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor20000     NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor25000     NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor30000     NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor40000     NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor50000     NaN
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1e+05     NaN
-##                                                                       Pr(&gt;|t|) 
-## fit_inhabs_rel_to_cutoff                                                    NA 
-## fit_total_seats                                                             NA 
-## fit_inhabitants_treshold_factor200                                          NA 
-## fit_inhabitants_treshold_factor300                                          NA 
-## fit_inhabitants_treshold_factor500                                          NA 
-## fit_inhabitants_treshold_factor750                                          NA 
-## fit_inhabitants_treshold_factor1000                                         NA 
-## fit_inhabitants_treshold_factor1250                                         NA 
-## fit_inhabitants_treshold_factor2000                                         NA 
-## fit_inhabitants_treshold_factor2500                                         NA 
-## fit_inhabitants_treshold_factor3000                                         NA 
-## fit_inhabitants_treshold_factor5000                                         NA 
-## fit_inhabitants_treshold_factor7500                                         NA 
-## fit_inhabitants_treshold_factor8000                                         NA 
-## fit_inhabitants_treshold_factor10000                                        NA 
-## fit_inhabitants_treshold_factor15000                                        NA 
-## fit_inhabitants_treshold_factor20000                                        NA 
-## fit_inhabitants_treshold_factor25000                                        NA 
-## fit_inhabitants_treshold_factor30000                                        NA 
-## fit_inhabitants_treshold_factor35000                                        NA 
-## fit_inhabitants_treshold_factor40000                                        NA 
-## fit_inhabitants_treshold_factor50000                                        NA 
-## fit_inhabitants_treshold_factor60000                                        NA 
-## fit_inhabitants_treshold_factor75000                                        NA 
-## fit_inhabitants_treshold_factor80000                                        NA 
-## fit_inhabitants_treshold_factor1e+05                                        NA 
-## fit_inhabitants_treshold_factor150000                                       NA 
-## fit_inhabitants_treshold_factor2e+05                                        NA 
-## fit_inhabitants_treshold_factor250000                                       NA 
-## fit_inhabitants_treshold_factor4e+05                                        NA 
-## fit_inhabitants_treshold_factor550000                                       NA 
-## fit_inhabs_rel_to_cutoff:total_seats                                        NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor200                     NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor300                     NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor500                     NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor750                     NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1000                    NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1250                    NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2000                    NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2500                    NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor3000                    NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor5000                    NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor7500                    NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor8000                    NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor10000                   NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor15000                   NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor20000                   NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor25000                   NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor30000                   NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor35000                   NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor40000                   NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor50000                   NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor80000                   NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1e+05                   NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor150000                  NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2e+05                   NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor250000                  NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor4e+05                   NA 
-## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor550000                  NA 
-## fit_total_seats:inhabitants_treshold_factor200                              NA 
-## fit_total_seats:inhabitants_treshold_factor300                              NA 
-## fit_total_seats:inhabitants_treshold_factor500                              NA 
-## fit_total_seats:inhabitants_treshold_factor750                              NA 
-## fit_total_seats:inhabitants_treshold_factor1000                             NA 
-## fit_total_seats:inhabitants_treshold_factor1250                             NA 
-## fit_total_seats:inhabitants_treshold_factor2000                             NA 
-## fit_total_seats:inhabitants_treshold_factor2500                             NA 
-## fit_total_seats:inhabitants_treshold_factor3000                             NA 
-## fit_total_seats:inhabitants_treshold_factor5000                             NA 
-## fit_total_seats:inhabitants_treshold_factor7500                             NA 
-## fit_total_seats:inhabitants_treshold_factor8000                             NA 
-## fit_total_seats:inhabitants_treshold_factor10000                            NA 
-## fit_total_seats:inhabitants_treshold_factor15000                            NA 
-## fit_total_seats:inhabitants_treshold_factor20000                            NA 
-## fit_total_seats:inhabitants_treshold_factor25000                            NA 
-## fit_total_seats:inhabitants_treshold_factor30000                            NA 
-## fit_total_seats:inhabitants_treshold_factor35000                            NA 
-## fit_total_seats:inhabitants_treshold_factor40000                            NA 
-## fit_total_seats:inhabitants_treshold_factor50000                            NA 
-## fit_total_seats:inhabitants_treshold_factor80000                            NA 
-## fit_total_seats:inhabitants_treshold_factor1e+05                            NA 
-## fit_total_seats:inhabitants_treshold_factor150000                           NA 
-## fit_total_seats:inhabitants_treshold_factor2e+05                            NA 
-## fit_total_seats:inhabitants_treshold_factor250000                           NA 
-## fit_total_seats:inhabitants_treshold_factor4e+05                            NA 
-## fit_total_seats:inhabitants_treshold_factor550000                           NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor200         NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor300         NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor500         NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor750         NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1000        NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1250        NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor2000        NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor2500        NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor3000        NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor5000        NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor7500        NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor8000        NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor10000       NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor15000       NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor20000       NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor25000       NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor30000       NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor40000       NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor50000       NA 
-## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1e+05       NA 
+##                                                                         Std. Error
+## fit_inhabs_rel_to_cutoff                                                  9.539897
+## fit_total_seats                                                           0.040461
+## fit_inhabitants_treshold_factor200                                        0.589574
+## fit_inhabitants_treshold_factor300                                       12.424442
+## fit_inhabitants_treshold_factor500                                       10.184811
+## fit_inhabitants_treshold_factor750                                        0.223164
+## fit_inhabitants_treshold_factor1000                                      35.483105
+## fit_inhabitants_treshold_factor1250                                       1.575351
+## fit_inhabitants_treshold_factor2000                                      15.263927
+## fit_inhabitants_treshold_factor2500                                      48.979408
+## fit_inhabitants_treshold_factor3000                                       9.299890
+## fit_inhabitants_treshold_factor5000                                       9.778091
+## fit_inhabitants_treshold_factor7500                                      11.706123
+## fit_inhabitants_treshold_factor8000                                      42.639549
+## fit_inhabitants_treshold_factor10000                                     20.157786
+## fit_inhabitants_treshold_factor15000                                     20.841928
+## fit_inhabitants_treshold_factor20000                                     35.979291
+## fit_inhabitants_treshold_factor25000                                    313.543825
+## fit_inhabitants_treshold_factor30000                                    231.558846
+## fit_inhabitants_treshold_factor35000                                      1.112276
+## fit_inhabitants_treshold_factor40000                                    120.702264
+## fit_inhabitants_treshold_factor50000                                    211.297477
+## fit_inhabitants_treshold_factor60000                                      7.781584
+## fit_inhabitants_treshold_factor75000                                     72.949078
+## fit_inhabitants_treshold_factor80000                                      5.400765
+## fit_inhabitants_treshold_factor1e+05                                    302.605965
+## fit_inhabitants_treshold_factor150000                                     2.887549
+## fit_inhabitants_treshold_factor2e+05                                      3.423599
+## fit_inhabitants_treshold_factor250000                                    16.783588
+## fit_inhabitants_treshold_factor4e+05                                      8.079289
+## fit_inhabitants_treshold_factor550000                                    29.754535
+## fit_inhabs_rel_to_cutoff:total_seats                                      1.373064
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor200                  22.097615
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor300                 135.149402
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor500                  57.433067
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor750                  12.973324
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1000                372.090440
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1250                 78.426111
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2000                253.915418
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2500                409.304081
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor3000                156.951825
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor5000                241.212556
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor7500                110.079343
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor8000                259.571298
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor10000               600.584705
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor15000               924.748123
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor20000               495.477216
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor25000              2596.314493
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor30000              4964.255786
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor35000                39.681196
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor40000              5023.730694
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor50000              3602.509706
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor80000                71.321518
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1e+05             16965.824069
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor150000               52.610148
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2e+05                65.177325
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor250000               62.059205
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor4e+05               128.536985
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor550000              112.072647
+## fit_total_seats:inhabitants_treshold_factor200                            0.076942
+## fit_total_seats:inhabitants_treshold_factor300                            1.770698
+## fit_total_seats:inhabitants_treshold_factor500                            1.025378
+## fit_total_seats:inhabitants_treshold_factor750                            0.040155
+## fit_total_seats:inhabitants_treshold_factor1000                           2.814618
+## fit_total_seats:inhabitants_treshold_factor1250                           0.138884
+## fit_total_seats:inhabitants_treshold_factor2000                           0.951790
+## fit_total_seats:inhabitants_treshold_factor2500                           2.554011
+## fit_total_seats:inhabitants_treshold_factor3000                           0.499741
+## fit_total_seats:inhabitants_treshold_factor5000                           0.271211
+## fit_total_seats:inhabitants_treshold_factor7500                           0.517788
+## fit_total_seats:inhabitants_treshold_factor8000                           1.526207
+## fit_total_seats:inhabitants_treshold_factor10000                          0.758843
+## fit_total_seats:inhabitants_treshold_factor15000                          0.909414
+## fit_total_seats:inhabitants_treshold_factor20000                          1.255374
+## fit_total_seats:inhabitants_treshold_factor25000                          8.719140
+## fit_total_seats:inhabitants_treshold_factor30000                          6.564010
+## fit_total_seats:inhabitants_treshold_factor35000                          0.042014
+## fit_total_seats:inhabitants_treshold_factor40000                          3.587332
+## fit_total_seats:inhabitants_treshold_factor50000                          4.814813
+## fit_total_seats:inhabitants_treshold_factor80000                          0.068705
+## fit_total_seats:inhabitants_treshold_factor1e+05                          5.953067
+## fit_total_seats:inhabitants_treshold_factor150000                         0.077847
+## fit_total_seats:inhabitants_treshold_factor2e+05                          0.069566
+## fit_total_seats:inhabitants_treshold_factor250000                         0.517775
+## fit_total_seats:inhabitants_treshold_factor4e+05                          0.143603
+## fit_total_seats:inhabitants_treshold_factor550000                         0.250027
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor200       2.712022
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor300      14.149553
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor500       4.205906
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor750       1.064639
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1000     25.457498
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1250      6.506766
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor2000     18.851831
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor2500     14.710320
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor3000     10.538700
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor5000     12.912854
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor7500      5.158763
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor8000      8.306937
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor10000    23.577169
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor15000    33.058366
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor20000    20.861077
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor25000    86.268157
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor30000   134.490281
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor40000   125.985678
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor50000    86.704201
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1e+05   323.152045
+##                                                                         t value
+## fit_inhabs_rel_to_cutoff                                               2.422706
+## fit_total_seats                                                       -2.246340
+## fit_inhabitants_treshold_factor200                                    -0.280442
+## fit_inhabitants_treshold_factor300                                    -0.462770
+## fit_inhabitants_treshold_factor500                                    -0.112925
+## fit_inhabitants_treshold_factor750                                    -2.517759
+## fit_inhabitants_treshold_factor1000                                    0.007833
+## fit_inhabitants_treshold_factor1250                                   -0.350811
+## fit_inhabitants_treshold_factor2000                                    0.036122
+## fit_inhabitants_treshold_factor2500                                   -0.008568
+## fit_inhabitants_treshold_factor3000                                    0.044402
+## fit_inhabitants_treshold_factor5000                                    0.019959
+## fit_inhabitants_treshold_factor7500                                   -0.100851
+## fit_inhabitants_treshold_factor8000                                   -0.009910
+## fit_inhabitants_treshold_factor10000                                   0.035764
+## fit_inhabitants_treshold_factor15000                                  -0.040594
+## fit_inhabitants_treshold_factor20000                                   0.021766
+## fit_inhabitants_treshold_factor25000                                  -0.034396
+## fit_inhabitants_treshold_factor30000                                   0.017577
+## fit_inhabitants_treshold_factor35000                                   0.385216
+## fit_inhabitants_treshold_factor40000                                   0.002693
+## fit_inhabitants_treshold_factor50000                                  -0.044996
+## fit_inhabitants_treshold_factor60000                                   0.548776
+## fit_inhabitants_treshold_factor75000                                   0.082508
+## fit_inhabitants_treshold_factor80000                                   0.506467
+## fit_inhabitants_treshold_factor1e+05                                   0.030223
+## fit_inhabitants_treshold_factor150000                                  0.950955
+## fit_inhabitants_treshold_factor2e+05                                   0.711079
+## fit_inhabitants_treshold_factor250000                                  0.103553
+## fit_inhabitants_treshold_factor4e+05                                   0.629664
+## fit_inhabitants_treshold_factor550000                                  0.190485
+## fit_inhabs_rel_to_cutoff:total_seats                                  -0.738228
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor200               -1.812276
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor300               -0.567026
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor500               -0.207508
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor750               -3.473467
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1000              -0.099749
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1250              -1.147888
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2000              -0.093107
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2500              -0.050837
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor3000              -0.064207
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor5000              -0.039411
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor7500              -0.479277
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor8000              -0.309416
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor10000             -0.049108
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor15000              0.027959
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor20000             -0.002058
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor25000              0.024751
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor30000             -0.017149
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor35000              0.157421
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor40000              0.000047
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor50000              0.046517
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor80000              0.364469
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1e+05             -0.018797
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor150000             0.454298
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2e+05              0.423955
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor250000             0.537156
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor4e+05              0.046390
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor550000             0.084705
+## fit_total_seats:inhabitants_treshold_factor200                         1.023450
+## fit_total_seats:inhabitants_treshold_factor300                         0.498839
+## fit_total_seats:inhabitants_treshold_factor500                         0.223175
+## fit_total_seats:inhabitants_treshold_factor750                         2.845509
+## fit_total_seats:inhabitants_treshold_factor1000                        0.028953
+## fit_total_seats:inhabitants_treshold_factor1250                        0.799191
+## fit_total_seats:inhabitants_treshold_factor2000                        0.064653
+## fit_total_seats:inhabitants_treshold_factor2500                        0.046971
+## fit_total_seats:inhabitants_treshold_factor3000                        0.157554
+## fit_total_seats:inhabitants_treshold_factor5000                        0.348392
+## fit_total_seats:inhabitants_treshold_factor7500                        0.305150
+## fit_total_seats:inhabitants_treshold_factor8000                        0.073396
+## fit_total_seats:inhabitants_treshold_factor10000                       0.093414
+## fit_total_seats:inhabitants_treshold_factor15000                       0.139663
+## fit_total_seats:inhabitants_treshold_factor20000                       0.059789
+## fit_total_seats:inhabitants_treshold_factor25000                       0.045300
+## fit_total_seats:inhabitants_treshold_factor30000                      -0.002096
+## fit_total_seats:inhabitants_treshold_factor35000                       1.797785
+## fit_total_seats:inhabitants_treshold_factor40000                       0.027149
+## fit_total_seats:inhabitants_treshold_factor50000                       0.068469
+## fit_total_seats:inhabitants_treshold_factor80000                       0.853205
+## fit_total_seats:inhabitants_treshold_factor1e+05                      -0.012133
+## fit_total_seats:inhabitants_treshold_factor150000                      0.625790
+## fit_total_seats:inhabitants_treshold_factor2e+05                       0.852924
+## fit_total_seats:inhabitants_treshold_factor250000                      0.146449
+## fit_total_seats:inhabitants_treshold_factor4e+05                       0.124246
+## fit_total_seats:inhabitants_treshold_factor550000                      0.240123
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor200    1.201162
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor300    0.446182
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor500   -0.151444
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor750    2.976080
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1000   0.085843
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1250   0.990250
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor2000   0.060990
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor2500   0.055015
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor3000   0.015551
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor5000   0.021615
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor7500   0.440799
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor8000   0.385312
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor10000  0.055692
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor15000 -0.017697
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor20000  0.014309
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor25000 -0.023499
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor30000  0.021589
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor40000  0.004823
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor50000 -0.042398
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1e+05  0.020716
+##                                                                        Pr(&gt;|t|)
+## fit_inhabs_rel_to_cutoff                                              0.0384397
+## fit_total_seats                                                       0.0513092
+## fit_inhabitants_treshold_factor200                                    0.7854778
+## fit_inhabitants_treshold_factor300                                    0.6545144
+## fit_inhabitants_treshold_factor500                                    0.9125689
+## fit_inhabitants_treshold_factor750                                    0.0328894
+## fit_inhabitants_treshold_factor1000                                   0.9939214
+## fit_inhabitants_treshold_factor1250                                   0.7338013
+## fit_inhabitants_treshold_factor2000                                   0.9719733
+## fit_inhabitants_treshold_factor2500                                   0.9933510
+## fit_inhabitants_treshold_factor3000                                   0.9655535
+## fit_inhabitants_treshold_factor5000                                   0.9845115
+## fit_inhabitants_treshold_factor7500                                   0.9218794
+## fit_inhabitants_treshold_factor8000                                   0.9923095
+## fit_inhabitants_treshold_factor10000                                  0.9722511
+## fit_inhabitants_treshold_factor15000                                  0.9685061
+## fit_inhabitants_treshold_factor20000                                  0.9831099
+## fit_inhabitants_treshold_factor25000                                  0.9733119
+## fit_inhabitants_treshold_factor30000                                  0.9863598
+## fit_inhabitants_treshold_factor35000                                  0.7090233
+## fit_inhabitants_treshold_factor40000                                  0.9979102
+## fit_inhabitants_treshold_factor50000                                  0.9650931
+## fit_inhabitants_treshold_factor60000                                  0.5965082
+## fit_inhabitants_treshold_factor75000                                  0.9360488
+## fit_inhabitants_treshold_factor80000                                  0.6247030
+## fit_inhabitants_treshold_factor1e+05                                  0.9765488
+## fit_inhabitants_treshold_factor150000                                 0.3664648
+## fit_inhabitants_treshold_factor2e+05                                  0.4950498
+## fit_inhabitants_treshold_factor250000                                 0.9197952
+## fit_inhabitants_treshold_factor4e+05                                  0.5445656
+## fit_inhabitants_treshold_factor550000                                 0.8531564
+## fit_inhabs_rel_to_cutoff:total_seats                                  0.4791823
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor200               0.1033613
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor300               0.5845596
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor500               0.8402327
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor750               0.0070104
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1000              0.9227300
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1250              0.2806104
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2000              0.9278579
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2500              0.9605657
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor3000              0.9502091
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor5000              0.9694232
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor7500              0.6431729
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor8000              0.7640486
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor10000             0.9619060
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor15000             0.9783051
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor20000             0.9984027
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor25000             0.9807934
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor30000             0.9866920
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor35000             0.8783884
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor40000             0.9999631
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor50000             0.9639139
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor80000             0.7239240
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1e+05             0.9854133
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor150000            0.6603724
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2e+05             0.6815517
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor250000            0.6041842
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor4e+05             0.9640127
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor550000            0.9343502
+## fit_total_seats:inhabitants_treshold_factor200                        0.3328161
+## fit_total_seats:inhabitants_treshold_factor300                        0.6298571
+## fit_total_seats:inhabitants_treshold_factor500                        0.8283823
+## fit_total_seats:inhabitants_treshold_factor750                        0.0192296
+## fit_total_seats:inhabitants_treshold_factor1000                       0.9775338
+## fit_total_seats:inhabitants_treshold_factor1250                       0.4447582
+## fit_total_seats:inhabitants_treshold_factor2000                       0.9498633
+## fit_total_seats:inhabitants_treshold_factor2500                       0.9635621
+## fit_total_seats:inhabitants_treshold_factor3000                       0.8782865
+## fit_total_seats:inhabitants_treshold_factor5000                       0.7355564
+## fit_total_seats:inhabitants_treshold_factor7500                       0.7671909
+## fit_total_seats:inhabitants_treshold_factor8000                       0.9430964
+## fit_total_seats:inhabitants_treshold_factor10000                      0.9276209
+## fit_total_seats:inhabitants_treshold_factor15000                      0.8920017
+## fit_total_seats:inhabitants_treshold_factor20000                      0.9536301
+## fit_total_seats:inhabitants_treshold_factor25000                      0.9648575
+## fit_total_seats:inhabitants_treshold_factor30000                      0.9983734
+## fit_total_seats:inhabitants_treshold_factor35000                      0.1057607
+## fit_total_seats:inhabitants_treshold_factor40000                      0.9789336
+## fit_total_seats:inhabitants_treshold_factor50000                      0.9469090
+## fit_total_seats:inhabitants_treshold_factor80000                      0.4156748
+## fit_total_seats:inhabitants_treshold_factor1e+05                      0.9905840
+## fit_total_seats:inhabitants_treshold_factor150000                     0.5469925
+## fit_total_seats:inhabitants_treshold_factor2e+05                      0.4158225
+## fit_total_seats:inhabitants_treshold_factor250000                     0.8867951
+## fit_total_seats:inhabitants_treshold_factor4e+05                      0.9038514
+## fit_total_seats:inhabitants_treshold_factor550000                     0.8156146
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor200   0.2603442
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor300   0.6660068
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor500   0.8829656
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor750   0.0155482
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1000  0.9334705
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1250  0.3479262
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor2000  0.9527000
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor2500  0.9573287
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor3000  0.9879317
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor5000  0.9832263
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor7500  0.6697565
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor8000  0.7089547
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor10000 0.9568036
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor15000 0.9862667
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor20000 0.9888953
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor25000 0.9817649
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor30000 0.9832466
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor40000 0.9962569
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor50000 0.9671073
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1e+05 0.9839244
+##                                                                          
+## fit_inhabs_rel_to_cutoff                                              *  
+## fit_total_seats                                                       .  
+## fit_inhabitants_treshold_factor200                                       
+## fit_inhabitants_treshold_factor300                                       
+## fit_inhabitants_treshold_factor500                                       
+## fit_inhabitants_treshold_factor750                                    *  
+## fit_inhabitants_treshold_factor1000                                      
+## fit_inhabitants_treshold_factor1250                                      
+## fit_inhabitants_treshold_factor2000                                      
+## fit_inhabitants_treshold_factor2500                                      
+## fit_inhabitants_treshold_factor3000                                      
+## fit_inhabitants_treshold_factor5000                                      
+## fit_inhabitants_treshold_factor7500                                      
+## fit_inhabitants_treshold_factor8000                                      
+## fit_inhabitants_treshold_factor10000                                     
+## fit_inhabitants_treshold_factor15000                                     
+## fit_inhabitants_treshold_factor20000                                     
+## fit_inhabitants_treshold_factor25000                                     
+## fit_inhabitants_treshold_factor30000                                     
+## fit_inhabitants_treshold_factor35000                                     
+## fit_inhabitants_treshold_factor40000                                     
+## fit_inhabitants_treshold_factor50000                                     
+## fit_inhabitants_treshold_factor60000                                     
+## fit_inhabitants_treshold_factor75000                                     
+## fit_inhabitants_treshold_factor80000                                     
+## fit_inhabitants_treshold_factor1e+05                                     
+## fit_inhabitants_treshold_factor150000                                    
+## fit_inhabitants_treshold_factor2e+05                                     
+## fit_inhabitants_treshold_factor250000                                    
+## fit_inhabitants_treshold_factor4e+05                                     
+## fit_inhabitants_treshold_factor550000                                    
+## fit_inhabs_rel_to_cutoff:total_seats                                     
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor200                  
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor300                  
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor500                  
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor750               ** 
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1000                 
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1250                 
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2000                 
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2500                 
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor3000                 
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor5000                 
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor7500                 
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor8000                 
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor10000                
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor15000                
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor20000                
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor25000                
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor30000                
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor35000                
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor40000                
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor50000                
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor80000                
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor1e+05                
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor150000               
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor2e+05                
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor250000               
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor4e+05                
+## fit_inhabs_rel_to_cutoff:inhabitants_treshold_factor550000               
+## fit_total_seats:inhabitants_treshold_factor200                           
+## fit_total_seats:inhabitants_treshold_factor300                           
+## fit_total_seats:inhabitants_treshold_factor500                           
+## fit_total_seats:inhabitants_treshold_factor750                        *  
+## fit_total_seats:inhabitants_treshold_factor1000                          
+## fit_total_seats:inhabitants_treshold_factor1250                          
+## fit_total_seats:inhabitants_treshold_factor2000                          
+## fit_total_seats:inhabitants_treshold_factor2500                          
+## fit_total_seats:inhabitants_treshold_factor3000                          
+## fit_total_seats:inhabitants_treshold_factor5000                          
+## fit_total_seats:inhabitants_treshold_factor7500                          
+## fit_total_seats:inhabitants_treshold_factor8000                          
+## fit_total_seats:inhabitants_treshold_factor10000                         
+## fit_total_seats:inhabitants_treshold_factor15000                         
+## fit_total_seats:inhabitants_treshold_factor20000                         
+## fit_total_seats:inhabitants_treshold_factor25000                         
+## fit_total_seats:inhabitants_treshold_factor30000                         
+## fit_total_seats:inhabitants_treshold_factor35000                         
+## fit_total_seats:inhabitants_treshold_factor40000                         
+## fit_total_seats:inhabitants_treshold_factor50000                         
+## fit_total_seats:inhabitants_treshold_factor80000                         
+## fit_total_seats:inhabitants_treshold_factor1e+05                         
+## fit_total_seats:inhabitants_treshold_factor150000                        
+## fit_total_seats:inhabitants_treshold_factor2e+05                         
+## fit_total_seats:inhabitants_treshold_factor250000                        
+## fit_total_seats:inhabitants_treshold_factor4e+05                         
+## fit_total_seats:inhabitants_treshold_factor550000                        
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor200      
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor300      
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor500      
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor750   *  
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1000     
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1250     
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor2000     
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor2500     
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor3000     
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor5000     
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor7500     
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor8000     
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor10000    
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor15000    
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor20000    
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor25000    
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor30000    
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor40000    
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor50000    
+## fit_inhabs_rel_to_cutoff:total_seats:inhabitants_treshold_factor1e+05    
 ## ... 62 variables were removed because of collinearity (fit_inhabitants_treshold_factor100, fit_inhabitants_treshold_factor700 and 60 others [full set in $collin.var])
 ## Important note: fifty-three endogenous regressors were removed =&gt; IV estimation not valid.
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## RMSE: NaNe+Inf     Adj. R2: NaNe+Inf
-##                  Within R2: NaNe+Inf
+## RMSE: 5.66155     Adj. R2: -209.3
+##                 Within R2: -327.8
 ## F-test (1st stage), inhabs_rel_to_cutoff                                              : stat =         3.187e+25, p &lt; 2.2e-16, on 100 and 12,863 DoF.
 ## F-test (1st stage), total_seats                                                       : stat =     1,619.3      , p &lt; 2.2e-16, on 100 and 12,863 DoF.
 ## F-test (1st stage), inhabitants_treshold_factor100                                    : stat =        NA        , p = NA     , on 100 and 12,863 DoF.
@@ -7856,11 +8186,11 @@ rdd &lt;- fixest::feols(ln_gross_expenditure_pc ~
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## RMSE: 0.294007     Adj. R2:  0.435969
 ##                  Within R2: -0.004404
-## F-test (1st stage), inhabs_rel_to_cutoff                                 : stat =      5.57e+32 , p &lt; 2.2e-16, on 7 and 12,947 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff                                 : stat =      2.404e+33, p &lt; 2.2e-16, on 7 and 12,947 DoF.
 ## F-test (1st stage), total_seats                                          : stat =    616.1      , p &lt; 2.2e-16, on 7 and 12,947 DoF.
 ## F-test (1st stage), inhabitants_treshold                                 : stat =      3.037e+34, p &lt; 2.2e-16, on 7 and 12,947 DoF.
 ## F-test (1st stage), inhabs_rel_to_cutoff:total_seats                     : stat = 25,676.1      , p &lt; 2.2e-16, on 7 and 12,947 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:inhabitants_treshold            : stat =      3.991e+32, p &lt; 2.2e-16, on 7 and 12,947 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:inhabitants_treshold            : stat =      1.235e+33, p &lt; 2.2e-16, on 7 and 12,947 DoF.
 ## F-test (1st stage), total_seats:inhabitants_treshold                     : stat =    361.6      , p &lt; 2.2e-16, on 7 and 12,947 DoF.
 ## F-test (1st stage), inhabs_rel_to_cutoff:total_seats:inhabitants_treshold: stat = 22,291.0      , p &lt; 2.2e-16, on 7 and 12,947 DoF.
 ##                                                                Wu-Hausman: stat =     NA        , p = NA     , on 7 and 12,899 DoF.</code></pre>
@@ -8025,7 +8355,6 @@ rdd &lt;- fixest::feols(ln_gross_expenditure_pc ~
 <pre><code>## Variance contained negative values in the diagonal and was &#39;fixed&#39; (a la Cameron, Gelbach &amp; Miller 2011).
 ## Variance contained negative values in the diagonal and was &#39;fixed&#39; (a la Cameron, Gelbach &amp; Miller 2011).
 ## Variance contained negative values in the diagonal and was &#39;fixed&#39; (a la Cameron, Gelbach &amp; Miller 2011).
-## Variance contained negative values in the diagonal and was &#39;fixed&#39; (a la Cameron, Gelbach &amp; Miller 2011).
 ## Variance contained negative values in the diagonal and was &#39;fixed&#39; (a la Cameron, Gelbach &amp; Miller 2011).</code></pre>
 <pre class="r"><code>summary(rdd)</code></pre>
 <pre><code>## TSLS estimation, Dep. Var.: ln_gross_expenditure_pc, Endo.: inhabs_rel_to_cutoff, total_seats, status, inhabs_rel_to_cutoff:total_seats, inhabs_rel_to_cutoff:status, total_seats:status, inhabs_rel_to_cutoff:total_seats:status, Instr.: inhabs_rel_to_cutoff, above_cutoff, status, inhabs_rel_to_cutoff:above_cutoff, inhabs_rel_to_cutoff:status, above_cutoff:status, inhabs_rel_to_cutoff:above_cutoff:status
@@ -8034,13 +8363,13 @@ rdd &lt;- fixest::feols(ln_gross_expenditure_pc ~
 ## Fixed-effects: inhabitants_treshold_factor: 30,  state: 10,  year: 13
 ## Standard-errors: Clustered (inhabitants_treshold_factor &amp; state &amp; year) 
 ##                                                            Estimate  Std. Error
-## fit_inhabs_rel_to_cutoff                                 213.057939  713.537089
+## fit_inhabs_rel_to_cutoff                                 213.057939  713.537091
 ## fit_total_seats                                            0.149037    0.421303
 ## fit_statusMunicipality                                     6.400366   20.548754
 ## fit_statusTown                                             7.714881   26.023724
 ## fit_inhabs_rel_to_cutoff:total_seats                      -4.501835   15.019069
-## fit_inhabs_rel_to_cutoff:statusMunicipality             -214.006151  712.937070
-## fit_inhabs_rel_to_cutoff:statusTown                     -275.206069 1360.257175
+## fit_inhabs_rel_to_cutoff:statusMunicipality             -214.006152  712.937073
+## fit_inhabs_rel_to_cutoff:statusTown                     -275.206070 1360.257180
 ## fit_total_seats:statusMunicipality                        -0.135723    0.422681
 ## fit_total_seats:statusTown                                -0.194531    0.683699
 ## fit_inhabs_rel_to_cutoff:total_seats:statusMunicipality    4.533552   14.939835
@@ -8061,13 +8390,13 @@ rdd &lt;- fixest::feols(ln_gross_expenditure_pc ~
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## RMSE: 0.380064     Adj. R2:  0.057165
 ##                  Within R2: -0.678443
-## F-test (1st stage), inhabs_rel_to_cutoff                               : stat =     9.561e+27, p &lt; 2.2e-16, on 11 and 12,952 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff                               : stat =     1.038e+28, p &lt; 2.2e-16, on 11 and 12,952 DoF.
 ## F-test (1st stage), total_seats                                        : stat =   390.6      , p &lt; 2.2e-16, on 11 and 12,952 DoF.
-## F-test (1st stage), statusMunicipality                                 : stat =     3.039e+28, p &lt; 2.2e-16, on 11 and 12,952 DoF.
-## F-test (1st stage), statusTown                                         : stat =     5.17e+28 , p &lt; 2.2e-16, on 11 and 12,952 DoF.
+## F-test (1st stage), statusMunicipality                                 : stat =     2.036e+28, p &lt; 2.2e-16, on 11 and 12,952 DoF.
+## F-test (1st stage), statusTown                                         : stat =     3.126e+28, p &lt; 2.2e-16, on 11 and 12,952 DoF.
 ## F-test (1st stage), inhabs_rel_to_cutoff:total_seats                   : stat = 8,662.1      , p &lt; 2.2e-16, on 11 and 12,952 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:statusMunicipality            : stat =     2.502e+28, p &lt; 2.2e-16, on 11 and 12,952 DoF.
-## F-test (1st stage), inhabs_rel_to_cutoff:statusTown                    : stat =     4.657e+28, p &lt; 2.2e-16, on 11 and 12,952 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:statusMunicipality            : stat =     1.603e+28, p &lt; 2.2e-16, on 11 and 12,952 DoF.
+## F-test (1st stage), inhabs_rel_to_cutoff:statusTown                    : stat =     3.367e+28, p &lt; 2.2e-16, on 11 and 12,952 DoF.
 ## F-test (1st stage), total_seats:statusMunicipality                     : stat = 7,575.6      , p &lt; 2.2e-16, on 11 and 12,952 DoF.
 ## F-test (1st stage), total_seats:statusTown                             : stat = 9,257.2      , p &lt; 2.2e-16, on 11 and 12,952 DoF.
 ## F-test (1st stage), inhabs_rel_to_cutoff:total_seats:statusMunicipality: stat = 7,986.6      , p &lt; 2.2e-16, on 11 and 12,952 DoF.
@@ -8086,7 +8415,7 @@ from baseline (independent large cities).</p>
 <h1>Concluding Remarks</h1>
 <p>For references, see the paper.</p>
 <pre class="r"><code>Sys.time() - time</code></pre>
-<pre><code>## Time difference of 2.583646 mins</code></pre>
+<pre><code>## Time difference of 20.6637 mins</code></pre>
 </div>
 
 
