@@ -1,0 +1,43 @@
+
+\begin{table}
+   \caption{\label{tab:rdd_conf_thresholds} Results of the interacted \acs{IV} \acs{RDD}s to investigate (non)confounded thresholds}
+   \centering
+   \begin{tabular}{lcc}
+      %\tabularnewline
+      \toprule \midrule
+      Dependent Variable: & \multicolumn{2}{c}{Ln of gross expenditure \acs{p. c.}}\\
+      Model & Confounded & Confounded thresholds \\     
+      & thresholds based &  based on \citeauthor{Hohmann.2017}'s \\
+      & on my research &  \parencite*{Hohmann.2017} research \\
+      & (1)                                        & (2)\\  
+      \midrule
+%      \emph{Variables}\\
+      Council size baseline \ac{TE} for              & -0.00001                      & -0.0215$^{***}$\\   
+       \hspace{5mm} nonconfounded thresholds & (0.0409)                                   & (0.0038)\\   
+      Additional \ac{TE} for                      & 0.0377                                     & 0.0428$^{*}$\\   
+       \hspace{5mm} confounded thresholds    & (0.2345)                                   & (0.0130)\\   
+      \midrule
+%      \emph{Fit statistics}\\
+      Observations                                                            & 103,589                                    & 103,618\\  
+      Window around the threshold                                             & 10\%                                       & 10\%\\   
+      Observations below                                                      & 5,073                                      & 5,073\\  
+      Observations above                                                      & 5,288                                      & 5,288\\  
+%      Observations                                                            & 10,361                                     & 10,332\\  
+      Adjusted R$^2$                                                                   & -1.0634                                    & 0.3281\\  
+      Within R$^2$                                                            & -2.6511                                    & -0.1842\\  
+      \midrule \bottomrule
+%      \multicolumn{3}{l}{\emph{Clustered (inhabitants\_treshold\_factor \& state \& year) standard-errors in parentheses}}\\  
+%      \multicolumn{3}{l}{\emph{Signif. Codes: ***: 0.001, **: 0.01, *: 0.05, ': 0.1}}\\
+   \end{tabular}
+   
+   \vspace{0.25cm}
+   \par \justifying{\footnotesize{
+   \textit{Notes:}
+   Results from the \ac{IV} \ac{RDD}, in a ten-percent window around the cutoffs.
+   No control variables but threshold, year, and municipality \ac{FE}.
+   Standard errors clustered at the threshold, year and municipality level in parentheses.
+   Significance codes: *** $p <$ 0.001, ** $p <$ 0.01, * $p <$ 0.05, ' $p <$ 0.10.
+   }}
+\end{table}
+
+

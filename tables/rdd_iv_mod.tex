@@ -1,0 +1,48 @@
+
+\begin{table}
+   \caption{\label{tab:rdd_iv} Results of the \acs{IV} \acs{RDD}}
+   \centering
+   \begin{tabular}{lcccc}
+      %\tabularnewline
+      \toprule \midrule
+%      Dependent Variable: & \multicolumn{4}{c}{Ln of gross expenditure p. c.}\\
+      \multicolumn{2}{l}{Dependent Variable:} & \multicolumn{3}{l}{Ln of gross expenditure p. c.}\\
+      Model & \acs{wo} covariates & \acs{wo} covariates & \acs{w} covariates & \acs{w} covariates \\ 
+       &  \& \acs{wo} \ac{FE} &   \& \acs{w} \ac{FE} &  \& \acs{wo} \ac{FE} &  \& \acs{w} \ac{FE} \\ 
+                                         & (1)      & (2)      & (3)      & (4)\\  
+      \midrule
+%      \emph{Variables}\\
+      \ac{RD} effect                             & 0.0125   & -0.0176  & 0.0092   & -0.0128\\   
+                                               & (0.0256) & (0.0150) & (0.0243) & (0.0118)\\   
+      \midrule
+%      \emph{Fixed-effects}\\
+      Controls                                 & No       & No       & Yes      & Yes\\  
+      Threshold \ac{FE}    & Yes      & Yes      & Yes      & Yes\\  
+      Year \ac{FE}                             & No         & Yes      & No         & Yes\\  
+      Municipality \ac{FE}                              & No         & Yes      & No         & Yes\\  
+      \acs{SE} & at \acs{thr} & at \acs{mcp}, & at \acs{thr} & at \acs{mcp},\\
+       & & \acs{yr} \& \acs{thr} & & \acs{yr} \& \acs{thr} \\
+      \midrule
+%      \emph{Fit statistics}\\
+      \acs{Obs.}                             & 103,618  & 103,618  & 101,409  & 101,409\\  
+      Window around              & 10\%     & 10\%     & 10\%     & 10\%\\ 
+      \hspace{5mm} the threshold &&&& \\  
+      \acs{Obs.} below                       & 5,073    & 5,073    & 4,933    & 4,933\\  
+      \acs{Obs.} above                       & 5,288    & 5,288    & 5,207    & 5,207\\  
+%      Observations                             & 10,361   & 10,361   & 10,140   & 10,140\\  
+      Adjusted R$^2$                                    & 0.2336  & 0.7924  & 0.3094  & 0.7990\\  
+      Within R$^2$                             & -0.0533 & -0.0133 & 0.0445  & -0.0246\\  
+      \midrule \bottomrule
+%      \multicolumn{5}{l}{\emph{Signif. Codes: ***: 0.001, **: 0.01, *: 0.05, ': 0.1}}\\
+   \end{tabular}
+   
+   \vspace{0.25cm}
+   \par \justifying{ 
+   \footnotesize{\textit{Notes:}
+   Results from the \ac{IV} \ac{RDD}, in a ten-percent window around the cutoffs.
+   Controls, \ac{FE} and \ac{SE} as indicated in the respective columns.
+   Controls, if included: population, share of population over 65 years, unemployment rate, total area, share of working-age population, and dummies for independent large cities, cities, as well as year in the electoral cycle. Standard errors clustered at the threshold, year and municipality level in parentheses.
+   Significance codes: *** $p <$ 0.001, ** $p <$ 0.01, * $p <$ 0.05, ' $p <$ 0.10.}}
+\end{table}
+
+
