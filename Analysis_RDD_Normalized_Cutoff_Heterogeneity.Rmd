@@ -907,7 +907,7 @@ Run RDD for Bavaria as some data are only available for Bavaria
 
 ## At-large vs. ward electoral systems
 
-Dummy `ward_elections` is 1 for states 01 and 05, 0 otherwise. 01 & 05 have 
+Dummy `ward_elections` is 1 for states 01 and 05, 0 otherwise. 01 & 05 have mixed elections.
 
 Subsample method:
 
@@ -955,15 +955,33 @@ rdd_vary_ward
 ```
 
 ```{r}
-ggplot2::ggplot(data = rdd_vary_ward, aes(x = value, y = point_estimate)) +
-  geom_point(size = 1.5, color = ifelse(rdd_vary_ward$p <= p_value_cutoff, 2, 1)) +
+ df <- rdd_vary_ward %>%
+  rowwise() %>%
+  mutate(note = paste0(
+    "n=",
+    trimws(format(sum(obs_below, obs_above), big.mark = ",")),
+    "\n",
+    p_value(p),
+    assign_stars(p)
+    )) %>%
+  ungroup() %>%
+  mutate(value2 = case_when(
+    value == 1 ~ "Mixed",
+    value == 0 ~ "At-large"
+  ))
+ggplot2::ggplot(data = df, aes(x = value2, y = point_estimate)) +
+  geom_point(size = 1.5, color = ifelse(df$p <= p_value_cutoff, 2, 1)) +
   geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
-                color = ifelse(rdd_vary_ward$p <= p_value_cutoff, 2, 1),
-                linetype = ifelse(rdd_vary_ward$p <= p_value_cutoff, 2, 1),
-                width = 0.5) +
+                color = ifelse(df$p <= p_value_cutoff, 2, 1),
+                linetype = ifelse(df$p <= p_value_cutoff, 2, 1),
+                width = 0.3) +
+  geom_text(aes(y = -0.0375, label = note),
+            colour = ifelse(df$p <= p_value_cutoff, 2, 1), vjust = 0) +
   geom_hline(aes(yintercept = 0), linetype = "dotted") +
   scale_y_continuous(labels = scales::percent) +
-  labs(y = y_lab_RDD)
+  labs(x = NULL, y = y_lab_RDD)
+ggsave(filename = "plots/rdd_atlarge_mixed.pdf", width = 6, height = 6*9/16)
+rm(df)
 ```
 
 Preliminary evidence looks promising: SH and NW spend more at the threshold (about 1.9 %), likely primarily driven by NW (see states section).
@@ -2119,7 +2137,7 @@ p1 <- ggplot2::ggplot(data = df1, aes(x = value, y = point_estimate)) +
   geom_text(aes(y = -0.14, label = note),
             colour = ifelse(df1$p <= p_value_cutoff, 2, 1), vjust = 0, size = 2.75) +
   labs(subtitle = "Share of women in council",
-       x = "Quantile", y = y_lab_RDD)
+       x = "Quartile", y = y_lab_RDD)
 p1
 p1 <- p1 + labs(x = NULL, y = NULL)
 p2 <- ggplot2::ggplot(data = df2, aes(x = value, y = point_estimate)) +
@@ -2133,7 +2151,7 @@ p2 <- ggplot2::ggplot(data = df2, aes(x = value, y = point_estimate)) +
   geom_text(aes(y = -0.14, label = note),
             colour = ifelse(df2$p <= p_value_cutoff, 2, 1), vjust = 0, size = 2.75) +
   labs(subtitle = "Share of women in the largest party",
-       x = "Quantile of the heterogeneity-inducing variable", y = y_lab_RDD)
+       x = "Quartile of the heterogeneity-inducing variable", y = y_lab_RDD)
 p2
 p2 <- p2 + labs(x = NULL, y = NULL)
 ggpubr::ggarrange(
@@ -2145,7 +2163,7 @@ ggpubr::ggarrange(
   ) %>%
   annotate_figure(
     left = text_grob(y_lab_RDD, rot = 90),
-    bottom = text_grob("Quantile")
+    bottom = text_grob("Quartile")
     )
 ggsave(filename = "plots/rdd_council_women.pdf", width = 6, height = 6*9/16)
 rm(df1, df2, lims, p1, p2)
