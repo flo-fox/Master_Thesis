@@ -20,10 +20,10 @@ You also find the analysis `.Rmd` files here:
 
 The repo contains the following folders:
 
-- `analysis`: The outputs corresponding to the `.Rmd` files listed above.
 - `data` (not visible): Contains the data sets.
 - `functions`: Contains functions and settings loaded into many `.Rmd` files.
 - `plots`: Contains the plots generated. 16 of the 22 `pdf` plots are used in the Thesis.
+- `results`: The outputs corresponding to the `.Rmd` files listed above.
 - `renv`: Folder for `renv` package files.
 - `tables`: Find the `.tex` tables output by the analysis. Those ending with `_mod.tex` are modified from their similar-named counterparts. These counterparts (obviously not ending with `_mod.tex`) are directly exported from R.
 - `tables_robustness_checks`: Since the code for the nonparametric regression takes quite some time to run, its results are stored in tables to speed up code execution. Despite its name, it does not only include robustness-check tables.
